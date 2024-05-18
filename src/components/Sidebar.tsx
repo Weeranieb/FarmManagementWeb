@@ -36,13 +36,15 @@ const Sidebar: React.FC = () => {
       <List>
         {items.map((item, index) => (
           <ListItem
-            button
             key={item.text}
             component={RouterLink}
             to={item.route}
             sx={{
               '&:hover': {
-                backgroundColor: '#e0e0e0', // Hover effect color
+                backgroundColor: '#CEBCA1', // Hover effect color
+                fontWeight: 'bolder', // Text thickness on hover
+                // fontSize: '1.2rem', // Text size on hover
+                color: 'white',
               },
               '&.Mui-selected': {
                 backgroundColor: '#d0d0d0', // Selected item color
@@ -51,8 +53,14 @@ const Sidebar: React.FC = () => {
               color: 'inherit', // Inherit text color from parent
             }}
           >
-            <ListItemIcon>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.text} />
+            <ListItemIcon sx={{ color: 'inherit' }}>{item.icon}</ListItemIcon>
+            <ListItemText
+              primaryTypographyProps={{
+                fontSize: 'inherit',
+                fontWeight: 'inherit',
+              }}
+              primary={item.text}
+            />
           </ListItem>
         ))}
       </List>
