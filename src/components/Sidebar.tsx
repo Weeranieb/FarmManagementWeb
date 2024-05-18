@@ -10,6 +10,7 @@ import {
 import InboxIcon from '@mui/icons-material/Inbox'
 import MailIcon from '@mui/icons-material/Mail'
 import { Link as RouterLink } from 'react-router-dom'
+import SidebarHeader from './SidebarHeader'
 
 const Sidebar: React.FC = () => {
   const items = [
@@ -33,6 +34,7 @@ const Sidebar: React.FC = () => {
         },
       }}
     >
+      <SidebarHeader />
       <List>
         {items.map((item, index) => (
           <ListItem
@@ -40,11 +42,12 @@ const Sidebar: React.FC = () => {
             component={RouterLink}
             to={item.route}
             sx={{
+              fontSize: '1.074rem', // Font size
               '&:hover': {
                 backgroundColor: '#CEBCA1', // Hover effect color
                 fontWeight: 'bolder', // Text thickness on hover
                 color: 'white',
-                borderRadius: '8.68px',
+                borderRadius: '0.543rem',
               },
               '&.Mui-selected': {
                 backgroundColor: '#d0d0d0', // Selected item color
