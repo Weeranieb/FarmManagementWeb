@@ -6,11 +6,14 @@ import TopBar from './TopBar'
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', height: '100vh', backgroundColor: '#D1D3D3' }}>
       <CssBaseline />
       <TopBar />
       <Sidebar />
-      <Box component='main' sx={{ flexGrow: 1, p: 3 }}>
+      <Box
+        component='main'
+        sx={{ flexGrow: 1, p: 3, mt: 8, ml: 30, overflow: 'auto' }}
+      >
         {children}
       </Box>
     </Box>

@@ -12,7 +12,19 @@ import MailIcon from '@mui/icons-material/Mail'
 
 const Sidebar: React.FC = () => {
   return (
-    <Drawer variant='permanent' anchor='left'>
+    <Drawer
+      variant='permanent'
+      anchor='left'
+      sx={{
+        width: 290,
+        flexShrink: 0,
+        '& .MuiDrawer-paper': {
+          width: 290,
+          boxSizing: 'border-box',
+          backgroundColor: '#CEBCA1', // Add background color here
+        },
+      }}
+    >
       <List>
         {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
           <ListItem button key={text}>
