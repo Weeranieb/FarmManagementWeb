@@ -9,15 +9,21 @@ import {
 } from '@mui/material'
 import InboxIcon from '@mui/icons-material/Inbox'
 import MailIcon from '@mui/icons-material/Mail'
+import HomeIcon from '@mui/icons-material/Home'
+import TableChartIcon from '@mui/icons-material/TableChart'
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd'
+import PaymentsIcon from '@mui/icons-material/Payments'
+import InsightsIcon from '@mui/icons-material/Insights'
 import { Link as RouterLink } from 'react-router-dom'
 import SidebarHeader from './SidebarHeader'
 
 const Sidebar: React.FC = () => {
   const items = [
-    { text: 'Inbox', icon: <InboxIcon />, route: '/inbox' },
-    { text: 'Starred', icon: <MailIcon />, route: '/starred' },
-    { text: 'Send email', icon: <InboxIcon />, route: '/send-email' },
-    { text: 'Drafts', icon: <MailIcon />, route: '/drafts' },
+    { text: 'หน้าแรก', icon: <HomeIcon />, route: '/' },
+    { text: 'ฟาร์มและบ่อปลา', icon: <TableChartIcon />, route: '/farm' },
+    { text: 'ลูกน้อง', icon: <AssignmentIndIcon />, route: '/worker' },
+    { text: 'ค่าใช้จ่าย', icon: <PaymentsIcon />, route: '/bill' },
+    { text: 'สถิติ', icon: <InsightsIcon />, route: '/stats' },
   ]
 
   return (
@@ -43,6 +49,8 @@ const Sidebar: React.FC = () => {
             to={item.route}
             sx={{
               fontSize: '1.074rem', // Font size
+              p: 1.7, // Padding between line
+              pl: 2, // Padding left
               '&:hover': {
                 backgroundColor: '#CEBCA1', // Hover effect color
                 fontWeight: 'bolder', // Text thickness on hover
