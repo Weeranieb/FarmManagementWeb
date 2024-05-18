@@ -9,7 +9,7 @@ const HomePage: React.FC = () => {
         backgroundColor: 'white',
         padding: 3,
         borderRadius: 1,
-        boxShadow: 1,
+        // boxShadow: 1,
       }}
     >
       <Typography variant='h4' gutterBottom>

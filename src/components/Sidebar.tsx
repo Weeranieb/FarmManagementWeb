@@ -21,7 +21,7 @@ const Sidebar: React.FC = () => {
         '& .MuiDrawer-paper': {
           width: 290,
           boxSizing: 'border-box',
-          backgroundColor: '#CEBCA1', // Add background color here
+          backgroundColor: '#FAF8EE',
         },
       }}
     >

@@ -10,8 +10,30 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <CssBaseline />
       <TopBar />
       <Sidebar />
-      <Box component='main' sx={{ flexGrow: 1, p: 3, mt: 8, overflow: 'auto' }}>
-        {children}
+      <Box
+        component='main'
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+          p: 2.5,
+          mt: 8,
+          overflow: 'auto',
+        }}
+      >
+        <Box
+          sx={{
+            flexGrow: 1,
+            backgroundColor: 'white',
+            width: '100%',
+            borderRadius: 4,
+            maxWidth: '1200px',
+            margin: '0 auto',
+            pt: 1.25,
+          }}
+        >
+          {children}
+        </Box>
       </Box>
     </Box>
   )
