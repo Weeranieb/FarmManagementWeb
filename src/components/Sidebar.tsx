@@ -43,8 +43,8 @@ const Sidebar: React.FC = () => {
               '&:hover': {
                 backgroundColor: '#CEBCA1', // Hover effect color
                 fontWeight: 'bolder', // Text thickness on hover
-                // fontSize: '1.2rem', // Text size on hover
                 color: 'white',
+                borderRadius: '8.68px',
               },
               '&.Mui-selected': {
                 backgroundColor: '#d0d0d0', // Selected item color
