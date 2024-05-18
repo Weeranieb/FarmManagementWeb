@@ -9,8 +9,16 @@ import {
 } from '@mui/material'
 import InboxIcon from '@mui/icons-material/Inbox'
 import MailIcon from '@mui/icons-material/Mail'
+import { Link as RouterLink } from 'react-router-dom'
 
 const Sidebar: React.FC = () => {
+  const items = [
+    { text: 'Inbox', icon: <InboxIcon />, route: '/inbox' },
+    { text: 'Starred', icon: <MailIcon />, route: '/starred' },
+    { text: 'Send email', icon: <InboxIcon />, route: '/send-email' },
+    { text: 'Drafts', icon: <MailIcon />, route: '/drafts' },
+  ]
+
   return (
     <Drawer
       variant='permanent'
@@ -26,12 +34,25 @@ const Sidebar: React.FC = () => {
       }}
     >
       <List>
-        {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-          <ListItem key={text}>
-            <ListItemIcon>
-              {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-            </ListItemIcon>
-            <ListItemText primary={text} />
+        {items.map((item, index) => (
+          <ListItem
+            button
+            key={item.text}
+            component={RouterLink}
+            to={item.route}
+            sx={{
+              '&:hover': {
+                backgroundColor: '#e0e0e0', // Hover effect color
+              },
+              '&.Mui-selected': {
+                backgroundColor: '#d0d0d0', // Selected item color
+              },
+              textDecoration: 'none', // Remove default link styling
+              color: 'inherit', // Inherit text color from parent
+            }}
+          >
+            <ListItemIcon>{item.icon}</ListItemIcon>
+            <ListItemText primary={item.text} />
           </ListItem>
         ))}
       </List>
