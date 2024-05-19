@@ -10,6 +10,7 @@ import {
 } from '@mui/material'
 import ExpandLess from '@mui/icons-material/ExpandLess'
 import ExpandMore from '@mui/icons-material/ExpandMore'
+import EditIcon from '@mui/icons-material/Edit'
 import HomeIcon from '@mui/icons-material/Home'
 import TableChartIcon from '@mui/icons-material/TableChart'
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd'
@@ -44,7 +45,7 @@ const Sidebar: React.FC = () => {
     { text: 'ฟาร์มและบ่อปลา', icon: <TableChartIcon />, route: '/farm' },
     {
       text: 'กรอกข้อมูล',
-      icon: <InsightsIcon />,
+      icon: <EditIcon />,
       route: '',
       subItems: [
         { text: 'เหยื่อรายวัน', route: '/dailyFeed' },
