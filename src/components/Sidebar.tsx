@@ -14,12 +14,13 @@ import TableChartIcon from '@mui/icons-material/TableChart'
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd'
 import PaymentsIcon from '@mui/icons-material/Payments'
 import InsightsIcon from '@mui/icons-material/Insights'
-import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom'
 import SidebarHeader from './SidebarHeader'
 
 const Sidebar: React.FC = () => {
   const [isSubMenuOpen, setIsSubMenuOpen] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
 
   const handleSubMenuToggle = () => {
     setIsSubMenuOpen(!isSubMenuOpen)
@@ -48,11 +49,9 @@ const Sidebar: React.FC = () => {
       variant='permanent'
       anchor='left'
       sx={{
-        // width: 290,
         width: '18.125rem',
         flexShrink: 0,
         '& .MuiDrawer-paper': {
-          // width: 290,
           width: '18.125rem',
           boxSizing: 'border-box',
           backgroundColor: '#FAF8EE',
@@ -76,6 +75,10 @@ const Sidebar: React.FC = () => {
                 fontSize: '1.074rem',
                 p: 1.7,
                 pl: 2,
+                borderRadius: '0.543rem',
+                backgroundColor:
+                  location.pathname === item.route ? '#CEBCA1' : 'inherit',
+                color: location.pathname === item.route ? 'white' : 'inherit',
                 '&:hover': {
                   backgroundColor: '#CEBCA1',
                   fontWeight: 'bolder',
@@ -86,10 +89,15 @@ const Sidebar: React.FC = () => {
                   backgroundColor: '#d0d0d0',
                 },
                 textDecoration: 'none',
-                color: 'inherit',
               }}
             >
-              <ListItemIcon sx={{ color: 'inherit' }}>{item.icon}</ListItemIcon>
+              <ListItemIcon
+                sx={{
+                  color: location.pathname === item.route ? 'white' : 'inherit',
+                }}
+              >
+                {item.icon}
+              </ListItemIcon>
               <ListItemText primary={item.text} />
               {item.text === 'กรอกข้อมูล' && (
                 <ListItemIcon sx={{ color: 'inherit' }}>
@@ -108,6 +116,15 @@ const Sidebar: React.FC = () => {
                       sx={{
                         fontSize: '1.074rem',
                         p: 1.7,
+                        borderRadius: '0.543rem',
+                        backgroundColor:
+                          location.pathname === subItem.route
+                            ? '#CEBCA1'
+                            : 'inherit',
+                        color:
+                          location.pathname === subItem.route
+                            ? 'white'
+                            : 'inherit',
                         '&:hover': {
                           backgroundColor: '#CEBCA1',
                           fontWeight: 'bolder',
@@ -115,7 +132,6 @@ const Sidebar: React.FC = () => {
                           borderRadius: '0.543rem',
                         },
                         textDecoration: 'none',
-                        color: 'inherit',
                       }}
                     >
                       <ListItemText primary={subItem.text} />
