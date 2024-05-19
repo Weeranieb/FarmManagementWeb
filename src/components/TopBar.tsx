@@ -8,6 +8,7 @@ import {
   Menu,
   MenuItem,
   ListItemIcon,
+  Badge,
   Divider,
 } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
@@ -18,7 +19,7 @@ const TopBar: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const navigate = useNavigate()
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleClickProfile = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
   }
 
@@ -26,10 +27,17 @@ const TopBar: React.FC = () => {
     setAnchorEl(null)
   }
 
+  const handleClickNotifications = () => {
+    // Implement your notification logic here
+  }
+
   const handleMenuItemClick = (route: string) => {
     navigate(route)
     handleClose()
   }
+
+  // Set this to true if there are notifications
+  const hasNotifications = false // Set this to true if there are notifications
 
   return (
     <AppBar position='fixed' sx={{ backgroundColor: 'white' }}>
@@ -39,13 +47,16 @@ const TopBar: React.FC = () => {
           size='large'
           edge='end'
           aria-label='notifications'
+          onClick={handleClickNotifications}
           sx={{ mr: 2 }}
         >
-          <NotificationsIcon />
+          <Badge color='error' variant={hasNotifications ? 'dot' : 'standard'}>
+            <NotificationsIcon />
+          </Badge>
         </IconButton>
         <Avatar
           sx={{ width: 32, height: 32, cursor: 'pointer' }}
-          onClick={handleClick}
+          onClick={handleClickProfile}
         >
           U
         </Avatar>
