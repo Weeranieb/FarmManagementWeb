@@ -1,5 +1,4 @@
-// src/components/Sidebar.tsx
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Drawer,
   List,
@@ -7,20 +6,37 @@ import {
   ListItemIcon,
   ListItemText,
 } from '@mui/material'
-import InboxIcon from '@mui/icons-material/Inbox'
-import MailIcon from '@mui/icons-material/Mail'
+import ExpandLess from '@mui/icons-material/ExpandLess'
+import ExpandMore from '@mui/icons-material/ExpandMore'
 import HomeIcon from '@mui/icons-material/Home'
 import TableChartIcon from '@mui/icons-material/TableChart'
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd'
 import PaymentsIcon from '@mui/icons-material/Payments'
 import InsightsIcon from '@mui/icons-material/Insights'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import SidebarHeader from './SidebarHeader'
 
 const Sidebar: React.FC = () => {
+  const [isSubMenuOpen, setIsSubMenuOpen] = useState(false)
+  const navigate = useNavigate()
+
+  const handleSubMenuToggle = () => {
+    setIsSubMenuOpen(!isSubMenuOpen)
+  }
+
   const items = [
     { text: 'หน้าแรก', icon: <HomeIcon />, route: '/' },
     { text: 'ฟาร์มและบ่อปลา', icon: <TableChartIcon />, route: '/farm' },
+    {
+      text: 'กรอกข้อมูล',
+      icon: <InsightsIcon />,
+      route: '', // No route for the button itself
+      subItems: [
+        { text: 'a', route: '/a' },
+        { text: 'b', route: '/b' },
+        { text: 'c', route: '/c' },
+      ],
+    },
     { text: 'ลูกน้อง', icon: <AssignmentIndIcon />, route: '/worker' },
     { text: 'ค่าใช้จ่าย', icon: <PaymentsIcon />, route: '/bill' },
     { text: 'สถิติ', icon: <InsightsIcon />, route: '/stats' },
@@ -43,36 +59,99 @@ const Sidebar: React.FC = () => {
       <SidebarHeader />
       <List>
         {items.map((item, index) => (
-          <ListItem
-            key={item.text}
-            component={RouterLink}
-            to={item.route}
-            sx={{
-              fontSize: '1.074rem', // Font size
-              p: 1.7, // Padding between line
-              pl: 2, // Padding left
-              '&:hover': {
-                backgroundColor: '#CEBCA1', // Hover effect color
-                fontWeight: 'bolder', // Text thickness on hover
-                color: 'white',
-                borderRadius: '0.543rem',
-              },
-              '&.Mui-selected': {
-                backgroundColor: '#d0d0d0', // Selected item color
-              },
-              textDecoration: 'none', // Remove default link styling
-              color: 'inherit', // Inherit text color from parent
-            }}
-          >
-            <ListItemIcon sx={{ color: 'inherit' }}>{item.icon}</ListItemIcon>
-            <ListItemText
-              primaryTypographyProps={{
-                fontSize: 'inherit',
-                fontWeight: 'inherit',
+          <React.Fragment key={item.text}>
+            <ListItem
+              onClick={() => {
+                if (item.text === 'กรอกข้อมูล') {
+                  handleSubMenuToggle()
+                } else {
+                  navigate(item.route)
+                }
               }}
-              primary={item.text}
-            />
-          </ListItem>
+              sx={{
+                fontSize: '1.074rem',
+                p: 1.7,
+                pl: 2,
+                '&:hover': {
+                  backgroundColor: '#CEBCA1',
+                  fontWeight: 'bolder',
+                  color: 'white',
+                  borderRadius: '0.543rem',
+                },
+                '&.Mui-selected': {
+                  backgroundColor: '#d0d0d0',
+                },
+                textDecoration: 'none',
+                color: 'inherit',
+              }}
+            >
+              <ListItemIcon sx={{ color: 'inherit' }}>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.text} />
+              {item.text === 'กรอกข้อมูล' && (
+                <ListItemIcon sx={{ color: 'inherit' }}>
+                  {isSubMenuOpen ? <ExpandLess /> : <ExpandMore />}
+                </ListItemIcon>
+              )}
+            </ListItem>
+            {item.text === 'กรอกข้อมูล' && isSubMenuOpen && (
+              <List sx={{ pl: 2 }}>
+                <ListItem
+                  component={RouterLink}
+                  to='/a'
+                  sx={{
+                    fontSize: '1.074rem',
+                    p: 1.7,
+                    '&:hover': {
+                      backgroundColor: '#CEBCA1',
+                      fontWeight: 'bolder',
+                      color: 'white',
+                      borderRadius: '0.543rem',
+                    },
+                    textDecoration: 'none',
+                    color: 'inherit',
+                  }}
+                >
+                  <ListItemText primary='a' />
+                </ListItem>
+                <ListItem
+                  component={RouterLink}
+                  to='/b'
+                  sx={{
+                    fontSize: '1.074rem',
+                    p: 1.7,
+                    '&:hover': {
+                      backgroundColor: '#CEBCA1',
+                      fontWeight: 'bolder',
+                      color: 'white',
+                      borderRadius: '0.543rem',
+                    },
+                    textDecoration: 'none',
+                    color: 'inherit',
+                  }}
+                >
+                  <ListItemText primary='b' />
+                </ListItem>
+                <ListItem
+                  component={RouterLink}
+                  to='/c'
+                  sx={{
+                    fontSize: '1.074rem',
+                    p: 1.7,
+                    '&:hover': {
+                      backgroundColor: '#CEBCA1',
+                      fontWeight: 'bolder',
+                      color: 'white',
+                      borderRadius: '0.543rem',
+                    },
+                    textDecoration: 'none',
+                    color: 'inherit',
+                  }}
+                >
+                  <ListItemText primary='c' />
+                </ListItem>
+              </List>
+            )}
+          </React.Fragment>
         ))}
       </List>
     </Drawer>
