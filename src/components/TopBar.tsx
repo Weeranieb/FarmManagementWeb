@@ -2,7 +2,7 @@
 import React from 'react'
 import { AppBar, Toolbar, Typography, IconButton, Avatar } from '@mui/material'
 import NotificationsIcon from '@mui/icons-material/Notifications'
-import MenuIcon from '@mui/icons-material/Menu'
+// import MenuIcon from '@mui/icons-material/Menu'
 
 const TopBar: React.FC = () => {
   return (

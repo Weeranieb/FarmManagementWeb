@@ -48,10 +48,12 @@ const Sidebar: React.FC = () => {
       variant='permanent'
       anchor='left'
       sx={{
-        width: 290,
+        // width: 290,
+        width: '18.125rem',
         flexShrink: 0,
         '& .MuiDrawer-paper': {
-          width: 290,
+          // width: 290,
+          width: '18.125rem',
           boxSizing: 'border-box',
           backgroundColor: '#FAF8EE',
         },
