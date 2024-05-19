@@ -6,6 +6,7 @@ import {
   ListItemIcon,
   ListItemText,
   Collapse,
+  Switch,
 } from '@mui/material'
 import ExpandLess from '@mui/icons-material/ExpandLess'
 import ExpandMore from '@mui/icons-material/ExpandMore'
@@ -14,17 +15,29 @@ import TableChartIcon from '@mui/icons-material/TableChart'
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd'
 import PaymentsIcon from '@mui/icons-material/Payments'
 import InsightsIcon from '@mui/icons-material/Insights'
+import SettingsIcon from '@mui/icons-material/Settings'
+import LogoutIcon from '@mui/icons-material/Logout'
+import DarkModeIcon from '@mui/icons-material/DarkMode'
+import LightModeIcon from '@mui/icons-material/LightMode'
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom'
 import SidebarHeader from './SidebarHeader'
 
 const Sidebar: React.FC = () => {
   const [isSubMenuOpen, setIsSubMenuOpen] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
 
   const handleSubMenuToggle = () => {
     setIsSubMenuOpen(!isSubMenuOpen)
   }
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode)
+    // Implement your dark mode logic here
+  }
+
+  const modeIcon = isDarkMode ? <DarkModeIcon /> : <LightModeIcon />
 
   const items = [
     { text: 'หน้าแรก', icon: <HomeIcon />, route: '/' },
@@ -44,6 +57,11 @@ const Sidebar: React.FC = () => {
     { text: 'สถิติ', icon: <InsightsIcon />, route: '/stats' },
   ]
 
+  const secondaryItems = [
+    { text: 'ตั้งค่า', icon: <SettingsIcon />, route: '/setting' },
+    { text: 'ออกจากระบบ', icon: <LogoutIcon />, route: '/logout' },
+  ]
+
   return (
     <Drawer
       variant='permanent'
@@ -59,11 +77,17 @@ const Sidebar: React.FC = () => {
       }}
     >
       <SidebarHeader />
-      <List>
+      <List
+        sx={{
+          maxHeight: '50vh',
+          // maxHeight: 'calc(100vh - 64px)', // Assuming SidebarHeader is 64px tall
+          overflowY: 'auto',
+          position: 'relative',
+        }}
+      >
         {items.map((item) => (
           <React.Fragment key={item.text}>
             <ListItem
-              button
               onClick={() => {
                 if (item.text === 'กรอกข้อมูล') {
                   handleSubMenuToggle()
@@ -80,10 +104,9 @@ const Sidebar: React.FC = () => {
                   location.pathname === item.route ? '#CEBCA1' : 'inherit',
                 color: location.pathname === item.route ? 'white' : 'inherit',
                 '&:hover': {
-                  backgroundColor: '#CEBCA1',
                   fontWeight: 'bolder',
-                  color: 'white',
                   borderRadius: '0.543rem',
+                  border: '2px solid #CEBCA1',
                 },
                 '&.Mui-selected': {
                   backgroundColor: '#d0d0d0',
@@ -126,10 +149,9 @@ const Sidebar: React.FC = () => {
                             ? 'white'
                             : 'inherit',
                         '&:hover': {
-                          backgroundColor: '#CEBCA1',
                           fontWeight: 'bolder',
-                          color: 'white',
                           borderRadius: '0.543rem',
+                          border: '2px solid #CEBCA1',
                         },
                         textDecoration: 'none',
                       }}
@@ -143,6 +165,69 @@ const Sidebar: React.FC = () => {
           </React.Fragment>
         ))}
       </List>
+      <List
+        sx={{
+          width: '100%',
+          mt: 3,
+          pb: 2,
+          pt: 2.5,
+          position: 'relative',
+          '::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: '20%',
+            width: '60%',
+            borderBottom: '2px solid #D1D3D3',
+          },
+        }}
+      >
+        {secondaryItems.map((item) => (
+          <React.Fragment key={item.text}>
+            <ListItem
+              onClick={() => {
+                if (item.text === 'กรอกข้อมูล') {
+                  handleSubMenuToggle()
+                } else {
+                  navigate(item.route)
+                }
+              }}
+              sx={{
+                fontSize: '1.074rem',
+                p: 1.7,
+                pl: 2,
+                borderRadius: '0.543rem',
+                backgroundColor:
+                  location.pathname === item.route ? '#CEBCA1' : 'inherit',
+                color: location.pathname === item.route ? 'white' : 'inherit',
+                '&:hover': {
+                  fontWeight: 'bolder',
+                  borderRadius: '0.543rem',
+                  border: '2px solid #CEBCA1',
+                },
+                '&.Mui-selected': {
+                  backgroundColor: '#d0d0d0',
+                },
+                textDecoration: 'none',
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  color: location.pathname === item.route ? 'white' : 'inherit',
+                }}
+              >
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItem>
+          </React.Fragment>
+        ))}
+      </List>
+      <ListItem sx={{ mt: 12 }}>
+        <ListItemIcon>{modeIcon}</ListItemIcon>
+        <ListItemText primary={isDarkMode ? 'Dark Mode' : 'Light Mode'} />
+        <Switch checked={isDarkMode} onChange={toggleDarkMode} />
+      </ListItem>
     </Drawer>
   )
 }
