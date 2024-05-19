@@ -7,9 +7,12 @@ import {
   Avatar,
   Menu,
   MenuItem,
+  ListItemIcon,
+  Divider,
 } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import NotificationsIcon from '@mui/icons-material/Notifications'
+import { Logout, PersonAdd, Settings } from '@mui/icons-material'
 
 const TopBar: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -83,19 +86,36 @@ const TopBar: React.FC = () => {
             sx={{ padding: '8px 20px' }}
             onClick={() => handleMenuItemClick('/profile')}
           >
-            Profile
+            <Avatar>U</Avatar>
+            โปรไฟล์
           </MenuItem>
+          <MenuItem
+            sx={{ padding: '8px 20px' }}
+            onClick={() => handleMenuItemClick('/addUser')}
+          >
+            <ListItemIcon>
+              <PersonAdd fontSize='small' />
+            </ListItemIcon>
+            เพิ่มผู้ใช้งาน
+          </MenuItem>
+          <Divider />
           <MenuItem
             sx={{ padding: '8px 20px' }}
             onClick={() => handleMenuItemClick('/settings')}
           >
-            Settings
+            <ListItemIcon>
+              <Settings fontSize='small' />
+            </ListItemIcon>
+            ตั้งค่า
           </MenuItem>
           <MenuItem
             sx={{ padding: '8px 20px' }}
             onClick={() => handleMenuItemClick('/logout')}
           >
-            Logout
+            <ListItemIcon>
+              <Logout fontSize='small' />
+            </ListItemIcon>
+            ออกจากระบบ
           </MenuItem>
         </Menu>
       </Toolbar>
