@@ -5,6 +5,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Collapse,
 } from '@mui/material'
 import ExpandLess from '@mui/icons-material/ExpandLess'
 import ExpandMore from '@mui/icons-material/ExpandMore'
@@ -30,11 +31,11 @@ const Sidebar: React.FC = () => {
     {
       text: 'กรอกข้อมูล',
       icon: <InsightsIcon />,
-      route: '', // No route for the button itself
+      route: '',
       subItems: [
-        { text: 'a', route: '/a' },
-        { text: 'b', route: '/b' },
-        { text: 'c', route: '/c' },
+        { text: 'เหยื่อรายวัน', route: '/dailyFeed' },
+        { text: 'เติม/ย้าย/ขาย', route: '/activity' },
+        { text: 'รายการเหยื่อ', route: '/feedCollection' },
       ],
     },
     { text: 'ลูกน้อง', icon: <AssignmentIndIcon />, route: '/worker' },
@@ -58,9 +59,10 @@ const Sidebar: React.FC = () => {
     >
       <SidebarHeader />
       <List>
-        {items.map((item, index) => (
+        {items.map((item) => (
           <React.Fragment key={item.text}>
             <ListItem
+              button
               onClick={() => {
                 if (item.text === 'กรอกข้อมูล') {
                   handleSubMenuToggle()
@@ -93,63 +95,32 @@ const Sidebar: React.FC = () => {
                 </ListItemIcon>
               )}
             </ListItem>
-            {item.text === 'กรอกข้อมูล' && isSubMenuOpen && (
-              <List sx={{ pl: 2 }}>
-                <ListItem
-                  component={RouterLink}
-                  to='/a'
-                  sx={{
-                    fontSize: '1.074rem',
-                    p: 1.7,
-                    '&:hover': {
-                      backgroundColor: '#CEBCA1',
-                      fontWeight: 'bolder',
-                      color: 'white',
-                      borderRadius: '0.543rem',
-                    },
-                    textDecoration: 'none',
-                    color: 'inherit',
-                  }}
-                >
-                  <ListItemText primary='a' />
-                </ListItem>
-                <ListItem
-                  component={RouterLink}
-                  to='/b'
-                  sx={{
-                    fontSize: '1.074rem',
-                    p: 1.7,
-                    '&:hover': {
-                      backgroundColor: '#CEBCA1',
-                      fontWeight: 'bolder',
-                      color: 'white',
-                      borderRadius: '0.543rem',
-                    },
-                    textDecoration: 'none',
-                    color: 'inherit',
-                  }}
-                >
-                  <ListItemText primary='b' />
-                </ListItem>
-                <ListItem
-                  component={RouterLink}
-                  to='/c'
-                  sx={{
-                    fontSize: '1.074rem',
-                    p: 1.7,
-                    '&:hover': {
-                      backgroundColor: '#CEBCA1',
-                      fontWeight: 'bolder',
-                      color: 'white',
-                      borderRadius: '0.543rem',
-                    },
-                    textDecoration: 'none',
-                    color: 'inherit',
-                  }}
-                >
-                  <ListItemText primary='c' />
-                </ListItem>
-              </List>
+            {item.text === 'กรอกข้อมูล' && (
+              <Collapse in={isSubMenuOpen} timeout='auto' unmountOnExit>
+                <List sx={{ pl: 4 }}>
+                  {item.subItems?.map((subItem) => (
+                    <ListItem
+                      component={RouterLink}
+                      to={subItem.route}
+                      key={subItem.text}
+                      sx={{
+                        fontSize: '1.074rem',
+                        p: 1.7,
+                        '&:hover': {
+                          backgroundColor: '#CEBCA1',
+                          fontWeight: 'bolder',
+                          color: 'white',
+                          borderRadius: '0.543rem',
+                        },
+                        textDecoration: 'none',
+                        color: 'inherit',
+                      }}
+                    >
+                      <ListItemText primary={subItem.text} />
+                    </ListItem>
+                  ))}
+                </List>
+              </Collapse>
             )}
           </React.Fragment>
         ))}
