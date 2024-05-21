@@ -10,6 +10,11 @@ import {
   ListItemIcon,
   Badge,
   Divider,
+  List,
+  ListItem,
+  ListItemText,
+  Popover,
+  Paper,
 } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import NotificationsIcon from '@mui/icons-material/Notifications'
@@ -17,6 +22,11 @@ import { Logout, PersonAdd, Settings } from '@mui/icons-material'
 
 const TopBar: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [notificationEl, setNotificationEl] = useState<null | HTMLElement>(null)
+  const [notifications, setNotifications] = useState([
+    { id: 1, message: 'New message received', path: '/' },
+    { id: 2, message: 'Server downtime scheduled', path: '/settings' },
+  ])
   const navigate = useNavigate()
 
   const handleClickProfile = (event: React.MouseEvent<HTMLElement>) => {
@@ -27,8 +37,12 @@ const TopBar: React.FC = () => {
     setAnchorEl(null)
   }
 
-  const handleClickNotifications = () => {
-    // Implement your notification logic here
+  const handleClickNotifications = (event: React.MouseEvent<HTMLElement>) => {
+    setNotificationEl(event.currentTarget)
+  }
+
+  const handleNotificationClose = () => {
+    setNotificationEl(null)
   }
 
   const handleMenuItemClick = (route: string) => {
@@ -36,8 +50,7 @@ const TopBar: React.FC = () => {
     handleClose()
   }
 
-  // Set this to true if there are notifications
-  const hasNotifications = false // Set this to true if there are notifications
+  const hasNotifications = notifications.length > 0
 
   return (
     <AppBar position='fixed' sx={{ backgroundColor: 'white' }}>
@@ -129,6 +142,47 @@ const TopBar: React.FC = () => {
             ออกจากระบบ
           </MenuItem>
         </Menu>
+        <Popover
+          open={Boolean(notificationEl)}
+          anchorEl={notificationEl}
+          onClose={handleNotificationClose}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+        >
+          <Paper>
+            <List>
+              {hasNotifications ? (
+                notifications.map((notification) => (
+                  <ListItem
+                    key={notification.id}
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: '#f5f5f5',
+                        cursor: 'pointer',
+                      },
+                    }}
+                    onClick={() => {
+                      navigate(notification.path)
+                      handleNotificationClose()
+                    }}
+                  >
+                    <ListItemText primary={notification.message} />
+                  </ListItem>
+                ))
+              ) : (
+                <ListItem>
+                  <ListItemText primary='No notifications' />
+                </ListItem>
+              )}
+            </List>
+          </Paper>
+        </Popover>
       </Toolbar>
     </AppBar>
   )
