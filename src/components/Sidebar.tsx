@@ -42,7 +42,7 @@ const Sidebar: React.FC = () => {
 
   const items = [
     { text: 'หน้าแรก', icon: <HomeIcon />, route: '/' },
-    { text: 'ฟาร์มและบ่อปลา', icon: <TableChartIcon />, route: '/farm' },
+    { text: 'ฟาร์มและบ่อปลา', icon: <TableChartIcon />, route: '/farms' },
     {
       text: 'กรอกข้อมูล',
       icon: <EditIcon />,
