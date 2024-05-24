@@ -124,7 +124,7 @@ const FarmsPage = () => {
       <Grid item xs={12} md={8}>
         <Box
           sx={{
-            width: '100%', // Set width to 100% to expand fully
+            width: '100%',
             p: 2,
             boxSizing: 'border-box',
             minHeight: 'calc(100vh - 120px)',
@@ -137,8 +137,9 @@ const FarmsPage = () => {
           <Box
             display='flex'
             flexWrap='wrap'
+            justifyContent='center'
             sx={{
-              width: '100%', // Set width to 100% to expand fully
+              width: '100%',
             }}
           >
             {selectedFarm !== null &&
@@ -160,8 +161,6 @@ const FarmsPage = () => {
                       selectedPond === pondIndex ? 'bolder' : 'normal',
                     '&:hover': {
                       fontWeight: 'bolder',
-                      // borderRadius: '0.543rem',
-                      // border: '2px solid #CEBCA1',
                       backgroundColor: '#CEBCA1',
                       color: 'white',
                     },
