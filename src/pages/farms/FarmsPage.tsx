@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Grid,
   Box,
@@ -36,9 +36,11 @@ const FarmsPage = () => {
 
   const location = useLocation()
   const navigate = useNavigate()
+  const [selectedButton, setSelectedButton] = useState<number | null>(null)
 
-  const handleListItemClick = (route: string) => {
-    navigate(route)
+  const handleListItemClick = (route: string, index: number) => {
+    // navigate(route)
+    setSelectedButton(index)
   }
 
   return (
@@ -61,15 +63,17 @@ const FarmsPage = () => {
             {farms.map((farm, index) => (
               <ListItem
                 key={index}
-                onClick={() => handleListItemClick(farm.route)}
+                onClick={() => handleListItemClick(farm.route, index)}
                 sx={{
                   fontSize: '1.074rem',
                   p: 1.7,
                   pl: 2,
                   borderRadius: '0.543rem',
                   backgroundColor:
-                    location.pathname === farm.route ? '#CEBCA1' : 'inherit',
-                  color: location.pathname === farm.route ? 'white' : 'inherit',
+                    selectedButton === index ? '#FAF8EE' : 'inherit',
+                  color: selectedButton === index ? '#CEBCA1' : 'inherit',
+                  borderRight:
+                    selectedButton === index ? '5px solid #CEBCA1' : 'inherit',
                   '&:hover': {
                     fontWeight: 'bolder',
                     borderRadius: '0.543rem',
@@ -81,7 +85,16 @@ const FarmsPage = () => {
                   textDecoration: 'none',
                 }}
               >
-                <ListItemText primary={farm.name} />
+                <ListItemText
+                  primary={farm.name}
+                  primaryTypographyProps={{
+                    style: {
+                      fontSize: selectedButton === index ? '1.2rem' : 'inherit',
+                      fontWeight:
+                        selectedButton === index ? 'bolder' : 'inherit',
+                    },
+                  }}
+                />
               </ListItem>
             ))}
           </List>
