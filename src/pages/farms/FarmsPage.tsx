@@ -7,6 +7,7 @@ import {
   List,
   ListItem,
   ListItemText,
+  Button,
 } from '@mui/material'
 import { useLocation, useNavigate } from 'react-router-dom'
 
@@ -15,7 +16,18 @@ const FarmsPage = () => {
     {
       name: 'ฟาร์ม 1',
       route: '/farm/1',
-      ponds: [{ name: 'บ่อ 1' }, { name: 'บ่อ 2' }],
+      ponds: [
+        { name: 'บ่อ 1' },
+        { name: 'บ่อ 2' },
+        { name: 'บ่อ 3' },
+        { name: 'บ่อ 4' },
+        { name: 'บ่อ 5' },
+        { name: 'บ่อ 6' },
+        { name: 'บ่อ 7' },
+        { name: 'บ่อ 8' },
+        { name: 'บ่อ 9' },
+        { name: 'บ่อ 10' },
+      ],
     },
     {
       name: 'ฟาร์ม 2',
@@ -36,11 +48,17 @@ const FarmsPage = () => {
 
   const location = useLocation()
   const navigate = useNavigate()
-  const [selectedButton, setSelectedButton] = useState<number | null>(null)
+  const [selectedFarm, setSelectedFarm] = useState<number | null>(null)
+  const [selectedPond, setSelectedPond] = useState<number | null>(null)
 
-  const handleListItemClick = (route: string, index: number) => {
-    // navigate(route)
-    setSelectedButton(index)
+  const handleFarmClick = (index: number) => {
+    setSelectedFarm(index)
+    setSelectedPond(null) // Reset selected pond when a different farm is selected
+  }
+
+  const handlePondClick = (pondIndex: number) => {
+    navigate(`${location.pathname}/${pondIndex}`)
+    setSelectedPond(pondIndex)
   }
 
   return (
@@ -60,20 +78,22 @@ const FarmsPage = () => {
           </Typography>
           <Divider />
           <List>
-            {farms.map((farm, index) => (
+            {farms.map((farm, farmIndex) => (
               <ListItem
-                key={index}
-                onClick={() => handleListItemClick(farm.route, index)}
+                key={farmIndex}
+                onClick={() => handleFarmClick(farmIndex)}
                 sx={{
                   fontSize: '1.074rem',
                   p: 1.7,
                   pl: 2,
                   borderRadius: '0.543rem',
                   backgroundColor:
-                    selectedButton === index ? '#FAF8EE' : 'inherit',
-                  color: selectedButton === index ? '#CEBCA1' : 'inherit',
+                    selectedFarm === farmIndex ? '#FAF8EE' : 'inherit',
+                  color: selectedFarm === farmIndex ? '#CEBCA1' : 'inherit',
                   borderRight:
-                    selectedButton === index ? '5px solid #CEBCA1' : 'inherit',
+                    selectedFarm === farmIndex
+                      ? '5px solid #CEBCA1'
+                      : 'inherit',
                   '&:hover': {
                     fontWeight: 'bolder',
                     borderRadius: '0.543rem',
@@ -89,9 +109,10 @@ const FarmsPage = () => {
                   primary={farm.name}
                   primaryTypographyProps={{
                     style: {
-                      fontSize: selectedButton === index ? '1.2rem' : 'inherit',
+                      fontSize:
+                        selectedFarm === farmIndex ? '1.2rem' : 'inherit',
                       fontWeight:
-                        selectedButton === index ? 'bolder' : 'inherit',
+                        selectedFarm === farmIndex ? 'bolder' : 'inherit',
                     },
                   }}
                 />
@@ -103,13 +124,53 @@ const FarmsPage = () => {
       <Grid item xs={12} md={8}>
         <Box
           sx={{
-            width: '100%',
+            width: '100%', // Set width to 100% to expand fully
             p: 2,
             boxSizing: 'border-box',
             minHeight: 'calc(100vh - 120px)',
           }}
         >
-          Right Side Content
+          <Typography variant='h4' gutterBottom fontWeight='bold'>
+            บ่อ
+          </Typography>
+          <Divider />
+          <Box
+            display='flex'
+            flexWrap='wrap'
+            sx={{
+              width: '100%', // Set width to 100% to expand fully
+            }}
+          >
+            {selectedFarm !== null &&
+              farms[selectedFarm].ponds.map((pond, pondIndex) => (
+                <Button
+                  key={pondIndex}
+                  variant='outlined'
+                  onClick={() => handlePondClick(pondIndex)}
+                  sx={{
+                    borderRadius: '50px',
+                    border: '3px solid #CEBCA1',
+                    margin: '8px',
+                    minWidth: 'calc((100% - 60px) / 3)',
+                    minHeight: '50px',
+                    backgroundColor:
+                      selectedPond === pondIndex ? '#CEBCA1' : 'white',
+                    color: selectedPond === pondIndex ? 'white' : 'inherit',
+                    fontWeight:
+                      selectedPond === pondIndex ? 'bolder' : 'normal',
+                    '&:hover': {
+                      fontWeight: 'bolder',
+                      // borderRadius: '0.543rem',
+                      // border: '2px solid #CEBCA1',
+                      backgroundColor: '#CEBCA1',
+                      color: 'white',
+                    },
+                  }}
+                >
+                  {pond.name}
+                </Button>
+              ))}
+          </Box>
         </Box>
       </Grid>
     </Grid>
