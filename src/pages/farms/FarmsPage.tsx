@@ -15,49 +15,53 @@ const FarmsPage = () => {
   const farms = [
     {
       name: 'ฟาร์ม 1',
-      route: '/farm/1',
       ponds: [
-        { name: 'บ่อ 1' },
-        { name: 'บ่อ 2' },
-        { name: 'บ่อ 3' },
-        { name: 'บ่อ 4' },
-        { name: 'บ่อ 5' },
-        { name: 'บ่อ 6' },
-        { name: 'บ่อ 7' },
-        { name: 'บ่อ 8' },
-        { name: 'บ่อ 9' },
-        { name: 'บ่อ 10' },
+        { name: 'บ่อ 1', id: 1 },
+        { name: 'บ่อ 2', id: 2 },
+        { name: 'บ่อ 3', id: 3 },
+        { name: 'บ่อ 4', id: 4 },
+        { name: 'บ่อ 5', id: 5 },
+        { name: 'บ่อ 6', id: 6 },
+        { name: 'บ่อ 7', id: 7 },
+        { name: 'บ่อ 8', id: 8 },
+        { name: 'บ่อ 9', id: 9 },
+        { name: 'บ่อ 10', id: 10 },
       ],
     },
     {
       name: 'ฟาร์ม 2',
-      route: '/farm/2',
-      ponds: [{ name: 'บ่อ 1' }, { name: 'บ่อ 2' }],
+      ponds: [
+        { name: 'บ่อ 1', id: 1 },
+        { name: 'บ่อ 2', id: 2 },
+      ],
     },
     {
       name: 'ฟาร์ม 3',
-      route: '/farm/3',
-      ponds: [{ name: 'บ่อ 1' }, { name: 'บ่อ 2' }],
+      ponds: [
+        { name: 'บ่อ 1', id: 1 },
+        { name: 'บ่อ 2', id: 2 },
+      ],
     },
     {
       name: 'ฟาร์ม 4',
-      route: '/farm/4',
-      ponds: [{ name: 'บ่อ 1' }, { name: 'บ่อ 2' }],
+      ponds: [
+        { name: 'บ่อ 1', id: 1 },
+        { name: 'บ่อ 2', id: 2 },
+      ],
     },
   ]
 
-  const location = useLocation()
   const navigate = useNavigate()
   const [selectedFarm, setSelectedFarm] = useState<number | null>(null)
   const [selectedPond, setSelectedPond] = useState<number | null>(null)
 
   const handleFarmClick = (index: number) => {
     setSelectedFarm(index)
-    setSelectedPond(null) // Reset selected pond when a different farm is selected
+    setSelectedPond(null)
   }
 
-  const handlePondClick = (pondIndex: number) => {
-    navigate(`${location.pathname}/${pondIndex}`)
+  const handlePondClick = (pondIndex: number, activePondId: number) => {
+    navigate(`/pond/${activePondId}`)
     setSelectedPond(pondIndex)
   }
 
@@ -89,10 +93,9 @@ const FarmsPage = () => {
                   borderRadius: '0.543rem',
                   backgroundColor:
                     selectedFarm === farmIndex ? '#FAF8EE' : 'inherit',
-                  color: selectedFarm === farmIndex ? '#CEBCA1' : 'inherit',
                   borderRight:
                     selectedFarm === farmIndex
-                      ? '5px solid #CEBCA1'
+                      ? '10px solid #CEBCA1'
                       : 'inherit',
                   '&:hover': {
                     fontWeight: 'bolder',
@@ -133,7 +136,6 @@ const FarmsPage = () => {
           <Typography variant='h4' gutterBottom fontWeight='bold'>
             บ่อ
           </Typography>
-          <Divider />
           <Box
             display='flex'
             flexWrap='wrap'
@@ -147,7 +149,7 @@ const FarmsPage = () => {
                 <Button
                   key={pondIndex}
                   variant='outlined'
-                  onClick={() => handlePondClick(pondIndex)}
+                  onClick={() => handlePondClick(pondIndex, pond.id)}
                   sx={{
                     borderRadius: '50px',
                     border: '3px solid #CEBCA1',
