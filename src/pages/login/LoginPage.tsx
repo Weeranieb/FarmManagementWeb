@@ -14,7 +14,6 @@ import { Visibility, VisibilityOff } from '@mui/icons-material'
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
-
   const handleClickShowPassword = () => setShowPassword(!showPassword)
   const handleMouseDownPassword = (event: any) => event.preventDefault()
 
