@@ -80,7 +80,7 @@ const FarmsPage = () => {
           <Typography variant='h4' gutterBottom fontWeight='bold'>
             ฟาร์ม
           </Typography>
-          <Divider />
+          <Divider sx={{ borderBottomWidth: 2, mb: 2, color: '#D9D9D9' }} />
           <List>
             {farms.map((farm, farmIndex) => (
               <ListItem
