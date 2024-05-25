@@ -46,32 +46,32 @@ const LoginPage = () => {
         component='form'
         sx={{
           width: '100%',
-          maxWidth: 360,
+          maxWidth: 450,
           margin: '0 auto',
-          backgroundColor: 'rgba(255, 255, 255, 1)',
-          padding: 3,
-          borderRadius: 2,
+          backgroundColor: 'rgba(255, 255, 255, 0.98)',
+          padding: 5,
+          borderRadius: 7,
           position: 'relative',
         }}
         noValidate
         onSubmit={(e) => e.preventDefault()}
       >
         <Typography
-          variant='h5'
+          variant='h4'
           component='h2'
-          sx={{ textAlign: 'center', marginBottom: 2 }}
+          sx={{ textAlign: 'left', mb: 4 }}
         >
           Sign in
         </Typography>
         <TextField
-          sx={{ marginBottom: 3 }} // Add more space between email and password fields
+          sx={{ marginBottom: 4 }}
           label='Email or phone number'
           variant='outlined'
           fullWidth
           required
         />
         <TextField
-          sx={{ marginBottom: 2 }}
+          sx={{ marginBottom: 3 }}
           label='Password'
           variant='outlined'
           fullWidth
@@ -92,7 +92,13 @@ const LoginPage = () => {
             ),
           }}
         />
-        <Button type='submit' variant='contained' color='primary' fullWidth>
+        <Button
+          type='submit'
+          variant='contained'
+          color='primary'
+          sx={{ mb: 1, color: 'white' }}
+          fullWidth
+        >
           Sign in
         </Button>
         <FormControlLabel
