@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   TextField,
   Button,
@@ -6,9 +6,18 @@ import {
   Checkbox,
   Grid,
   Box,
+  Typography,
+  IconButton,
+  InputAdornment,
 } from '@mui/material'
+import { Visibility, VisibilityOff } from '@mui/icons-material'
 
 const LoginPage = () => {
+  const [showPassword, setShowPassword] = useState(false)
+
+  const handleClickShowPassword = () => setShowPassword(!showPassword)
+  const handleMouseDownPassword = (event: any) => event.preventDefault()
+
   return (
     <Grid
       container
@@ -39,16 +48,23 @@ const LoginPage = () => {
           width: '100%',
           maxWidth: 360,
           margin: '0 auto',
-          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backgroundColor: 'rgba(255, 255, 255, 1)',
           padding: 3,
           borderRadius: 2,
-          zIndex: 1,
+          position: 'relative',
         }}
         noValidate
         onSubmit={(e) => e.preventDefault()}
       >
+        <Typography
+          variant='h5'
+          component='h2'
+          sx={{ textAlign: 'center', marginBottom: 2 }}
+        >
+          Sign in
+        </Typography>
         <TextField
-          sx={{ marginBottom: 2 }}
+          sx={{ marginBottom: 3 }} // Add more space between email and password fields
           label='Email or phone number'
           variant='outlined'
           fullWidth
@@ -60,15 +76,29 @@ const LoginPage = () => {
           variant='outlined'
           fullWidth
           required
-          type='password'
-        />
-        <FormControlLabel
-          control={<Checkbox value='remember' color='primary' />}
-          label='Remember me'
+          type={showPassword ? 'text' : 'password'}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position='end'>
+                <IconButton
+                  aria-label='toggle password visibility'
+                  onClick={handleClickShowPassword}
+                  onMouseDown={handleMouseDownPassword}
+                  edge='end'
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
         <Button type='submit' variant='contained' color='primary' fullWidth>
           Sign in
         </Button>
+        <FormControlLabel
+          control={<Checkbox value='remember' color='primary' />}
+          label='Remember me'
+        />
       </Box>
     </Grid>
   )
