@@ -9,7 +9,7 @@ import {
   ListItemText,
   Button,
 } from '@mui/material'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 const FarmsPage = () => {
   const farms = [
@@ -151,6 +151,7 @@ const FarmsPage = () => {
                   variant='outlined'
                   onClick={() => handlePondClick(pondIndex, pond.id)}
                   sx={{
+                    fontSize: '1.074rem',
                     borderRadius: '50px',
                     border: '3px solid #CEBCA1',
                     margin: '8px',
