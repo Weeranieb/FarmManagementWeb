@@ -92,8 +92,8 @@ const ExpenseList: React.FC = () => {
             '& .MuiDataGrid-cell': {
               borderBottom: 'none',
             },
-            '& .MuiDataGrid-row': {
-              borderBottom: 'none',
+            '& .MuiDataGrid-row:hover': {
+              backgroundColor: 'transparent',
             },
           }}
         />
