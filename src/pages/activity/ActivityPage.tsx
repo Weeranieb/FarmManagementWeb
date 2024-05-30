@@ -1,6 +1,12 @@
 import * as React from 'react'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
-import { Box, TextField, MenuItem, InputAdornment } from '@mui/material'
+import {
+  Box,
+  TextField,
+  MenuItem,
+  InputAdornment,
+  Typography,
+} from '@mui/material'
 import { Search as SearchIcon } from '@mui/icons-material'
 
 const columns: GridColDef[] = [
@@ -34,10 +40,18 @@ const ExpenseList: React.FC = () => {
         display='flex'
         justifyContent='space-between'
         alignItems='center'
-        marginBottom={2}
+        p={2}
       >
         <Box>
-          <h2 style={{ margin: 0, padding: '0 10px' }}>กิจกรรม</h2>
+          <Typography
+            variant='h4'
+            component='h4'
+            style={{ margin: 0, padding: '0 10px' }}
+            gutterBottom
+            fontWeight='bold'
+          >
+            กิจกรรม
+          </Typography>
         </Box>
         <Box display='flex' alignItems='center'>
           <Box display='flex' alignItems='center' sx={{ marginRight: 1 }}>
@@ -68,7 +82,21 @@ const ExpenseList: React.FC = () => {
         </Box>
       </Box>
       <div style={{ height: 400, width: '100%' }}>
-        <DataGrid rows={rows} columns={columns} />
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          sx={{
+            '& .MuiDataGrid-columnHeaders': {
+              backgroundColor: '#FAF8EE',
+            },
+            '& .MuiDataGrid-cell': {
+              borderBottom: 'none',
+            },
+            '& .MuiDataGrid-row': {
+              borderBottom: 'none',
+            },
+          }}
+        />
       </div>
     </div>
   )
