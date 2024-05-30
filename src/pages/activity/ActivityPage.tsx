@@ -1,12 +1,6 @@
 import * as React from 'react'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
-import {
-  Box,
-  TextField,
-  MenuItem,
-  IconButton,
-  InputAdornment,
-} from '@mui/material'
+import { Box, TextField, MenuItem, InputAdornment } from '@mui/material'
 import { Search as SearchIcon } from '@mui/icons-material'
 
 const columns: GridColDef[] = [
@@ -46,21 +40,20 @@ const ExpenseList: React.FC = () => {
           <h2 style={{ margin: 0, padding: '0 10px' }}>กิจกรรม</h2>
         </Box>
         <Box display='flex' alignItems='center'>
-          <TextField
-            label='Search'
-            variant='outlined'
-            size='small'
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position='end'>
-                  <IconButton>
+          <Box display='flex' alignItems='center' sx={{ marginRight: 1 }}>
+            <TextField
+              variant='outlined'
+              size='small'
+              placeholder='Search'
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position='start'>
                     <SearchIcon />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-            sx={{ marginRight: 1 }}
-          />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
           <TextField
             select
             variant='outlined'
