@@ -13,11 +13,14 @@ import {
   MoreHoriz as MoreHorizIcon,
 } from '@mui/icons-material'
 
+import { GridSortModel } from '@mui/x-data-grid/models/gridSortModel'
+
 const columns: GridColDef[] = [
   {
     field: 'id',
     headerName: '',
     flex: 0.05,
+    hideSortIcons: true,
   },
   { field: 'pond', headerName: 'บ่อ', flex: 0.15 },
   { field: 'activity', headerName: 'กิจกรรม', flex: 0.15 },
@@ -119,6 +122,19 @@ const ExpenseList: React.FC = () => {
   const [typeFilter, setTypeFilter] = React.useState('')
   const [farmFilter, setFarmFilter] = React.useState('')
 
+  const [initialSortModel, setInitialSortModel] = React.useState<GridSortModel>(
+    [
+      {
+        field: 'id',
+        sort: 'desc',
+      },
+    ]
+  )
+
+  const handleSortModelChange = (newSortModel: any) => {
+    setInitialSortModel(newSortModel)
+  }
+
   const filteredRows = rows.filter((row) => {
     return (
       (typeFilter === '' || row.activity.includes(typeFilter)) &&
@@ -206,6 +222,8 @@ const ExpenseList: React.FC = () => {
         <DataGrid
           rows={filteredRows}
           columns={columns}
+          sortModel={initialSortModel}
+          onSortModelChange={handleSortModelChange}
           sx={{
             '& .MuiDataGrid-columnHeaders': {
               backgroundColor: '#FAF8EE',
