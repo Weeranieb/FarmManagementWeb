@@ -45,7 +45,7 @@ const rows = [
     id: 1,
     pond: 'บ่อ 2',
     activity: 'ย้าย',
-    farm: 'บ้านระกาศ',
+    farm: 'ฟาร์ม 1',
     totalWeight: '4.3 ต้น',
     unit: 'กิโลกรัม',
     date: '02/08/2566',
@@ -55,13 +55,13 @@ const rows = [
         <InfoIcon color='disabled' />
         <MoreHorizIcon color='disabled' />
       </>
-    ), // Add empty string for the info column
+    ),
   },
   {
     id: 2,
     pond: 'บ่อ 3',
     activity: 'ย้าย',
-    farm: 'บ้านระกาศ',
+    farm: 'ฟาร์ม 2',
     totalWeight: '4.3 ต้น',
     unit: 'กิโลกรัม',
     date: '02/08/2566',
@@ -71,11 +71,23 @@ const rows = [
         <InfoIcon color='disabled' />
         <MoreHorizIcon color='disabled' />
       </>
-    ), // Add InfoIcon for the info column
+    ),
   },
 ]
 
 const ExpenseList: React.FC = () => {
+  const [typeFilter, setTypeFilter] = React.useState('')
+  const [farmFilter, setFarmFilter] = React.useState('')
+  const [dateFilter, setDateFilter] = React.useState('')
+
+  const filteredRows = rows.filter((row) => {
+    return (
+      (typeFilter === '' || row.activity.includes(typeFilter)) &&
+      (farmFilter === '' || row.farm.includes(farmFilter)) &&
+      (dateFilter === '' || row.date.includes(dateFilter))
+    )
+  })
+
   return (
     <div>
       <Box
@@ -123,9 +135,46 @@ const ExpenseList: React.FC = () => {
           </TextField>
         </Box>
       </Box>
+      <Box display='flex' alignItems='center' p={2}>
+        <TextField
+          label='ประเภท'
+          variant='outlined'
+          size='small'
+          sx={{ width: 150, mr: 3 }}
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+          select
+        >
+          <MenuItem value=''>ทั้งหมด</MenuItem>
+          <MenuItem value='เติม'>เติม</MenuItem>
+          <MenuItem value='ย้าย'>ย้าย</MenuItem>
+          <MenuItem value='ขาย'>ขาย</MenuItem>
+        </TextField>
+        <TextField
+          label='ฟาร์ม'
+          variant='outlined'
+          size='small'
+          sx={{ width: 150, mr: 3 }}
+          value={farmFilter}
+          onChange={(e) => setFarmFilter(e.target.value)}
+          select
+        >
+          <MenuItem value=''>ทั้งหมด</MenuItem>
+          <MenuItem value='ฟาร์ม 1'>ฟาร์ม 1</MenuItem>
+          <MenuItem value='ฟาร์ม 2'>ฟาร์ม 2</MenuItem>
+        </TextField>
+        <TextField
+          label='วันที่'
+          variant='outlined'
+          size='small'
+          sx={{ width: 150, mr: 3 }}
+          value={dateFilter}
+          onChange={(e) => setDateFilter(e.target.value)}
+        />
+      </Box>
       <div style={{ height: 600, width: '100%' }}>
         <DataGrid
-          rows={rows}
+          rows={filteredRows}
           columns={columns}
           sx={{
             '& .MuiDataGrid-columnHeaders': {
