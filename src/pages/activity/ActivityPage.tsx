@@ -20,18 +20,50 @@ const columns: GridColDef[] = [
   { field: 'farm', headerName: 'ฟาร์ม', flex: 0.2 },
   { field: 'totalWeight', headerName: 'น้ำหนักรวม', flex: 0.2 },
   { field: 'unit', headerName: 'หน่วย', flex: 0.2 },
-  { field: 'date', headerName: 'วันที่ทำ', flex: 0.2 },
+  {
+    field: 'date',
+    headerName: 'วันที่ทำ',
+    flex: 0.2,
+  },
   { field: 'edit', headerName: 'เพิ่มข้อมูลวันที่', flex: 0.2 },
   {
-    field: 'actions',
+    field: 'info',
     headerName: '',
-    flex: 0.15,
+    align: 'right',
+    hideSortIcons: true,
+    disableColumnMenu: true,
+    flex: 0.05,
     renderCell: (params) => {
-      if (params.field === 'actions') {
+      if (params.field === 'info') {
         return (
           <Box display='flex' alignItems='center'>
-            <InfoIcon color='disabled' />
-            <MoreHorizIcon color='disabled' />
+            <InfoIcon
+              color='disabled'
+              style={{ cursor: 'pointer' }}
+              onClick={() => console.log('info', params.row.id)}
+            />
+          </Box>
+        )
+      }
+      return params.value
+    },
+  },
+  {
+    field: 'more',
+    headerName: '',
+    align: 'left',
+    hideSortIcons: true,
+    disableColumnMenu: true,
+    flex: 0.1,
+    renderCell: (params) => {
+      if (params.field === 'more') {
+        return (
+          <Box display='flex' alignItems='center'>
+            <MoreHorizIcon
+              color='disabled'
+              style={{ cursor: 'pointer' }}
+              onClick={() => console.log('more', params.row.id)}
+            />
           </Box>
         )
       }
@@ -50,9 +82,13 @@ const rows = [
     unit: 'กิโลกรัม',
     date: '02/08/2566',
     edit: '8/21/15',
-    actions: (
+    info: (
       <>
         <InfoIcon color='disabled' />
+      </>
+    ),
+    more: (
+      <>
         <MoreHorizIcon color='disabled' />
       </>
     ),
