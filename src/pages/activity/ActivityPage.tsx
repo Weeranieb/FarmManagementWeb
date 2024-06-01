@@ -78,13 +78,11 @@ const rows = [
 const ExpenseList: React.FC = () => {
   const [typeFilter, setTypeFilter] = React.useState('')
   const [farmFilter, setFarmFilter] = React.useState('')
-  const [dateFilter, setDateFilter] = React.useState('')
 
   const filteredRows = rows.filter((row) => {
     return (
       (typeFilter === '' || row.activity.includes(typeFilter)) &&
-      (farmFilter === '' || row.farm.includes(farmFilter)) &&
-      (dateFilter === '' || row.date.includes(dateFilter))
+      (farmFilter === '' || row.farm.includes(farmFilter))
     )
   })
 
@@ -163,14 +161,6 @@ const ExpenseList: React.FC = () => {
           <MenuItem value='ฟาร์ม 1'>ฟาร์ม 1</MenuItem>
           <MenuItem value='ฟาร์ม 2'>ฟาร์ม 2</MenuItem>
         </TextField>
-        <TextField
-          label='วันที่'
-          variant='outlined'
-          size='small'
-          sx={{ width: 150, mr: 3 }}
-          value={dateFilter}
-          onChange={(e) => setDateFilter(e.target.value)}
-        />
       </Box>
       <div style={{ height: 600, width: '100%' }}>
         <DataGrid
