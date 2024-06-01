@@ -14,18 +14,18 @@ import {
 } from '@mui/icons-material'
 
 const columns: GridColDef[] = [
-  { field: 'id', headerName: '', width: 70 },
-  { field: 'pond', headerName: 'บ่อ', width: 150 },
-  { field: 'activity', headerName: 'กิจกรรม', width: 150 },
-  { field: 'farm', headerName: 'ฟาร์ม', width: 150 },
-  { field: 'totalWeight', headerName: 'น้ำหนักรวม', width: 150 },
-  { field: 'unit', headerName: 'หน่วย', width: 100 },
-  { field: 'date', headerName: 'วันที่ทำ', width: 150 },
-  { field: 'edit', headerName: 'เพิ่มข้อมูลวันที่', width: 160 },
+  { field: 'id', headerName: '', flex: 0.05 },
+  { field: 'pond', headerName: 'บ่อ', flex: 0.15 },
+  { field: 'activity', headerName: 'กิจกรรม', flex: 0.15 },
+  { field: 'farm', headerName: 'ฟาร์ม', flex: 0.2 },
+  { field: 'totalWeight', headerName: 'น้ำหนักรวม', flex: 0.2 },
+  { field: 'unit', headerName: 'หน่วย', flex: 0.2 },
+  { field: 'date', headerName: 'วันที่ทำ', flex: 0.2 },
+  { field: 'edit', headerName: 'เพิ่มข้อมูลวันที่', flex: 0.2 },
   {
     field: 'actions',
     headerName: '',
-    width: 100,
+    flex: 0.15,
     renderCell: (params) => {
       if (params.field === 'actions') {
         return (
