@@ -24,8 +24,14 @@ const columns: GridColDef[] = [
   },
   { field: 'pond', headerName: 'บ่อ', flex: 0.15 },
   { field: 'activity', headerName: 'กิจกรรม', flex: 0.15 },
-  { field: 'farm', headerName: 'ฟาร์ม', flex: 0.2 },
-  { field: 'totalWeight', headerName: 'น้ำหนักรวม', flex: 0.2 },
+  {
+    field: 'farm',
+    headerName: 'ฟาร์ม',
+    flex: 0.2,
+    headerAlign: 'center',
+    align: 'center',
+  },
+  { field: 'totalWeight', headerName: 'น้ำหนักรวม', flex: 0.2, align: 'right' },
   { field: 'unit', headerName: 'หน่วย', flex: 0.2 },
   {
     field: 'date',
@@ -85,8 +91,8 @@ const rows = [
     pond: 'บ่อ 2',
     activity: 'ย้าย',
     farm: 'ฟาร์ม 1',
-    totalWeight: '4.3 ต้น',
-    unit: 'กิโลกรัม',
+    totalWeight: '4.3',
+    unit: 'ตัน',
     date: '02/08/2566',
     edit: '8/21/15',
     info: (
@@ -105,8 +111,8 @@ const rows = [
     pond: 'บ่อ 3',
     activity: 'ย้าย',
     farm: 'ฟาร์ม 2',
-    totalWeight: '4.3 ต้น',
-    unit: 'กิโลกรัม',
+    totalWeight: '4.3',
+    unit: 'ตัน',
     date: '02/08/2566',
     edit: '8/21/15',
     actions: (

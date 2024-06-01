@@ -177,8 +177,8 @@ const Sidebar: React.FC = () => {
             content: '""',
             position: 'absolute',
             top: 0,
-            left: '20%',
-            width: '60%',
+            left: '12%',
+            width: '76%',
             borderBottom: '2px solid #D1D3D3',
           },
         }}
