@@ -14,7 +14,11 @@ import {
 } from '@mui/icons-material'
 
 const columns: GridColDef[] = [
-  { field: 'id', headerName: '', flex: 0.05 },
+  {
+    field: 'id',
+    headerName: '',
+    flex: 0.05,
+  },
   { field: 'pond', headerName: 'บ่อ', flex: 0.15 },
   { field: 'activity', headerName: 'กิจกรรม', flex: 0.15 },
   { field: 'farm', headerName: 'ฟาร์ม', flex: 0.2 },
@@ -161,7 +165,7 @@ const ExpenseList: React.FC = () => {
             variant='outlined'
             size='small'
             label='เพิ่ม'
-            sx={{ width: 150, mr: 3 }}
+            sx={{ width: 100, mr: 3 }}
           >
             <MenuItem value='เติม'>เติม</MenuItem>
             <MenuItem value='ย้าย'>ย้าย</MenuItem>
