@@ -12,8 +12,8 @@ import {
   Info as InfoIcon,
   MoreHoriz as MoreHorizIcon,
 } from '@mui/icons-material'
-
 import { GridSortModel } from '@mui/x-data-grid/models/gridSortModel'
+import DialogFill from './DialogFill'
 
 const columns: GridColDef[] = [
   {
@@ -127,6 +127,7 @@ const rows = [
 const Activity: React.FC = () => {
   const [typeFilter, setTypeFilter] = React.useState('')
   const [farmFilter, setFarmFilter] = React.useState('')
+  const [dialogOpen, setDialogOpen] = React.useState(false)
 
   const [initialSortModel, setInitialSortModel] = React.useState<GridSortModel>(
     [
@@ -139,6 +140,18 @@ const Activity: React.FC = () => {
 
   const handleSortModelChange = (newSortModel: any) => {
     setInitialSortModel(newSortModel)
+  }
+
+  const handleDialogOpen = () => {
+    setDialogOpen(true)
+  }
+
+  const handleDialogClose = () => {
+    setDialogOpen(false)
+  }
+
+  const handleFormSubmit = (newActivity: any) => {
+    console.log('New Activity:', newActivity)
   }
 
   const filteredRows = rows.filter((row) => {
@@ -188,6 +201,7 @@ const Activity: React.FC = () => {
             size='small'
             label='เพิ่ม'
             sx={{ width: 100, mr: 3 }}
+            onChange={(e) => e.target.value === 'เติม' && handleDialogOpen()}
           >
             <MenuItem value='เติม'>เติม</MenuItem>
             <MenuItem value='ย้าย'>ย้าย</MenuItem>
@@ -245,6 +259,11 @@ const Activity: React.FC = () => {
           }}
         />
       </div>
+      <DialogFill
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        onSubmit={handleFormSubmit}
+      />
     </div>
   )
 }
