@@ -7,6 +7,12 @@ import {
   TextField,
   Button,
   IconButton,
+  Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
 } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
 import { styled } from '@mui/system'
@@ -23,22 +29,26 @@ interface NewActivityData {
   farm: string
   totalWeight: string
   unit: string
+  pricePerUnit: string
   date: string
 }
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiPaper-root': {
-    borderRadius: 16, // Adjust the value for rounder corners
+    borderRadius: 50,
   },
 }))
 
 const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
-  color: theme.palette.common.white,
+  color: theme.palette.text.primary,
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  paddingRight: theme.spacing(2),
+  fontSize: '1.85rem',
+  padding: `${theme.spacing(3)}px ${theme.spacing(2)}px ${theme.spacing(
+    1
+  )}px ${theme.spacing(5)}px`,
 }))
 
 const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
@@ -48,6 +58,7 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
     farm: '',
     totalWeight: '',
     unit: '',
+    pricePerUnit: '',
     date: '',
   })
 
@@ -59,6 +70,16 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
     }))
   }
 
+  const handleSelectChange = (e: SelectChangeEvent<string>) => {
+    const { name, value } = e.target
+    if (name) {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }))
+    }
+  }
+
   const handleFormSubmit = () => {
     onSubmit(formData)
     onClose()
@@ -67,80 +88,117 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
   return (
     <StyledDialog open={open} onClose={onClose}>
       <StyledDialogTitle>
-        เพิ่มข้อมูลกิจกรรม
+        กรอกข้อมูล: เติม
         <IconButton edge='end' color='inherit' onClick={onClose}>
           <CloseIcon />
         </IconButton>
       </StyledDialogTitle>
       <DialogContent>
-        <TextField
-          margin='dense'
-          name='pond'
-          label='บ่อ'
-          type='text'
-          fullWidth
-          variant='outlined'
-          value={formData.pond}
-          onChange={handleInputChange}
-        />
-        <TextField
-          margin='dense'
-          name='activity'
-          label='กิจกรรม'
-          type='text'
-          fullWidth
-          variant='outlined'
-          value={formData.activity}
-          onChange={handleInputChange}
-        />
-        <TextField
-          margin='dense'
-          name='farm'
-          label='ฟาร์ม'
-          type='text'
-          fullWidth
-          variant='outlined'
-          value={formData.farm}
-          onChange={handleInputChange}
-        />
-        <TextField
-          margin='dense'
-          name='totalWeight'
-          label='น้ำหนักรวม'
-          type='text'
-          fullWidth
-          variant='outlined'
-          value={formData.totalWeight}
-          onChange={handleInputChange}
-        />
-        <TextField
-          margin='dense'
-          name='unit'
-          label='หน่วย'
-          type='text'
-          fullWidth
-          variant='outlined'
-          value={formData.unit}
-          onChange={handleInputChange}
-        />
-        <TextField
-          margin='dense'
-          name='date'
-          label='วันที่ทำ'
-          type='text'
-          fullWidth
-          variant='outlined'
-          value={formData.date}
-          onChange={handleInputChange}
-        />
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <FormControl fullWidth variant='outlined' margin='dense'>
+              <InputLabel>ฟาร์ม</InputLabel>
+              <Select
+                name='farm'
+                value={formData.farm}
+                onChange={handleSelectChange}
+                label='ฟาร์ม'
+              >
+                <MenuItem value='Farm1'>Farm1</MenuItem>
+                <MenuItem value='Farm2'>Farm2</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={6}>
+            <FormControl fullWidth variant='outlined' margin='dense'>
+              <InputLabel>บ่อ</InputLabel>
+              <Select
+                name='pond'
+                value={formData.pond}
+                onChange={handleSelectChange}
+                label='บ่อ'
+              >
+                <MenuItem value='Pond1'>Pond1</MenuItem>
+                <MenuItem value='Pond2'>Pond2</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={4}>
+            <FormControl fullWidth variant='outlined' margin='dense'>
+              <InputLabel>ปลา</InputLabel>
+              <Select
+                name='activity'
+                value={formData.activity}
+                onChange={handleSelectChange}
+                label='ปลา'
+              >
+                <MenuItem value='Fish1'>Fish1</MenuItem>
+                <MenuItem value='Fish2'>Fish2</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={4}>
+            <TextField
+              margin='dense'
+              name='totalWeight'
+              label='น้ำหนัก'
+              type='text'
+              fullWidth
+              variant='outlined'
+              value={formData.totalWeight}
+              onChange={handleInputChange}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <FormControl fullWidth variant='outlined' margin='dense'>
+              <InputLabel>หน่วย</InputLabel>
+              <Select
+                name='unit'
+                value={formData.unit}
+                onChange={handleSelectChange}
+                label='หน่วย'
+              >
+                <MenuItem value='kg'>kg</MenuItem>
+                <MenuItem value='g'>g</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              margin='dense'
+              name='pricePerUnit'
+              label='ราคาต่อหน่วย'
+              type='text'
+              fullWidth
+              variant='outlined'
+              value={formData.pricePerUnit}
+              onChange={handleInputChange}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              margin='dense'
+              name='date'
+              label='วันที่ทำ'
+              type='text'
+              fullWidth
+              variant='outlined'
+              value={formData.date}
+              onChange={handleInputChange}
+            />
+          </Grid>
+        </Grid>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color='primary'>
-          ยกเลิก
-        </Button>
-        <Button onClick={handleFormSubmit} color='primary'>
-          เพิ่ม
-        </Button>
+        <Grid container justifyContent='center'>
+          <Button
+            onClick={handleFormSubmit}
+            color='primary'
+            variant='contained'
+          >
+            บันทึก
+          </Button>
+        </Grid>
       </DialogActions>
     </StyledDialog>
   )
