@@ -55,7 +55,7 @@ const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
   marginTop: theme.spacing(4),
   paddingLeft: theme.spacing(5),
   paddingRight: theme.spacing(5),
-  paddingBottom: theme.spacing(4),
+  paddingBottom: theme.spacing(3),
 }))
 
 const StyledDialogActions = styled(DialogActions)(({ theme }) => ({
@@ -64,11 +64,16 @@ const StyledDialogActions = styled(DialogActions)(({ theme }) => ({
 
 const CustomButton = styled(Button)(({ theme }) => ({
   fontSize: '1.1rem',
-  color: theme.palette.text.primary, // Custom text color
+  color: theme.palette.text.primary,
   padding: theme.spacing(1.5, 4),
-  borderColor: theme.palette.primary.main, // Custom border color
-  borderWidth: 2, // Custom border width
-  backgroundColor: theme.palette.secondary.main, // Custom background color
+  border: `2px solid ${theme.palette.primary.main}`,
+  backgroundColor: theme.palette.secondary.main,
+  borderRadius: 50,
+  boxShadow: 'none',
+  '&:hover': {
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.common.white,
+  },
 }))
 
 const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
