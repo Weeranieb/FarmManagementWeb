@@ -51,6 +51,17 @@ const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
   )}px ${theme.spacing(5)}px`,
 }))
 
+const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
+  marginTop: theme.spacing(4),
+  paddingLeft: theme.spacing(5),
+  paddingRight: theme.spacing(5),
+  paddingBottom: theme.spacing(4),
+}))
+
+const StyledDialogActions = styled(DialogActions)(({ theme }) => ({
+  paddingBottom: theme.spacing(3),
+}))
+
 const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
   const [formData, setFormData] = React.useState<NewActivityData>({
     pond: '',
@@ -93,8 +104,8 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
           <CloseIcon />
         </IconButton>
       </StyledDialogTitle>
-      <DialogContent>
-        <Grid container spacing={2}>
+      <StyledDialogContent>
+        <Grid container spacing={3}>
           <Grid item xs={6}>
             <FormControl fullWidth variant='outlined' margin='dense'>
               <InputLabel>ฟาร์ม</InputLabel>
@@ -188,8 +199,8 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
             />
           </Grid>
         </Grid>
-      </DialogContent>
-      <DialogActions>
+      </StyledDialogContent>
+      <StyledDialogActions>
         <Grid container justifyContent='center'>
           <Button
             onClick={handleFormSubmit}
@@ -199,7 +210,7 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
             บันทึก
           </Button>
         </Grid>
-      </DialogActions>
+      </StyledDialogActions>
     </StyledDialog>
   )
 }
