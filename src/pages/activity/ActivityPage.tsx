@@ -14,6 +14,7 @@ import {
 } from '@mui/icons-material'
 import { GridSortModel } from '@mui/x-data-grid/models/gridSortModel'
 import DialogFill from './DialogFill'
+import Swal from 'sweetalert2'
 
 const rows = [
   {
@@ -121,7 +122,7 @@ const Activity: React.FC = () => {
               <DeleteIcon
                 color='disabled'
                 style={{ cursor: 'pointer' }}
-                onClick={() => console.log('more', params.row.id)}
+                onClick={() => handleDeleteClick(params.row.id)}
               />
             </Box>
           )
@@ -146,6 +147,29 @@ const Activity: React.FC = () => {
 
   const handleInfoClick = () => {
     setDialogOpen(true) // Open the dialog when Info icon is clicked
+  }
+
+  const handleDeleteClick = (id: number) => {
+    Swal.fire({
+      title: 'ยืนยันการลบข้อมูล',
+      text: 'คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนี้? \nข้อมูลจะถูกลบถาวรและไม่สามารถกู้คืนได้!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'ลบข้อมูล',
+      cancelButtonText: 'ยกเลิก',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // เริ่มต้นการลบข้อมูลที่นี่
+        console.log('กำลังลบข้อมูลกิจกรรม ID:', id)
+        Swal.fire(
+          'ลบข้อมูลสำเร็จ!',
+          'ข้อมูลของคุณถูกลบเรียบร้อยแล้ว.',
+          'success'
+        )
+      }
+    })
   }
 
   const handleSortModelChange = (newSortModel: any) => {
