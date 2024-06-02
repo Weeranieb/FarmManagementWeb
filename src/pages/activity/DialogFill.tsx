@@ -44,11 +44,11 @@ const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
   color: theme.palette.text.primary,
   display: 'flex',
   justifyContent: 'space-between',
-  alignItems: 'center',
   fontSize: '1.85rem',
-  padding: `${theme.spacing(3)}px ${theme.spacing(2)}px ${theme.spacing(
-    1
-  )}px ${theme.spacing(5)}px`,
+  paddingLeft: theme.spacing(5),
+  paddingBottom: theme.spacing(1),
+  paddingTop: theme.spacing(4),
+  paddingRight: theme.spacing(3),
 }))
 
 const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
@@ -60,6 +60,15 @@ const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
 
 const StyledDialogActions = styled(DialogActions)(({ theme }) => ({
   paddingBottom: theme.spacing(3),
+}))
+
+const CustomButton = styled(Button)(({ theme }) => ({
+  fontSize: '1.1rem',
+  color: theme.palette.text.primary, // Custom text color
+  padding: theme.spacing(1.5, 4),
+  borderColor: theme.palette.primary.main, // Custom border color
+  borderWidth: 2, // Custom border width
+  backgroundColor: theme.palette.secondary.main, // Custom background color
 }))
 
 const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
@@ -202,13 +211,13 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
       </StyledDialogContent>
       <StyledDialogActions>
         <Grid container justifyContent='center'>
-          <Button
+          <CustomButton
             onClick={handleFormSubmit}
             color='primary'
             variant='contained'
           >
             บันทึก
-          </Button>
+          </CustomButton>
         </Grid>
       </StyledDialogActions>
     </StyledDialog>
