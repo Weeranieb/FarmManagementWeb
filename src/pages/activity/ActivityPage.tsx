@@ -124,7 +124,7 @@ const rows = [
   },
 ]
 
-const ExpenseList: React.FC = () => {
+const Activity: React.FC = () => {
   const [typeFilter, setTypeFilter] = React.useState('')
   const [farmFilter, setFarmFilter] = React.useState('')
 
@@ -249,4 +249,4 @@ const ExpenseList: React.FC = () => {
   )
 }
 
-export default ExpenseList
+export default Activity
