@@ -10,7 +10,7 @@ import {
 import {
   Search as SearchIcon,
   Info as InfoIcon,
-  MoreHoriz as MoreHorizIcon,
+  Delete as DeleteIcon,
 } from '@mui/icons-material'
 import { GridSortModel } from '@mui/x-data-grid/models/gridSortModel'
 import DialogFill from './DialogFill'
@@ -32,7 +32,7 @@ const rows = [
     ),
     more: (
       <>
-        <MoreHorizIcon color='disabled' />
+        <DeleteIcon color='disabled' />
       </>
     ),
   },
@@ -48,7 +48,7 @@ const rows = [
     actions: (
       <>
         <InfoIcon color='disabled' />
-        <MoreHorizIcon color='disabled' />
+        <DeleteIcon color='disabled' />
       </>
     ),
   },
@@ -118,7 +118,7 @@ const Activity: React.FC = () => {
         if (params.field === 'more') {
           return (
             <Box display='flex' alignItems='center'>
-              <MoreHorizIcon
+              <DeleteIcon
                 color='disabled'
                 style={{ cursor: 'pointer' }}
                 onClick={() => console.log('more', params.row.id)}
