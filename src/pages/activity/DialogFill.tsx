@@ -16,6 +16,10 @@ import {
 } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
 import { styled } from '@mui/system'
+import { LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import dayjs, { Dayjs } from 'dayjs'
 
 interface DialogFillProps {
   open: boolean
@@ -84,7 +88,7 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
     totalWeight: '',
     unit: '',
     pricePerUnit: '',
-    date: '',
+    date: dayjs().format('YYYY-MM-DD'), // Initialize with today's date
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,6 +96,14 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
+    }))
+  }
+
+  const handleDateChange = (date: Dayjs | null) => {
+    const formattedDate = date ? date.format('YYYY-MM-DD') : ''
+    setFormData((prevData) => ({
+      ...prevData,
+      date: formattedDate,
     }))
   }
 
@@ -200,17 +212,14 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
               onChange={handleInputChange}
             />
           </Grid>
-          <Grid item xs={6}>
-            <TextField
-              margin='dense'
-              name='date'
-              label='วันที่ทำ'
-              type='text'
-              fullWidth
-              variant='outlined'
-              value={formData.date}
-              onChange={handleInputChange}
-            />
+          <Grid item xs={6} style={{ marginTop: '8px' }}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label='วันที่ทำ'
+                value={dayjs(formData.date)}
+                onChange={handleDateChange}
+              />
+            </LocalizationProvider>
           </Grid>
         </Grid>
       </StyledDialogContent>
