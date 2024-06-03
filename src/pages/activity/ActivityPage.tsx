@@ -16,6 +16,7 @@ import { GridSortModel } from '@mui/x-data-grid/models/gridSortModel'
 import DialogFill from './DialogFill'
 import DialogMove from './DialogMove'
 import Swal from 'sweetalert2'
+import DialogSell from './DialogSell'
 
 const rows = [
   {
@@ -304,6 +305,12 @@ const Activity: React.FC = () => {
         />
       ) : selectedActivity === 'ย้าย' ? (
         <DialogMove
+          open={dialogOpen}
+          onClose={handleDialogClose}
+          onSubmit={handleFormSubmit}
+        />
+      ) : selectedActivity === 'ขาย' ? (
+        <DialogSell
           open={dialogOpen}
           onClose={handleDialogClose}
           onSubmit={handleFormSubmit}
