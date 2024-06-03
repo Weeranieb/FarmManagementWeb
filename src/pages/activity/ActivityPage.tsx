@@ -14,6 +14,7 @@ import {
 } from '@mui/icons-material'
 import { GridSortModel } from '@mui/x-data-grid/models/gridSortModel'
 import DialogFill from './DialogFill'
+import DialogMove from './DialogMove'
 import Swal from 'sweetalert2'
 
 const rows = [
@@ -135,6 +136,7 @@ const Activity: React.FC = () => {
   const [typeFilter, setTypeFilter] = React.useState('')
   const [farmFilter, setFarmFilter] = React.useState('')
   const [dialogOpen, setDialogOpen] = React.useState(false)
+  const [selectedActivity, setSelectedActivity] = React.useState('')
 
   const [initialSortModel, setInitialSortModel] = React.useState<GridSortModel>(
     [
@@ -176,7 +178,8 @@ const Activity: React.FC = () => {
     setInitialSortModel(newSortModel)
   }
 
-  const handleDialogOpen = () => {
+  const handleDialogOpen = (activity: string) => {
+    setSelectedActivity(activity)
     setDialogOpen(true)
   }
 
@@ -235,7 +238,7 @@ const Activity: React.FC = () => {
             size='small'
             label='เพิ่ม'
             sx={{ width: 100, mr: 3 }}
-            onChange={(e) => e.target.value === 'เติม' && handleDialogOpen()}
+            onChange={(e) => handleDialogOpen(e.target.value)}
           >
             <MenuItem value='เติม'>เติม</MenuItem>
             <MenuItem value='ย้าย'>ย้าย</MenuItem>
@@ -293,11 +296,19 @@ const Activity: React.FC = () => {
           }}
         />
       </div>
-      <DialogFill
-        open={dialogOpen}
-        onClose={handleDialogClose}
-        onSubmit={handleFormSubmit}
-      />
+      {selectedActivity === 'เติม' ? (
+        <DialogFill
+          open={dialogOpen}
+          onClose={handleDialogClose}
+          onSubmit={handleFormSubmit}
+        />
+      ) : selectedActivity === 'ย้าย' ? (
+        <DialogMove
+          open={dialogOpen}
+          onClose={handleDialogClose}
+          onSubmit={handleFormSubmit}
+        />
+      ) : null}
     </div>
   )
 }
