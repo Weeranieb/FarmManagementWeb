@@ -4,7 +4,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
   Button,
   IconButton,
   Grid,
@@ -13,6 +12,8 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
+  Checkbox,
+  FormControlLabel,
 } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
 import { styled } from '@mui/system'
@@ -35,6 +36,7 @@ interface NewActivityData {
   unit: string
   pricePerUnit: string
   date: string
+  closePond: boolean
 }
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
@@ -89,13 +91,15 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
     unit: '',
     pricePerUnit: '',
     date: dayjs().format('YYYY-MM-DD'), // Initialize with today's date
+    closePond: false,
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+    const { name, value, checked, type } = e.target
+    const newValue = type === 'checkbox' ? checked : value
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: newValue,
     }))
   }
 
@@ -160,58 +164,6 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={4}>
-            <FormControl fullWidth variant='outlined' margin='dense'>
-              <InputLabel>ปลา</InputLabel>
-              <Select
-                name='activity'
-                value={formData.activity}
-                onChange={handleSelectChange}
-                label='ปลา'
-              >
-                <MenuItem value='Fish1'>Fish1</MenuItem>
-                <MenuItem value='Fish2'>Fish2</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={4}>
-            <TextField
-              margin='dense'
-              name='totalWeight'
-              label='น้ำหนัก'
-              type='text'
-              fullWidth
-              variant='outlined'
-              value={formData.totalWeight}
-              onChange={handleInputChange}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <FormControl fullWidth variant='outlined' margin='dense'>
-              <InputLabel>หน่วย</InputLabel>
-              <Select
-                name='unit'
-                value={formData.unit}
-                onChange={handleSelectChange}
-                label='หน่วย'
-              >
-                <MenuItem value='kg'>kg</MenuItem>
-                <MenuItem value='g'>g</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              margin='dense'
-              name='pricePerUnit'
-              label='ราคาต่อหน่วย'
-              type='text'
-              fullWidth
-              variant='outlined'
-              value={formData.pricePerUnit}
-              onChange={handleInputChange}
-            />
-          </Grid>
           <Grid item xs={6} style={{ marginTop: '8px' }}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
@@ -220,6 +172,19 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
                 onChange={handleDateChange}
               />
             </LocalizationProvider>
+          </Grid>
+          <Grid item xs={6} container justifyContent='left' alignItems='center'>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formData.closePond}
+                  onChange={handleInputChange}
+                  name='closePond'
+                  color='primary'
+                />
+              }
+              label='ปิดบ่อ'
+            />
           </Grid>
         </Grid>
       </StyledDialogContent>
