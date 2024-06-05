@@ -106,8 +106,9 @@ const AddRowFab = styled(Fab)(({ theme }) => ({
 }))
 
 const CustomTextField = styled(TextField)(({ theme }) => ({
-  '& .MuiInputBase-root': {
-    lineHeight: '1.2em', // Adjust this value to reduce the line height
+  '& .MuiInputBase-input': {
+    padding: '8px 10px', // Adjust the padding to reduce the text field height
+    fontSize: '0.8rem', // Adjust the font size to make the text smaller
   },
 }))
 
