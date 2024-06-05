@@ -22,7 +22,11 @@ import {
   TextField,
   Fab,
 } from '@mui/material'
-import { Close as CloseIcon, Add as AddIcon } from '@mui/icons-material'
+import {
+  Close as CloseIcon,
+  Add as AddIcon,
+  Remove as RemoveIcon,
+} from '@mui/icons-material'
 import { styled } from '@mui/system'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -57,7 +61,7 @@ interface TableData {
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiPaper-root': {
     borderRadius: 50,
-    maxHeight: '70vh',
+    maxHeight: '75vh',
   },
 }))
 
@@ -77,10 +81,11 @@ const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
   marginTop: theme.spacing(4),
   paddingLeft: theme.spacing(5),
   paddingRight: theme.spacing(5),
-  paddingBottom: theme.spacing(3),
+  // paddingBottom: theme.spacing(3),
 }))
 
 const StyledDialogActions = styled(DialogActions)(({ theme }) => ({
+  paddingTop: theme.spacing(2),
   paddingBottom: theme.spacing(3),
 }))
 
@@ -178,6 +183,13 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
         { fish: '', size: '', amount: '', pricePerKg: '' },
       ],
     }))
+  }
+
+  const handleRemoveRow = (index: number) => {
+    setFormData((prevData) => {
+      const updatedTableData = prevData.tableData.filter((_, i) => i !== index)
+      return { ...prevData, tableData: updatedTableData }
+    })
   }
 
   const handleFormSubmit = () => {
@@ -328,13 +340,20 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
                         }
                       />
                     </CustomTableCell>
-                    {index === formData.tableData.length - 1 && (
-                      <CustomTableCell>
+                    <CustomTableCell>
+                      {index === formData.tableData.length - 1 ? (
                         <AddRowFab size='small' onClick={handleAddRow}>
                           <AddIcon />
                         </AddRowFab>
-                      </CustomTableCell>
-                    )}
+                      ) : (
+                        <IconButton
+                          size='small'
+                          onClick={() => handleRemoveRow(index)}
+                        >
+                          <RemoveIcon sx={{ color: '#CEBCA1' }} />
+                        </IconButton>
+                      )}
+                    </CustomTableCell>
                   </TableRow>
                 ))}
               </TableBody>
