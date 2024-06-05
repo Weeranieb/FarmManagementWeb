@@ -9,7 +9,6 @@ import {
   IconButton,
   Grid,
   FormControl,
-  SelectChangeEvent,
   Typography,
   Table,
   TableRow,
@@ -140,11 +139,13 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
   const handleAddRow = () => {
     setFormData((prevData) => ({
       ...prevData,
-      tableData: [
+      feedPriceHistories: [
         ...prevData.feedPriceHistories,
         {
+          id: 0,
+          feedCollectionId: prevData?.id || 0,
           priceUpdatedDate: '',
-          price: '',
+          price: 0,
         },
       ],
     }))
@@ -152,10 +153,10 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
 
   const handleRemoveRow = (index: number) => {
     setFormData((prevData) => {
-      const updatedTableData = prevData.feedPriceHistories.filter(
+      const updatedFeedPriceHistories = prevData.feedPriceHistories.filter(
         (_, i) => i !== index
       )
-      return { ...prevData, tableData: updatedTableData }
+      return { ...prevData, feedPriceHistories: updatedFeedPriceHistories }
     })
   }
 
@@ -165,16 +166,6 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
       ...prevData,
       date: formattedDate,
     }))
-  }
-
-  const handleSelectChange = (e: SelectChangeEvent<string>) => {
-    const { name, value } = e.target
-    if (name) {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }))
-    }
   }
 
   const handleFormSubmit = () => {
