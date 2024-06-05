@@ -95,7 +95,7 @@ const Feed: React.FC = () => {
     },
     {
       field: 'priceUpdatedDate',
-      headerName: 'อัปเดทวันที่',
+      headerName: 'อัคเดทวันที่',
       flex: 0.15,
     },
     {
