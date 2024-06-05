@@ -83,6 +83,11 @@ const StyledDialogActions = styled(DialogActions)(({ theme }) => ({
   paddingBottom: theme.spacing(3),
 }))
 
+const HeaderTableCell = styled(TableCell)(({ theme }) => ({
+  fontSize: '1.03rem',
+  textAlign: 'center',
+}))
+
 const CustomButton = styled(Button)(({ theme }) => ({
   fontSize: '1.1rem',
   color: theme.palette.text.primary,
@@ -246,21 +251,38 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
               <TableHead>
                 <TableRow>
                   <TableCell style={{ width: '5%' }}></TableCell>
-                  <TableCell style={{ width: '20%', textAlign: 'center' }}>
+                  <HeaderTableCell
+                    sx={{
+                      width: '20%',
+                    }}
+                  >
                     ปลา
-                  </TableCell>
-                  <TableCell style={{ width: '20%', textAlign: 'center' }}>
+                  </HeaderTableCell>
+                  <HeaderTableCell
+                    sx={{
+                      width: '20%',
+                    }}
+                  >
                     ไซส์
-                  </TableCell>
-                  <TableCell style={{ width: '20%', textAlign: 'center' }}>
+                  </HeaderTableCell>
+                  <HeaderTableCell
+                    sx={{
+                      width: '20%',
+                    }}
+                  >
                     จำนวน
-                  </TableCell>
-                  <TableCell style={{ width: '25%', textAlign: 'center' }}>
+                  </HeaderTableCell>
+                  <HeaderTableCell
+                    sx={{
+                      width: '30%',
+                    }}
+                  >
                     ราคาต่อกิโล
-                  </TableCell>
-                  <TableCell style={{ width: '10%' }}></TableCell>
+                  </HeaderTableCell>
+                  <TableCell style={{ width: '5%' }}></TableCell>
                 </TableRow>
               </TableHead>
+
               <TableBody>
                 {formData.tableData.map((row, index) => (
                   <TableRow key={index}>
