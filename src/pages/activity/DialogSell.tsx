@@ -107,9 +107,13 @@ const AddRowFab = styled(Fab)(({ theme }) => ({
 
 const CustomTextField = styled(TextField)(({ theme }) => ({
   '& .MuiInputBase-input': {
-    padding: '8px 10px', // Adjust the padding to reduce the text field height
-    fontSize: '0.8rem', // Adjust the font size to make the text smaller
+    padding: '8px 10px',
+    fontSize: '0.8rem',
   },
+}))
+
+const CustomTableCell = styled(TableCell)(({ theme }) => ({
+  borderBottom: 'none',
 }))
 
 const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
@@ -240,22 +244,28 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
           <Grid item xs={12}>
             <Table>
               <TableHead>
-                <TableRow
-                  style={{ borderBottom: '2px solid rgba(224, 224, 224, 1)' }}
-                >
-                  <TableCell style={{ width: '1%' }}></TableCell>
-                  <TableCell>ปลา</TableCell>
-                  <TableCell>ไซส์</TableCell>
-                  <TableCell>จำนวน</TableCell>
-                  <TableCell>ราคาต่อกิโล</TableCell>
-                  <TableCell />
+                <TableRow>
+                  <TableCell style={{ width: '5%' }}></TableCell>
+                  <TableCell style={{ width: '20%', textAlign: 'center' }}>
+                    ปลา
+                  </TableCell>
+                  <TableCell style={{ width: '20%', textAlign: 'center' }}>
+                    ไซส์
+                  </TableCell>
+                  <TableCell style={{ width: '20%', textAlign: 'center' }}>
+                    จำนวน
+                  </TableCell>
+                  <TableCell style={{ width: '25%', textAlign: 'center' }}>
+                    ราคาต่อกิโล
+                  </TableCell>
+                  <TableCell style={{ width: '10%' }}></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {formData.tableData.map((row, index) => (
                   <TableRow key={index}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>
+                    <CustomTableCell>{index + 1}</CustomTableCell>
+                    <CustomTableCell>
                       <CustomTextField
                         name='fish'
                         value={row.fish}
@@ -263,8 +273,8 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
                           handleTableDataChange(index, 'fish', e.target.value)
                         }
                       />
-                    </TableCell>
-                    <TableCell>
+                    </CustomTableCell>
+                    <CustomTableCell>
                       <CustomTextField
                         name='size'
                         value={row.size}
@@ -272,8 +282,8 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
                           handleTableDataChange(index, 'size', e.target.value)
                         }
                       />
-                    </TableCell>
-                    <TableCell>
+                    </CustomTableCell>
+                    <CustomTableCell>
                       <CustomTextField
                         name='amount'
                         value={row.amount}
@@ -281,8 +291,8 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
                           handleTableDataChange(index, 'amount', e.target.value)
                         }
                       />
-                    </TableCell>
-                    <TableCell>
+                    </CustomTableCell>
+                    <CustomTableCell>
                       <CustomTextField
                         name='pricePerKg'
                         value={row.pricePerKg}
@@ -294,13 +304,13 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
                           )
                         }
                       />
-                    </TableCell>
+                    </CustomTableCell>
                     {index === formData.tableData.length - 1 && (
-                      <TableCell>
+                      <CustomTableCell>
                         <AddRowFab size='small' onClick={handleAddRow}>
                           <AddIcon />
                         </AddRowFab>
-                      </TableCell>
+                      </CustomTableCell>
                     )}
                   </TableRow>
                 ))}
