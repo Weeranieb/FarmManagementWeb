@@ -14,8 +14,15 @@ import {
   SelectChangeEvent,
   Checkbox,
   FormControlLabel,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Fab,
 } from '@mui/material'
-import { Close as CloseIcon } from '@mui/icons-material'
+import { Close as CloseIcon, Add as AddIcon } from '@mui/icons-material'
 import { styled } from '@mui/system'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -37,6 +44,14 @@ interface NewActivityData {
   pricePerUnit: string
   date: string
   closePond: boolean
+  tableData: TableData[]
+}
+
+interface TableData {
+  fish: string
+  size: string
+  amount: string
+  pricePerKg: string
 }
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
@@ -82,6 +97,20 @@ const CustomButton = styled(Button)(({ theme }) => ({
   },
 }))
 
+const AddRowFab = styled(Fab)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.common.white,
+  '&:hover': {
+    backgroundColor: theme.palette.primary.dark,
+  },
+}))
+
+const CustomTextField = styled(TextField)(({ theme }) => ({
+  '& .MuiInputBase-root': {
+    lineHeight: '1.2em', // Adjust this value to reduce the line height
+  },
+}))
+
 const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
   const [formData, setFormData] = React.useState<NewActivityData>({
     pond: '',
@@ -90,8 +119,9 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
     totalWeight: '',
     unit: '',
     pricePerUnit: '',
-    date: dayjs().format('YYYY-MM-DD'), // Initialize with today's date
+    date: dayjs().format('YYYY-MM-DD'),
     closePond: false,
+    tableData: [{ fish: '', size: '', amount: '', pricePerKg: '' }],
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,6 +149,24 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
         [name]: value,
       }))
     }
+  }
+
+  const handleTableDataChange = (index: number, key: string, value: string) => {
+    setFormData((prevData) => {
+      const updatedTableData = [...prevData.tableData]
+      updatedTableData[index] = { ...updatedTableData[index], [key]: value }
+      return { ...prevData, tableData: updatedTableData }
+    })
+  }
+
+  const handleAddRow = () => {
+    setFormData((prevData) => ({
+      ...prevData,
+      tableData: [
+        ...prevData.tableData,
+        { fish: '', size: '', amount: '', pricePerKg: '' },
+      ],
+    }))
   }
 
   const handleFormSubmit = () => {
@@ -185,6 +233,78 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
               }
               label='ปิดบ่อ'
             />
+          </Grid>
+        </Grid>
+        <Grid container spacing={3} style={{ marginTop: '16px' }}>
+          <Grid item xs={12}>
+            <Table>
+              <TableHead>
+                <TableRow
+                  style={{ borderBottom: '2px solid rgba(224, 224, 224, 1)' }}
+                >
+                  <TableCell style={{ width: '1%' }}></TableCell>
+                  <TableCell>ปลา</TableCell>
+                  <TableCell>ไซส์</TableCell>
+                  <TableCell>จำนวน</TableCell>
+                  <TableCell>ราคาต่อกิโล</TableCell>
+                  <TableCell />
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {formData.tableData.map((row, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>
+                      <CustomTextField
+                        name='fish'
+                        value={row.fish}
+                        onChange={(e) =>
+                          handleTableDataChange(index, 'fish', e.target.value)
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <CustomTextField
+                        name='size'
+                        value={row.size}
+                        onChange={(e) =>
+                          handleTableDataChange(index, 'size', e.target.value)
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <CustomTextField
+                        name='amount'
+                        value={row.amount}
+                        onChange={(e) =>
+                          handleTableDataChange(index, 'amount', e.target.value)
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <CustomTextField
+                        name='pricePerKg'
+                        value={row.pricePerKg}
+                        onChange={(e) =>
+                          handleTableDataChange(
+                            index,
+                            'pricePerKg',
+                            e.target.value
+                          )
+                        }
+                      />
+                    </TableCell>
+                    {index === formData.tableData.length - 1 && (
+                      <TableCell>
+                        <AddRowFab size='small' onClick={handleAddRow}>
+                          <AddIcon />
+                        </AddRowFab>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </Grid>
         </Grid>
       </StyledDialogContent>
