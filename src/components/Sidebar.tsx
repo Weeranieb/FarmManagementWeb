@@ -50,7 +50,7 @@ const Sidebar: React.FC = () => {
       subItems: [
         { text: 'เหยื่อรายวัน', route: '/dailyFeed' },
         { text: 'เติม/ย้าย/ขาย', route: '/activity' },
-        { text: 'รายการเหยื่อ', route: '/feedCollection' },
+        { text: 'รายการเหยื่อ', route: '/feed' },
       ],
     },
     { text: 'ลูกน้อง', icon: <AssignmentIndIcon />, route: '/worker' },

@@ -5,6 +5,7 @@ import HomePage from './pages/home/HomePage'
 import FarmsPage from './pages/farms/FarmsPage'
 import Login from './pages/login/LoginPage'
 import ActivityPage from './pages/activity/ActivityPage'
+import Feed from './pages/feed/FeedPage'
 
 const App: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const App: React.FC = () => {
                 <Route path='/' element={<HomePage />} />
                 <Route path='/farms' element={<FarmsPage />} />
                 <Route path='/activity' element={<ActivityPage />} />
+                <Route path='/feed' element={<Feed />} />
                 {/* Add more routes as needed */}
               </Routes>
             </Layout>
