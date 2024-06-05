@@ -57,6 +57,7 @@ interface TableData {
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiPaper-root': {
     borderRadius: 50,
+    maxHeight: '70vh',
   },
 }))
 
