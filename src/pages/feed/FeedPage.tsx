@@ -18,11 +18,11 @@ import DialogAdd from './DialogAdd'
 
 const rows = [
   {
-    id: 1,
-    name: 'บ่อ 2',
-    code: 'ย้าย',
-    price: 'ฟาร์ม 1',
-    unit: 'ตัน',
+    id: '1.',
+    name: 'เหยื่อสด',
+    code: 'สด',
+    price: 40,
+    unit: 'ลัง',
     priceUpdatedDate: '02/08/2566',
     info: (
       <>
@@ -36,11 +36,11 @@ const rows = [
     ),
   },
   {
-    id: 2,
-    name: 'บ่อ 3',
-    code: 'ย้าย',
-    price: 'ฟาร์ม 2',
-    unit: 'ตัน',
+    id: '2.',
+    name: 'อาหารเม็ด',
+    code: 'เม็ด',
+    price: 940,
+    unit: 'ถุง',
     priceUpdatedDate: '02/08/2566',
     info: (
       <>
@@ -63,13 +63,26 @@ const Feed: React.FC = () => {
       headerName: '',
       flex: 0.05,
       hideSortIcons: true,
+      align: 'right',
     },
-    { field: 'name', headerName: 'รายการเหยื่อปลา', flex: 0.15 },
-    { field: 'code', headerName: 'โค้ดเนม', flex: 0.15 },
+    {
+      field: 'name',
+      headerName: 'รายการ',
+      flex: 0.2,
+      headerAlign: 'center',
+      align: 'center',
+    },
+    {
+      field: 'code',
+      headerName: 'โค้ดเนม',
+      flex: 0.15,
+      headerAlign: 'center',
+      align: 'center',
+    },
     {
       field: 'price',
       headerName: 'ราคาล่าสุด',
-      flex: 0.2,
+      flex: 0.15,
       headerAlign: 'center',
       align: 'center',
     },
@@ -78,6 +91,7 @@ const Feed: React.FC = () => {
       headerName: 'หน่วย',
       flex: 0.15,
       align: 'center',
+      headerAlign: 'center',
     },
     {
       field: 'priceUpdatedDate',
