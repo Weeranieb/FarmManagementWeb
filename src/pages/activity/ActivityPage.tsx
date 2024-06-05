@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React, { useState } from 'react'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import {
   Box,
@@ -6,6 +6,8 @@ import {
   MenuItem,
   InputAdornment,
   Typography,
+  Button,
+  Menu,
 } from '@mui/material'
 import {
   Search as SearchIcon,
@@ -17,6 +19,7 @@ import DialogFill from './DialogFill'
 import DialogMove from './DialogMove'
 import Swal from 'sweetalert2'
 import DialogSell from './DialogSell'
+import { styled } from '@mui/system'
 
 const rows = [
   {
@@ -79,7 +82,7 @@ const Activity: React.FC = () => {
       field: 'totalWeight',
       headerName: 'น้ำหนักรวม',
       flex: 0.2,
-      align: 'right',
+      align: 'center',
     },
     { field: 'unit', headerName: 'หน่วย', flex: 0.2 },
     {
@@ -87,7 +90,12 @@ const Activity: React.FC = () => {
       headerName: 'วันที่ทำ',
       flex: 0.2,
     },
-    { field: 'edit', headerName: 'เพิ่มข้อมูลวันที่', flex: 0.2 },
+    {
+      field: 'edit',
+      headerName: 'เพิ่มข้อมูลวันที่',
+      flex: 0.2,
+      align: 'center',
+    },
     {
       field: 'info',
       headerName: '',
@@ -175,6 +183,19 @@ const Activity: React.FC = () => {
     })
   }
 
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+  const handleMenuItemClick = (activity: string) => {
+    handleDialogOpen(activity)
+    setAnchorEl(null)
+  }
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null)
+  }
+
   const handleSortModelChange = (newSortModel: any) => {
     setInitialSortModel(newSortModel)
   }
@@ -233,18 +254,31 @@ const Activity: React.FC = () => {
               }}
             />
           </Box>
-          <TextField
-            select
+          <Button
             variant='outlined'
-            size='small'
-            label='เพิ่ม'
-            sx={{ width: 100, mr: 3 }}
-            onChange={(e) => handleDialogOpen(e.target.value)}
+            onClick={handleMenuClick}
+            sx={{
+              backgroundColor: '#CEBCA1',
+              color: '#4B4B4C',
+              fontSize: '1.03rem',
+              padding: '4px 20px',
+            }}
           >
-            <MenuItem value='เติม'>เติม</MenuItem>
-            <MenuItem value='ย้าย'>ย้าย</MenuItem>
-            <MenuItem value='ขาย'>ขาย</MenuItem>
-          </TextField>
+            เพิ่ม
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleCloseMenu}
+          >
+            <MenuItem onClick={() => handleMenuItemClick('เติม')}>
+              เติม
+            </MenuItem>
+            <MenuItem onClick={() => handleMenuItemClick('ย้าย')}>
+              ย้าย
+            </MenuItem>
+            <MenuItem onClick={() => handleMenuItemClick('ขาย')}>ขาย</MenuItem>
+          </Menu>
         </Box>
       </Box>
       <Box display='flex' alignItems='center' p={2}>
