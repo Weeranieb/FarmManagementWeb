@@ -15,16 +15,15 @@ import {
 } from '@mui/icons-material'
 import { GridSortModel } from '@mui/x-data-grid/models/gridSortModel'
 import Swal from 'sweetalert2'
-import DialogAdd from './DialogAdd'
+// import DialogAdd from './DialogAdd'
 
 const rows = [
   {
     id: '1.',
-    type: 'ค่าไฟ',
-    other: 'ย้าย',
-    farm: 'ฟาร์ม 1',
-    paidAmount: '20,000',
-    paymentDate: '02/08/2566',
+    name: 'วีรชัย แป้นถึง',
+    country: 'กัมพูชา',
+    salary: 50000,
+    startDate: '02/08/2566',
     updatedDate: '8/21/15',
     info: (
       <>
@@ -39,11 +38,10 @@ const rows = [
   },
   {
     id: '2.',
-    type: 'ค่าไฟ',
-    other: 'ย้าย',
-    farm: 'ฟาร์ม 1',
-    paidAmount: '20,000',
-    paymentDate: '02/08/2566',
+    name: 'วีรชน แป้นถึง',
+    country: 'ไทย',
+    salary: 80000,
+    startDate: '02/08/2566',
     updatedDate: '8/21/15',
     info: (
       <>
@@ -58,7 +56,7 @@ const rows = [
   },
 ]
 
-const Bill: React.FC = () => {
+const Worker: React.FC = () => {
   // make column in scope of the component
   const columns: GridColDef[] = [
     {
@@ -68,44 +66,37 @@ const Bill: React.FC = () => {
       hideSortIcons: true,
     },
     {
-      field: 'type',
-      headerName: 'ประเภท',
+      field: 'name',
+      headerName: 'ชื่อ - นามสกุล',
+      flex: 0.3,
+      headerAlign: 'center',
+      align: 'center',
+    },
+    {
+      field: 'country',
+      headerName: 'ประเทศ',
+      flex: 0.2,
+      headerAlign: 'center',
+      align: 'center',
+    },
+    {
+      field: 'salary',
+      headerName: 'เงินเดือน',
+      flex: 0.2,
+      headerAlign: 'center',
+      align: 'center',
+    },
+    {
+      field: 'startDate',
+      headerName: 'วันที่เริ่มงาน',
       flex: 0.15,
-      headerAlign: 'center',
-      align: 'center',
-    },
-    {
-      field: 'other',
-      headerName: 'รายละเอียดเพิ่มเติม',
-      flex: 0.2,
-      headerAlign: 'center',
-      align: 'center',
-    },
-    {
-      field: 'farm',
-      headerName: 'ฟาร์ม',
-      flex: 0.2,
-      headerAlign: 'center',
-      align: 'center',
-    },
-    {
-      field: 'paidAmount',
-      headerName: 'ค่าใช้จ่าย',
-      flex: 0.2,
-      headerAlign: 'center',
-      align: 'center',
-    },
-    {
-      field: 'paymentDate',
-      headerName: 'วันที่จ่าย',
-      flex: 0.2,
       headerAlign: 'center',
       align: 'center',
     },
     {
       field: 'updatedDate',
       headerName: 'เพิ่มข้อมูลวันที่',
-      flex: 0.2,
+      flex: 0.15,
       headerAlign: 'center',
       align: 'center',
     },
@@ -155,8 +146,6 @@ const Bill: React.FC = () => {
     },
   ]
 
-  const [typeFilter, setTypeFilter] = React.useState('')
-  const [farmFilter, setFarmFilter] = React.useState('')
   const [dialogOpen, setDialogOpen] = React.useState(false)
 
   const [initialSortModel, setInitialSortModel] = React.useState<GridSortModel>(
@@ -207,16 +196,9 @@ const Bill: React.FC = () => {
     setDialogOpen(false)
   }
 
-  const handleFormSubmit = (newBill: any) => {
-    console.log('New Bill:', newBill)
+  const handleFormSubmit = (newWorker: any) => {
+    console.log('New Worker:', newWorker)
   }
-
-  const filteredRows = rows.filter((row) => {
-    return (
-      (typeFilter === '' || row.type.includes(typeFilter)) &&
-      (farmFilter === '' || row.farm.includes(farmFilter))
-    )
-  })
 
   return (
     <div>
@@ -234,7 +216,7 @@ const Bill: React.FC = () => {
             gutterBottom
             fontWeight='bold'
           >
-            ค่าใช้จ่าย
+            รายชื่อลูกน้อง
           </Typography>
         </Box>
         <Box display='flex' alignItems='center'>
@@ -266,37 +248,9 @@ const Bill: React.FC = () => {
           </Button>
         </Box>
       </Box>
-      <Box display='flex' alignItems='center' p={2}>
-        <TextField
-          label='ประเภท'
-          variant='outlined'
-          size='small'
-          sx={{ width: 170, mr: 3 }}
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          select
-        >
-          <MenuItem value=''>ทั้งหมด</MenuItem>
-          <MenuItem value='ค่าไฟ'>ค่าไฟ</MenuItem>
-          <MenuItem value='เงินเดือนลูกน้อง'>เงินเดือนลูกน้อง</MenuItem>
-        </TextField>
-        <TextField
-          label='ฟาร์ม'
-          variant='outlined'
-          size='small'
-          sx={{ width: 150, mr: 3 }}
-          value={farmFilter}
-          onChange={(e) => setFarmFilter(e.target.value)}
-          select
-        >
-          <MenuItem value=''>ทั้งหมด</MenuItem>
-          <MenuItem value='ฟาร์ม 1'>ฟาร์ม 1</MenuItem>
-          <MenuItem value='ฟาร์ม 2'>ฟาร์ม 2</MenuItem>
-        </TextField>
-      </Box>
       <div style={{ height: 600, width: '100%' }}>
         <DataGrid
-          rows={filteredRows}
+          rows={rows}
           columns={columns}
           sortModel={initialSortModel}
           onSortModelChange={handleSortModelChange}
@@ -315,13 +269,13 @@ const Bill: React.FC = () => {
           }}
         />
       </div>
-      <DialogAdd
+      {/* <DialogAdd
         open={dialogOpen}
         onClose={handleDialogClose}
         onSubmit={handleFormSubmit}
-      />
+      /> */}
     </div>
   )
 }
 
-export default Bill
+export default Worker

@@ -7,6 +7,7 @@ import Login from './pages/login/LoginPage'
 import ActivityPage from './pages/activity/ActivityPage'
 import Feed from './pages/feed/FeedPage'
 import Bill from './pages/bill/BillPage'
+import Worker from './pages/worker/WorkerPage'
 
 const App: React.FC = () => {
   return (
@@ -23,6 +24,7 @@ const App: React.FC = () => {
                 <Route path='/activity' element={<ActivityPage />} />
                 <Route path='/feed' element={<Feed />} />
                 <Route path='bill' element={<Bill />} />
+                <Route path='worker' element={<Worker />} />
                 {/* Add more routes as needed */}
               </Routes>
             </Layout>
