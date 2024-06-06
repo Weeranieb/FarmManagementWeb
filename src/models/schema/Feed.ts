@@ -1,4 +1,6 @@
-export interface FeedCollection {
+import { Base } from './base'
+
+export interface FeedCollection extends Base {
   id?: number
   code: string
   name: string
