@@ -81,6 +81,8 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
     paymentDate: dayjs().format('YYYY-MM-DD'), // Initialize with today's date
   })
 
+  const [isOtherType, setIsOtherType] = React.useState(false)
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prevData) => ({
@@ -103,6 +105,9 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
       ...prevData,
       [name]: value,
     }))
+    if (name === 'type') {
+      setIsOtherType(value === 'อื่นๆ')
+    }
   }
 
   const handleFormSubmit = () => {
@@ -131,6 +136,7 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
               >
                 <MenuItem value='ค่าไฟ'>ค่าไฟ</MenuItem>
                 <MenuItem value='เงินเดือนลูกน้อง'>เงินเดือนลูกน้อง</MenuItem>
+                <MenuItem value='อื่นๆ'>อื่นๆ</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -144,6 +150,7 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
               variant='outlined'
               value={formData.other}
               onChange={handleInputChange}
+              disabled={!isOtherType}
             />
           </Grid>
           <Grid item xs={6}>
@@ -160,6 +167,7 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
               </Select>
             </FormControl>
           </Grid>
+          <Grid item xs={6} />
           <Grid item xs={6} style={{ marginTop: '8px' }}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
