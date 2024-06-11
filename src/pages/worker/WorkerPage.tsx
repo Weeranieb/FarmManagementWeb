@@ -63,6 +63,7 @@ const Worker: React.FC = () => {
       headerName: '',
       flex: 0.05,
       hideSortIcons: true,
+      align: 'right',
     },
     {
       field: 'name',

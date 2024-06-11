@@ -60,7 +60,7 @@ const Sidebar: React.FC = () => {
 
   const secondaryItems = [
     { text: 'ตั้งค่า', icon: <SettingsIcon />, route: '/settings' },
-    { text: 'ออกจากระบบ', icon: <LogoutIcon />, route: '/logout' },
+    { text: 'ออกจากระบบ', icon: <LogoutIcon />, route: '/login' },
   ]
 
   return (
