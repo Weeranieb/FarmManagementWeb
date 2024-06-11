@@ -16,6 +16,7 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  FormLabel,
 } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
 import { styled } from '@mui/system'
@@ -154,6 +155,7 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
           </Grid>
           <Grid item xs={6}>
             <FormControl component='fieldset'>
+              <FormLabel component='legend'>เพศ</FormLabel>
               <RadioGroup
                 row
                 name='gender'
@@ -174,8 +176,8 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
                 onChange={handleSelectChange}
                 label='ประเทศ'
               >
-                <MenuItem value='Thailand'>ไทย</MenuItem>
-                <MenuItem value='Cambodia'>กัมพูชา</MenuItem>
+                <MenuItem value='Thailand'>🇹🇭 ไทย</MenuItem>
+                <MenuItem value='Cambodia'>🇰🇭 กัมพูชา</MenuItem>
               </Select>
             </FormControl>
           </Grid>
