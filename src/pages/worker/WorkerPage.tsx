@@ -3,7 +3,6 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import {
   Box,
   TextField,
-  MenuItem,
   InputAdornment,
   Typography,
   Button,
@@ -15,7 +14,7 @@ import {
 } from '@mui/icons-material'
 import { GridSortModel } from '@mui/x-data-grid/models/gridSortModel'
 import Swal from 'sweetalert2'
-// import DialogAdd from './DialogAdd'
+import DialogAdd from './DialogAdd'
 
 const rows = [
   {
@@ -269,11 +268,11 @@ const Worker: React.FC = () => {
           }}
         />
       </div>
-      {/* <DialogAdd
+      <DialogAdd
         open={dialogOpen}
         onClose={handleDialogClose}
         onSubmit={handleFormSubmit}
-      /> */}
+      />
     </div>
   )
 }
