@@ -134,7 +134,7 @@ const TopBar: React.FC = () => {
           </MenuItem>
           <MenuItem
             sx={{ padding: '8px 20px' }}
-            onClick={() => handleMenuItemClick('/logout')}
+            onClick={() => handleMenuItemClick('/login')}
           >
             <ListItemIcon>
               <Logout fontSize='small' />
