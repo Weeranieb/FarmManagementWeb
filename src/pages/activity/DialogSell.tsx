@@ -28,10 +28,8 @@ import {
   Remove as RemoveIcon,
 } from '@mui/icons-material'
 import { styled } from '@mui/system'
-import { LocalizationProvider } from '@mui/x-date-pickers'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs, { Dayjs } from 'dayjs'
+import DateSelect from '../../components/DateSelect'
 
 interface DialogSellProps {
   open: boolean
@@ -236,13 +234,11 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
             </FormControl>
           </Grid>
           <Grid item xs={6} style={{ marginTop: '8px' }}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label='วันที่ทำ'
-                value={dayjs(formData.date)}
-                onChange={handleDateChange}
-              />
-            </LocalizationProvider>
+            <DateSelect
+              label='วันที่ทำ'
+              value={dayjs(formData.date)}
+              onChange={handleDateChange}
+            />
           </Grid>
           <Grid item xs={6} container justifyContent='left' alignItems='center'>
             <FormControlLabel

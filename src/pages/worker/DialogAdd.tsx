@@ -20,11 +20,9 @@ import {
 } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
 import { styled } from '@mui/system'
-import { LocalizationProvider } from '@mui/x-date-pickers'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs, { Dayjs } from 'dayjs'
 import { Worker } from '../../models/schema/worker'
+import DateSelect from '../../components/DateSelect'
 
 interface DialogAddProps {
   open: boolean
@@ -194,13 +192,11 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
             />
           </Grid>
           <Grid item xs={6} style={{ marginTop: '8px' }}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label='วันที่เริ่มงาน'
-                value={dayjs(formData.hireDate)}
-                onChange={handleDateChange}
-              />
-            </LocalizationProvider>
+            <DateSelect
+              label='วันที่เริ่มงาน'
+              value={dayjs(formData.hireDate)}
+              onChange={handleDateChange}
+            />
           </Grid>
           <Grid item xs={6}>
             <FormControl fullWidth variant='outlined' margin='dense'>

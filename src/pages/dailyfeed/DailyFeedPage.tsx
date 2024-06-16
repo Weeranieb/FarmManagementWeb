@@ -13,13 +13,11 @@ import {
   Grid,
   Divider,
 } from '@mui/material'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { Dayjs } from 'dayjs'
 import { useDropzone } from 'react-dropzone'
+import DateSelect from '../../components/DateSelect'
 
-const HomePage: React.FC = () => {
+const DailyFeed: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null)
   const [selectedFarm, setSelectedFarm] = useState('')
   const [openDialog, setOpenDialog] = useState(false)
@@ -141,13 +139,11 @@ const HomePage: React.FC = () => {
               Search
             </Typography>
             <Box sx={{ mb: 2, width: '100%' }}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label='Select Date'
-                  value={selectedDate}
-                  onChange={(newValue) => setSelectedDate(newValue)}
-                />
-              </LocalizationProvider>
+              <DateSelect
+                label='Select Date'
+                value={selectedDate}
+                onChange={(newValue) => setSelectedDate(newValue)}
+              />
             </Box>
             <Box sx={{ mb: 2, width: '100%' }}>
               <TextField
@@ -191,4 +187,4 @@ const HomePage: React.FC = () => {
   )
 }
 
-export default HomePage
+export default DailyFeed

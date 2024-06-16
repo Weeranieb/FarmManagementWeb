@@ -23,11 +23,9 @@ import {
   Remove as RemoveIcon,
 } from '@mui/icons-material'
 import { styled } from '@mui/system'
-import { LocalizationProvider } from '@mui/x-date-pickers'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs, { Dayjs } from 'dayjs'
 import { FeedCollection } from '../../models/schema/feed'
+import DateSelect from '../../components/DateSelect'
 
 interface DialogAddProps {
   open: boolean
@@ -253,13 +251,11 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
                   <TableRow key={index}>
                     <CustomTableCell>{index + 1}</CustomTableCell>
                     <CustomTableCell>
-                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DatePicker
-                          label='วันที่ทำ'
-                          value={dayjs(row.priceUpdatedDate)}
-                          onChange={handleDateChange}
-                        />
-                      </LocalizationProvider>
+                      <DateSelect
+                        label='วันที่'
+                        value={dayjs(row.priceUpdatedDate)}
+                        onChange={handleDateChange}
+                      />
                     </CustomTableCell>
                     <CustomTableCell>
                       <TextField

@@ -17,10 +17,8 @@ import {
 } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
 import { styled } from '@mui/system'
-import { LocalizationProvider } from '@mui/x-date-pickers'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs, { Dayjs } from 'dayjs'
+import DateSelect from '../../components/DateSelect'
 
 interface DialogMoveProps {
   open: boolean
@@ -264,13 +262,11 @@ const DialogMove: React.FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
             />
           </Grid>
           <Grid item xs={6} style={{ marginTop: '8px' }}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label='วันที่ทำ'
-                value={dayjs(formData.date)}
-                onChange={handleDateChange}
-              />
-            </LocalizationProvider>
+            <DateSelect
+              label='วันที่ทำ'
+              value={dayjs(formData.date)}
+              onChange={handleDateChange}
+            />
           </Grid>
         </Grid>
       </StyledDialogContent>
