@@ -43,7 +43,7 @@ const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
 
 const DialogWrapper: React.FC<StyledDialogWrapperProps> = ({
   title,
-  open, // Corrected prop name
+  open,
   onClose,
   children,
 }) => {
