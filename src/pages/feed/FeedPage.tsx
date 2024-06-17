@@ -1,20 +1,11 @@
 import React from 'react'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
-import {
-  Box,
-  TextField,
-  InputAdornment,
-  Typography,
-  Button,
-} from '@mui/material'
-import {
-  Search as SearchIcon,
-  Info as InfoIcon,
-  Delete as DeleteIcon,
-} from '@mui/icons-material'
+import { Box } from '@mui/material'
+import { Info as InfoIcon, Delete as DeleteIcon } from '@mui/icons-material'
 import { GridSortModel } from '@mui/x-data-grid/models/gridSortModel'
 import Swal from 'sweetalert2'
 import DialogAdd from './DialogAdd'
+import PageBar from '../../components/PageBar'
 
 const rows = [
   {
@@ -199,52 +190,7 @@ const Feed: React.FC = () => {
 
   return (
     <div>
-      <Box
-        display='flex'
-        justifyContent='space-between'
-        alignItems='center'
-        p={2}
-      >
-        <Box>
-          <Typography
-            variant='h4'
-            component='h4'
-            style={{ margin: 0, padding: '0 10px' }}
-            gutterBottom
-            fontWeight='bold'
-          >
-            รายการเหยื่อ
-          </Typography>
-        </Box>
-        <Box display='flex' alignItems='center' sx={{ pb: 4 }}>
-          <Box display='flex' alignItems='center' sx={{ marginRight: 1 }}>
-            <TextField
-              variant='outlined'
-              size='small'
-              placeholder='ค้นหา'
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
-          <Button
-            variant='outlined'
-            onClick={handleDialogOpen}
-            sx={{
-              backgroundColor: '#CEBCA1',
-              color: '#4B4B4C',
-              fontSize: '1.03rem',
-              padding: '4px 20px',
-            }}
-          >
-            เพิ่ม
-          </Button>
-        </Box>
-      </Box>
+      <PageBar title='รายการเหยื่อ' handleDialogOpen={handleDialogOpen} />
       <div style={{ height: 600, width: '100%' }}>
         <DataGrid
           rows={rows}
