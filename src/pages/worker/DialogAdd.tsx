@@ -1,12 +1,6 @@
 import * as React from 'react'
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
-  Button,
-  IconButton,
   Grid,
   FormControl,
   InputLabel,
@@ -18,60 +12,16 @@ import {
   Radio,
   FormLabel,
 } from '@mui/material'
-import { Close as CloseIcon } from '@mui/icons-material'
-import { styled } from '@mui/system'
 import dayjs, { Dayjs } from 'dayjs'
 import { Worker } from '../../models/schema/worker'
 import DateSelect from '../../components/DateSelect'
+import DialogWrapper from '../../components/DialogWrapper'
 
 interface DialogAddProps {
   open: boolean
   onClose: () => void
   onSubmit: (data: Worker) => void
 }
-
-const StyledDialog = styled(Dialog)(({ theme }) => ({
-  '& .MuiPaper-root': {
-    borderRadius: 50,
-  },
-}))
-
-const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
-  color: theme.palette.text.primary,
-  display: 'flex',
-  justifyContent: 'space-between',
-  fontSize: '1.85rem',
-  paddingLeft: theme.spacing(5),
-  paddingBottom: theme.spacing(1),
-  paddingTop: theme.spacing(4),
-  paddingRight: theme.spacing(3),
-}))
-
-const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
-  marginTop: theme.spacing(4),
-  paddingLeft: theme.spacing(5),
-  paddingRight: theme.spacing(5),
-  paddingBottom: theme.spacing(3),
-}))
-
-const StyledDialogActions = styled(DialogActions)(({ theme }) => ({
-  paddingBottom: theme.spacing(3),
-}))
-
-const CustomButton = styled(Button)(({ theme }) => ({
-  fontSize: '1.1rem',
-  color: theme.palette.text.primary,
-  padding: theme.spacing(1.5, 4),
-  border: `2px solid ${theme.palette.primary.main}`,
-  backgroundColor: theme.palette.secondary.main,
-  borderRadius: 50,
-  boxShadow: 'none',
-  '&:hover': {
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.common.white,
-  },
-}))
 
 const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
   const [formData, setFormData] = React.useState<Worker>({
@@ -118,114 +68,95 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
   }
 
   return (
-    <StyledDialog open={open} onClose={onClose}>
-      <StyledDialogTitle>
-        กรอกข้อมูล
-        <IconButton edge='end' color='inherit' onClick={onClose}>
-          <CloseIcon />
-        </IconButton>
-      </StyledDialogTitle>
-      <StyledDialogContent>
-        <Grid container spacing={3}>
-          <Grid item xs={6}>
-            <TextField
-              margin='dense'
-              name='firstName'
-              label='ชื่อ'
-              type='text'
-              fullWidth
-              variant='outlined'
-              value={formData.firstName}
-              onChange={handleInputChange}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              margin='dense'
-              name='lastName'
-              label='นามสกุล'
-              type='text'
-              fullWidth
-              variant='outlined'
-              value={formData.lastName}
-              onChange={handleInputChange}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <FormControl component='fieldset'>
-              <FormLabel component='legend'>เพศ</FormLabel>
-              <RadioGroup
-                row
-                name='gender'
-                value={formData.gender}
-                onChange={handleInputChange}
-              >
-                <FormControlLabel value='M' control={<Radio />} label='ชาย' />
-                <FormControlLabel value='F' control={<Radio />} label='หญิง' />
-              </RadioGroup>
-            </FormControl>
-          </Grid>
-          <Grid item xs={6}>
-            <FormControl fullWidth variant='outlined' margin='dense'>
-              <InputLabel>ประเทศ</InputLabel>
-              <Select
-                name='country'
-                value={formData.country}
-                onChange={handleSelectChange}
-                label='ประเทศ'
-              >
-                <MenuItem value='Thailand'>🇹🇭 ไทย</MenuItem>
-                <MenuItem value='Cambodia'>🇰🇭 กัมพูชา</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              margin='dense'
-              name='salary'
-              label='เงินเดือน'
-              type='number'
-              fullWidth
-              variant='outlined'
-              value={formData.salary}
-              onChange={handleInputChange}
-            />
-          </Grid>
-          <Grid item xs={6} style={{ marginTop: '8px' }}>
-            <DateSelect
-              label='วันที่เริ่มงาน'
-              value={dayjs(formData.hireDate)}
-              onChange={handleDateChange}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <FormControl fullWidth variant='outlined' margin='dense'>
-              <InputLabel>ฟาร์ม</InputLabel>
-              <Select
-                name='farmGroupId'
-                value={formData.farmGroupId}
-                onChange={handleSelectChange}
-                label='ฟาร์ม'
-              >
-                <MenuItem value={1}>ฟาร์มบุญมา</MenuItem>
-                <MenuItem value={2}>ฟาร์มบ้านระกาศ</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
+    <DialogWrapper open={open} onClose={onClose} onSubmit={handleFormSubmit}>
+      <Grid container spacing={3}>
+        <Grid item xs={6}>
+          <TextField
+            margin='dense'
+            name='firstName'
+            label='ชื่อ'
+            type='text'
+            fullWidth
+            variant='outlined'
+            value={formData.firstName}
+            onChange={handleInputChange}
+          />
         </Grid>
-      </StyledDialogContent>
-      <StyledDialogActions>
-        <Grid container justifyContent='center'>
-          <CustomButton
-            onClick={handleFormSubmit}
-            color='primary'
-            variant='contained'
-          >
-            บันทึก
-          </CustomButton>
+        <Grid item xs={6}>
+          <TextField
+            margin='dense'
+            name='lastName'
+            label='นามสกุล'
+            type='text'
+            fullWidth
+            variant='outlined'
+            value={formData.lastName}
+            onChange={handleInputChange}
+          />
         </Grid>
-      </StyledDialogActions>
-    </StyledDialog>
+        <Grid item xs={6}>
+          <FormControl component='fieldset'>
+            <FormLabel component='legend'>เพศ</FormLabel>
+            <RadioGroup
+              row
+              name='gender'
+              value={formData.gender}
+              onChange={handleInputChange}
+            >
+              <FormControlLabel value='M' control={<Radio />} label='ชาย' />
+              <FormControlLabel value='F' control={<Radio />} label='หญิง' />
+            </RadioGroup>
+          </FormControl>
+        </Grid>
+        <Grid item xs={6}>
+          <FormControl fullWidth variant='outlined' margin='dense'>
+            <InputLabel>ประเทศ</InputLabel>
+            <Select
+              name='country'
+              value={formData.country}
+              onChange={handleSelectChange}
+              label='ประเทศ'
+            >
+              <MenuItem value='Thailand'>🇹🇭 ไทย</MenuItem>
+              <MenuItem value='Cambodia'>🇰🇭 กัมพูชา</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={6}>
+          <TextField
+            margin='dense'
+            name='salary'
+            label='เงินเดือน'
+            type='number'
+            fullWidth
+            variant='outlined'
+            value={formData.salary}
+            onChange={handleInputChange}
+          />
+        </Grid>
+        <Grid item xs={6} style={{ marginTop: '8px' }}>
+          <DateSelect
+            label='วันที่เริ่มงาน'
+            value={dayjs(formData.hireDate)}
+            onChange={handleDateChange}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <FormControl fullWidth variant='outlined' margin='dense'>
+            <InputLabel>ฟาร์ม</InputLabel>
+            <Select
+              name='farmGroupId'
+              value={formData.farmGroupId}
+              onChange={handleSelectChange}
+              label='ฟาร์ม'
+            >
+              <MenuItem value={1}>ฟาร์มบุญมา</MenuItem>
+              <MenuItem value={2}>ฟาร์มบ้านระกาศ</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+      </Grid>
+    </DialogWrapper>
   )
 }
 

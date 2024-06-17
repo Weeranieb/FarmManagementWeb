@@ -5,6 +5,9 @@ import {
   DialogContent,
   DialogProps,
   IconButton,
+  Grid,
+  Button,
+  DialogActions,
 } from '@mui/material'
 import { styled } from '@mui/system'
 import { Close as CloseIcon } from '@mui/icons-material'
@@ -13,6 +16,7 @@ interface StyledDialogWrapperProps extends DialogProps {
   title?: string
   open: boolean
   onClose: () => void
+  handleFormSubmit?: () => void
   children: React.ReactNode
 }
 
@@ -41,10 +45,30 @@ const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
   paddingBottom: theme.spacing(3),
 }))
 
+const StyledDialogActions = styled(DialogActions)(({ theme }) => ({
+  paddingBottom: theme.spacing(3),
+  paddingTop: theme.spacing(3),
+}))
+
+const CustomButton = styled(Button)(({ theme }) => ({
+  fontSize: '1.1rem',
+  color: theme.palette.text.primary,
+  padding: theme.spacing(1.5, 4),
+  border: `2px solid ${theme.palette.primary.main}`,
+  backgroundColor: theme.palette.secondary.main,
+  borderRadius: 50,
+  boxShadow: 'none',
+  '&:hover': {
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.common.white,
+  },
+}))
+
 const DialogWrapper: React.FC<StyledDialogWrapperProps> = ({
   title,
   open,
   onClose,
+  handleFormSubmit,
   children,
 }) => {
   return (
@@ -55,7 +79,20 @@ const DialogWrapper: React.FC<StyledDialogWrapperProps> = ({
           <CloseIcon />
         </IconButton>
       </StyledDialogTitle>
-      <StyledDialogContent>{children}</StyledDialogContent>
+      <StyledDialogContent>
+        {children}
+        <StyledDialogActions>
+          <Grid container justifyContent='center'>
+            <CustomButton
+              onClick={handleFormSubmit}
+              color='primary'
+              variant='contained'
+            >
+              บันทึก
+            </CustomButton>
+          </Grid>
+        </StyledDialogActions>
+      </StyledDialogContent>
     </StyledDialog>
   )
 }

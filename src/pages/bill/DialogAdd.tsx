@@ -1,8 +1,6 @@
 import * as React from 'react'
 import {
-  DialogActions,
   TextField,
-  Button,
   Grid,
   FormControl,
   InputLabel,
@@ -11,7 +9,6 @@ import {
   SelectChangeEvent,
 } from '@mui/material'
 import dayjs, { Dayjs } from 'dayjs'
-import { styled } from '@mui/system'
 import { Bill } from '../../models/schema/bill'
 import DateSelect from '../../components/DateSelect'
 import DialogWrapper from '../../components/DialogWrapper'
@@ -21,24 +18,6 @@ interface DialogAddProps {
   onClose: () => void
   onSubmit: (data: Bill) => void
 }
-
-const StyledDialogActions = styled(DialogActions)(({ theme }) => ({
-  paddingBottom: theme.spacing(3),
-}))
-
-const CustomButton = styled(Button)(({ theme }) => ({
-  fontSize: '1.1rem',
-  color: theme.palette.text.primary,
-  padding: theme.spacing(1.5, 4),
-  border: `2px solid ${theme.palette.primary.main}`,
-  backgroundColor: theme.palette.secondary.main,
-  borderRadius: 50,
-  boxShadow: 'none',
-  '&:hover': {
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.common.white,
-  },
-}))
 
 const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
   const [formData, setFormData] = React.useState<Bill>({
@@ -85,7 +64,12 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
   }
 
   return (
-    <DialogWrapper open={open} onClose={onClose} title='กรอกข้อมูล'>
+    <DialogWrapper
+      open={open}
+      onClose={onClose}
+      title='กรอกข้อมูล'
+      handleFormSubmit={handleFormSubmit}
+    >
       <Grid container spacing={3}>
         <Grid item xs={6}>
           <FormControl fullWidth variant='outlined' margin='dense'>
@@ -150,7 +134,7 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
           />
         </Grid>
       </Grid>
-      <StyledDialogActions>
+      {/* <StyledDialogActions>
         <Grid container justifyContent='center'>
           <CustomButton
             onClick={handleFormSubmit}
@@ -160,7 +144,7 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
             บันทึก
           </CustomButton>
         </Grid>
-      </StyledDialogActions>
+      </StyledDialogActions> */}
     </DialogWrapper>
   )
 }
