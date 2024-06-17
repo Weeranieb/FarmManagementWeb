@@ -10,12 +10,13 @@ import { styled } from '@mui/system'
 import { Close as CloseIcon } from '@mui/icons-material'
 
 interface StyledDialogWrapperProps extends DialogProps {
-  title: string
+  title?: string
+  open: boolean
   onClose: () => void
   children: React.ReactNode
 }
 
-const StyledDialog = styled(Dialog)<DialogProps>(({ theme }) => ({
+const StyledDialog = styled(Dialog)<StyledDialogWrapperProps>(({ theme }) => ({
   '& .MuiPaper-root': {
     borderRadius: 50,
   },
@@ -42,12 +43,12 @@ const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
 
 const DialogWrapper: React.FC<StyledDialogWrapperProps> = ({
   title,
+  open, // Corrected prop name
   onClose,
   children,
-  ...props
 }) => {
   return (
-    <StyledDialog {...props}>
+    <StyledDialog open={open} onClose={onClose}>
       <StyledDialogTitle>
         {title}
         <IconButton edge='end' color='inherit' onClick={onClose}>
