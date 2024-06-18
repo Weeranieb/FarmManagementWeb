@@ -9,11 +9,24 @@ export const lightTheme = createTheme({
     secondary: {
       main: '#FAF8EE',
     },
+    grey: {
+      50: '#F9F9F9',
+      100: '#F1F1F1',
+      200: '#E9E9E9',
+      300: '#D9D9D9',
+      400: '#BFBFBF',
+      500: '#A5A5A5',
+      600: '#7E7E7E',
+      700: '#666666',
+      800: '#4D4D4D',
+      900: '#333333',
+    },
     background: {
       default: '#ffffff',
     },
     text: {
       primary: '#4B4B4C',
+      secondary: '#ffffff',
     },
   },
 })

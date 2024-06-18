@@ -1,8 +1,9 @@
 import React from 'react'
 import { useParams } from 'react-router-dom'
-import { Box, Typography } from '@mui/material'
+import { Box, Typography, Stack } from '@mui/material'
 import StatsTop from './StatsTop'
 import StatsBottom from './StatsBottom'
+import ActiveButton from '../../components/ActiveButton'
 
 const OnePond: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -15,15 +16,18 @@ const OnePond: React.FC = () => {
         alignItems='center'
         p={2}
       >
-        <Typography
-          variant='h4'
-          component='h4'
-          style={{ margin: 0, padding: '0 10px' }}
-          gutterBottom
-          fontWeight='bold'
-        >
-          บ่อ 1/2 (id: {id})
-        </Typography>
+        <Stack direction='row' spacing={2} alignItems='center'>
+          <Typography
+            variant='h4'
+            component='h4'
+            style={{ margin: 0, padding: '0 10px' }}
+            gutterBottom
+            fontWeight='bold'
+          >
+            บ่อ 1/2 (id: {id})
+          </Typography>
+          <ActiveButton isActive={true} />
+        </Stack>
       </Box>
       <StatsTop />
       <StatsBottom />
