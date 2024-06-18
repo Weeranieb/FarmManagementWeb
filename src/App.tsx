@@ -9,6 +9,7 @@ import Feed from './pages/feed/FeedPage'
 import Bill from './pages/bill/BillPage'
 import Worker from './pages/worker/WorkerPage'
 import DailyFeed from './pages/dailyfeed/DailyFeedPage'
+import OnePond from './pages/onepond/OnePond'
 
 const App: React.FC = () => {
   return (
@@ -27,6 +28,7 @@ const App: React.FC = () => {
                 <Route path='bill' element={<Bill />} />
                 <Route path='worker' element={<Worker />} />
                 <Route path='dailyFeed' element={<DailyFeed />} />
+                <Route path='pond/:id' element={<OnePond />} />
                 {/* Add more routes as needed */}
               </Routes>
             </Layout>
