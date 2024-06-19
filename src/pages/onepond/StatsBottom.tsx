@@ -46,6 +46,8 @@ const StatsBottom: React.FC = () => {
                 ],
                 innerRadius: 0,
                 outerRadius: 100,
+                cx: '70%',
+                cy: '58%',
               },
             ]}
             slotProps={{
