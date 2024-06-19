@@ -1,28 +1,42 @@
-import { Grid, Box } from '@mui/material'
-import { BarChart, PieChart } from '@mui/x-charts'
 import React from 'react'
+import { Grid, Box } from '@mui/material'
+import { LineChart, PieChart } from '@mui/x-charts'
 
 const StatsBottom: React.FC = () => {
   return (
     <Grid container spacing={2}>
-      <Grid item xs={9}>
-        <Box sx={{ border: '1px solid', padding: 2, height: '100%' }}>
-          <BarChart
+      <Grid item xs={8}>
+        <Box
+          sx={{
+            border: '1px solid rgba(0, 0, 0, 0.2)',
+            borderRadius: '8px',
+            padding: '16px',
+            height: '100%',
+          }}
+        >
+          <LineChart
+            xAxis={[{ data: [1, 2, 3, 5, 8, 10] }]}
             series={[
-              { data: [35, 44, 24, 34] },
-              { data: [51, 6, 49, 30] },
-              { data: [15, 25, 30, 50] },
-              { data: [60, 50, 15, 25] },
+              {
+                data: [2, 5.5, 2, 8.5, 1.5, 5],
+              },
             ]}
-            height={290}
-            xAxis={[{ data: ['Q1', 'Q2', 'Q3', 'Q4'], scaleType: 'band' }]}
-            margin={{ top: 10, bottom: 30, left: 40, right: 10 }}
+            height={300}
           />
         </Box>
       </Grid>
-      <Grid item xs={3}>
-        <Box sx={{ border: '1px solid', padding: 2, height: '100%' }}>
+      <Grid item xs={4}>
+        <Box
+          sx={{
+            border: '1px solid rgba(0, 0, 0, 0.2)',
+            borderRadius: '8px',
+            padding: '16px',
+            height: '100%',
+            display: 'flex',
+          }}
+        >
           <PieChart
+            colors={['#fbb4ae', '#b3cde3', '#ccebc5']}
             series={[
               {
                 data: [
@@ -32,8 +46,13 @@ const StatsBottom: React.FC = () => {
                 ],
               },
             ]}
-            width={400}
-            height={200}
+            slotProps={{
+              legend: {
+                direction: 'row',
+                position: { vertical: 'top', horizontal: 'middle' },
+              },
+            }}
+            height={300}
           />
         </Box>
       </Grid>
