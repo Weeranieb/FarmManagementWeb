@@ -1,8 +1,8 @@
 import React from 'react'
 import { useParams } from 'react-router-dom'
-import { Box, Typography, Stack } from '@mui/material'
+import { Box, Typography, Stack, Divider } from '@mui/material'
 import StatsTop from './StatsTop'
-// import StatsBottom from './StatsBottom'
+import StatsBottom from './StatsBottom'
 import ActiveButton from '../../components/ActiveButton'
 import AllActivity from './AllActivity'
 
@@ -33,7 +33,23 @@ const OnePond: React.FC = () => {
       <Box>
         <StatsTop />
       </Box>
-      {/* <StatsBottom /> */}
+      <Divider
+        sx={{
+          margin: '12px 0',
+          height: '4px',
+          backgroundColor: 'rgba(0, 0, 0, 0.12)',
+        }}
+      />
+      <Box>
+        <StatsBottom />
+      </Box>
+      <Divider
+        sx={{
+          margin: '12px 0',
+          height: '4px',
+          backgroundColor: 'rgba(0, 0, 0, 0.12)',
+        }}
+      />
       <Box>
         <AllActivity />
       </Box>
