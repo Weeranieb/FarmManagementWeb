@@ -41,7 +41,7 @@ export const getColumns = (
           <ArrowForwardIcon
             color='disabled'
             style={{ cursor: 'pointer' }}
-            onClick={() => handleInfoClick(params.row.id)} // Pass the row ID to the click handler
+            onClick={() => handleInfoClick(params.row.id)}
           />
         </Box>
       )

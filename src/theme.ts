@@ -26,7 +26,7 @@ export const lightTheme = createTheme({
     },
     text: {
       primary: '#4B4B4C',
-      secondary: '#ffffff',
+      // secondary: '#ffffff',
     },
   },
 })

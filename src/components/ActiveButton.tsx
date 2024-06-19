@@ -12,13 +12,13 @@ const StyledButton = styled(Button, {
   backgroundColor: isActive
     ? theme.palette.primary.main
     : theme.palette.grey[400],
-  color: isActive ? theme.palette.text.secondary : theme.palette.text.primary,
+  color: isActive ? 'white' : theme.palette.text.primary,
   borderRadius: '20px',
   '&:hover': {
     backgroundColor: isActive
       ? theme.palette.primary.dark
       : theme.palette.grey[600],
-    color: isActive ? theme.palette.text.secondary : theme.palette.text.primary,
+    color: isActive ? 'white' : theme.palette.text.primary,
   },
 }))
 

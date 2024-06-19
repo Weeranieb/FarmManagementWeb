@@ -55,122 +55,54 @@ const DailyFeed: React.FC = () => {
       }}
     >
       <Typography variant='h4' gutterBottom>
-        ยินดีต้อนรับสู่บุญมาฟาร์ม
+        เหยื่อปลารายวัน
       </Typography>
 
-      <Grid container spacing={4} justifyContent='center'>
-        <Grid item xs={12}>
-          <Divider />
-        </Grid>
-        <Grid
-          item
-          xs={12}
-          md={6}
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}
-        >
-          <Box
-            sx={{
-              backgroundColor: '#f9f9f9',
-              padding: 3,
-              borderRadius: 1,
-              boxShadow: 1,
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minHeight: '200px',
-              border: '2px dashed #2196F3',
-              cursor: 'pointer',
-              transition: 'border .3s ease-in-out',
-              '&:hover': {
-                border: '2px dashed #0D47A1',
-              },
-            }}
-            {...getRootProps()}
-          >
-            <input {...getInputProps()} />
-            {isDragActive ? (
-              <Typography variant='body1' color='primary'>
-                Drop the files here ...
-              </Typography>
-            ) : (
-              <Typography variant='body1'>
-                Drag 'n' drop some files here, or click to select files
-              </Typography>
-            )}
-            {file && (
-              <Typography variant='body2' sx={{ marginTop: 2 }}>
-                {file.name}
-              </Typography>
-            )}
-          </Box>
-        </Grid>
-
-        <Grid
-          item
-          xs={12}
-          md={6}
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}
-        >
-          <Box
-            sx={{
-              backgroundColor: '#f9f9f9',
-              padding: 3,
-              borderRadius: 1,
-              boxShadow: 1,
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minHeight: '200px',
-            }}
-          >
-            <Typography variant='h6' gutterBottom>
-              Search
+      <Box
+        sx={{
+          backgroundColor: '#f9f9f9',
+          padding: 3,
+          borderRadius: 1,
+          boxShadow: 1,
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '200px',
+          border: '2px dashed #2196F3',
+          cursor: 'pointer',
+          transition: 'border .3s ease-in-out',
+          '&:hover': {
+            border: '2px dashed #0D47A1',
+          },
+        }}
+        {...getRootProps()}
+      >
+        <input {...getInputProps()} />
+        {isDragActive ? (
+          <Typography variant='h5'>Drop the files here ...</Typography>
+        ) : (
+          <>
+            <img
+              src={process.env.PUBLIC_URL + '/icons/cloud-upload.png'}
+              alt='Cloud Upload'
+              style={{ width: '100px', marginBottom: '10px' }}
+            />
+            <Typography variant='h6'>
+              Select a file or a drag and drop here
             </Typography>
-            <Box sx={{ mb: 2, width: '100%' }}>
-              <DateSelect
-                label='Select Date'
-                value={selectedDate}
-                onChange={(newValue) => setSelectedDate(newValue)}
-              />
-            </Box>
-            <Box sx={{ mb: 2, width: '100%' }}>
-              <TextField
-                select
-                label='Select Farm'
-                value={selectedFarm}
-                onChange={(e) => setSelectedFarm(e.target.value)}
-                fullWidth
-              >
-                {farms.map((farm) => (
-                  <MenuItem key={farm} value={farm}>
-                    {farm}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Box>
-            <Button
-              variant='contained'
-              color='primary'
-              onClick={handleSearch}
-              fullWidth
-            >
-              Search
-            </Button>
-          </Box>
-        </Grid>
-      </Grid>
+            <Typography variant='body2' sx={{ color: 'grey.500' }}>
+              .xlsx, file size no more than 10 MB
+            </Typography>
+          </>
+        )}
+        {file && (
+          <Typography variant='body1' sx={{ marginTop: 2 }}>
+            file: {file.name}
+          </Typography>
+        )}
+      </Box>
 
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>Search Result</DialogTitle>
