@@ -10,6 +10,8 @@ import {
   TextField,
   Typography,
   MenuItem,
+  Grid,
+  Divider,
 } from '@mui/material'
 import { Dayjs } from 'dayjs'
 import { useDropzone } from 'react-dropzone'
@@ -100,10 +102,66 @@ const DailyFeed: React.FC = () => {
           variant='contained'
           color='primary'
           onClick={handleSearch}
-          sx={{ ml: 2, height: '40px' }}
+          sx={{ height: '100%', ml: 2, minHeight: '40px' }}
         >
           Search
         </Button>
+      </Box>
+
+      {/* Divider and Text Section */}
+      <Grid
+        container
+        alignItems='center'
+        justifyContent='center'
+        width={'50%'}
+        sx={{ margin: '20px auto' }} // Center the grid horizontally
+      >
+        <Grid item xs={5}>
+          <Divider />
+        </Grid>
+        <Grid item xs={2}>
+          <Typography
+            variant='body1'
+            sx={{ textAlign: 'center', color: 'grey.500', mt: 1 }}
+          >
+            อัปโหลด
+          </Typography>
+        </Grid>
+        <Grid item xs={5}>
+          <Divider />
+        </Grid>
+      </Grid>
+
+      {/* Text and Buttons Section */}
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}
+      >
+        <Typography
+          variant='body1'
+          sx={{ textAlign: 'center', marginBottom: '10px' }}
+        >
+          ดาวน์โหลดฟอร์ม:
+        </Typography>
+        <Box sx={{ margin: '0 10px' }}>
+          <Button
+            variant='contained'
+            color='primary'
+            onClick={handleSearch}
+            sx={{ height: '100%', minHeight: '40px' }}
+          >
+            ฟอร์มรายเดือน
+          </Button>
+        </Box>
+        <Box sx={{ margin: '0 10px' }}>
+          <Button
+            variant='contained'
+            color='primary'
+            onClick={handleSearch}
+            sx={{ height: '100%', minHeight: '40px' }}
+          >
+            ฟอร์มรายปี
+          </Button>
+        </Box>
       </Box>
 
       {/* Dropzone Section */}
