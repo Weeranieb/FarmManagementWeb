@@ -7,9 +7,55 @@ import {
   Box,
   Typography,
 } from '@mui/material'
-import { LineChart, PieChart } from '@mui/x-charts'
+import { BarChart, PieChart } from '@mui/x-charts'
+import { axisClasses } from '@mui/x-charts/ChartsAxis'
 
 const StatsBottom: React.FC = () => {
+  const valueFormatter = (value: number | null) => `${value} แสนบาท`
+  const dataset = [
+    {
+      month: 'ส.ค. 68',
+      cost: 100,
+    },
+    {
+      month: 'ก.ย.',
+      cost: 200,
+    },
+    {
+      month: 'ต.ค.',
+      cost: 300,
+    },
+    {
+      month: 'พ.ย.',
+      cost: 400,
+    },
+    {
+      month: 'ธ.ค.',
+      cost: 500,
+    },
+    {
+      month: 'ม.ค. 69',
+      cost: 600,
+    },
+  ]
+
+  const chartSetting = {
+    yAxis: [
+      {
+        label: 'จำนวนเงิน (แสนบาท)',
+      },
+    ],
+    series: [{ dataKey: 'cost', valueFormatter }],
+    height: 300,
+    sx: {
+      [`& .${axisClasses.directionY} .${axisClasses.label}`]: {
+        transform: 'translateX(-10px)',
+      },
+    },
+    margin: { top: 10, bottom: 20 },
+    color: '#fbb4ae',
+  }
+
   return (
     <Grid container spacing={1}>
       <Grid item xs={8}>
@@ -39,23 +85,18 @@ const StatsBottom: React.FC = () => {
             }
           />
           <CardContent sx={{ paddingTop: 0 }}>
-            <LineChart
+            <BarChart
+              dataset={dataset}
+              colors={['#fbb4ae']}
               xAxis={[
                 {
-                  data: [1, 2, 3, 5, 8, 10],
-                  label: 'วันที่',
-                  labelStyle: { textAlign: 'right' },
+                  scaleType: 'band',
+                  dataKey: 'month',
+                  tickPlacement: 'middle',
+                  tickLabelPlacement: 'middle',
                 },
               ]}
-              series={[
-                {
-                  data: [2, 5.5, 2, 8.5, 1.5, 5],
-                },
-              ]}
-              height={300}
-              colors={['#fbb4ae']}
-              grid={{ vertical: true, horizontal: true }}
-              margin={{ top: 10 }}
+              {...chartSetting}
             />
           </CardContent>
         </Card>
