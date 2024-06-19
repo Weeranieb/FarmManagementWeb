@@ -13,14 +13,23 @@ import {
   Grid,
   Divider,
 } from '@mui/material'
-import { Dayjs } from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import { useDropzone } from 'react-dropzone'
 import DateSelect from '../../components/DateSelect'
+import Search from './Search'
+
+export interface SearchDailyFeedProps {
+  date: string
+  farm: string
+  type: string
+}
 
 const DailyFeed: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null)
-  const [selectedFarm, setSelectedFarm] = useState<string>('')
-  const [selectedType, setSelectedType] = useState<string>('')
+  const [formData, setFormData] = useState<SearchDailyFeedProps>({
+    date: dayjs().format('YYYY-MM-DD'),
+    farm: '',
+    type: '',
+  })
   const [openDialog, setOpenDialog] = useState(false)
   const [file, setFile] = useState<File | null>(null)
 
@@ -33,6 +42,22 @@ const DailyFeed: React.FC = () => {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
   })
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }))
+  }
+
+  const handleDateChange = (date: Dayjs | null) => {
+    const formattedDate = date ? date.format('YYYY-MM-DD') : ''
+    setFormData((prevData) => ({
+      ...prevData,
+      date: formattedDate,
+    }))
+  }
 
   const handleSearch = () => {
     setOpenDialog(true)
@@ -60,55 +85,12 @@ const DailyFeed: React.FC = () => {
       </Typography>
 
       {/* Filters Section */}
-      <Box display='flex' alignItems='center' justifyContent='center' p={2}>
-        <TextField
-          label='ประเภท'
-          variant='outlined'
-          size='medium'
-          sx={{ width: 150, mr: 3 }}
-          value={selectedType}
-          onChange={(e) => setSelectedType(e.target.value)}
-          select
-        >
-          <MenuItem value=''>ทั้งหมด</MenuItem>
-          <MenuItem value='เหยื่อสด'>เหยื่อสด</MenuItem>
-          <MenuItem value='อาหารเม็ด'>อาหารเม็ด</MenuItem>
-        </TextField>
-
-        <TextField
-          label='ฟาร์ม'
-          variant='outlined'
-          size='medium'
-          sx={{ width: 150, mr: 3 }}
-          value={selectedFarm}
-          onChange={(e) => setSelectedFarm(e.target.value)}
-          select
-        >
-          <MenuItem value=''>ทั้งหมด</MenuItem>
-          {farms.map((farm, index) => (
-            <MenuItem key={index} value={farm}>
-              {farm}
-            </MenuItem>
-          ))}
-        </TextField>
-
-        <DateSelect
-          label='วันที่ทำ'
-          value={selectedDate}
-          onChange={(date) => setSelectedDate(date)}
-          sx={{ width: '180px' }}
-        />
-
-        <Button
-          variant='contained'
-          color='primary'
-          onClick={handleSearch}
-          sx={{ height: '100%', ml: 2, minHeight: '40px' }}
-        >
-          Search
-        </Button>
-      </Box>
-
+      <Search
+        searchFormData={formData}
+        handleInputChange={handleInputChange}
+        handleDateChange={handleDateChange}
+        handleSearch={handleSearch}
+      />
       {/* Divider and Text Section */}
       <Grid
         container
