@@ -44,6 +44,8 @@ const StatsBottom: React.FC = () => {
                   { id: 1, value: 15, label: 'series B' },
                   { id: 2, value: 20, label: 'series C' },
                 ],
+                innerRadius: 0,
+                outerRadius: 100,
               },
             ]}
             slotProps={{
