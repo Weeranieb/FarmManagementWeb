@@ -65,7 +65,7 @@ const DailyFeed: React.FC = () => {
           label='ประเภท'
           variant='outlined'
           size='medium'
-          sx={{ width: 170, mr: 3 }}
+          sx={{ width: 150, mr: 3 }}
           value={selectedType}
           onChange={(e) => setSelectedType(e.target.value)}
           select
@@ -96,6 +96,7 @@ const DailyFeed: React.FC = () => {
           label='วันที่ทำ'
           value={selectedDate}
           onChange={(date) => setSelectedDate(date)}
+          sx={{ width: '180px' }}
         />
 
         <Button
@@ -181,7 +182,7 @@ const DailyFeed: React.FC = () => {
           border: '2px dashed #ccc',
           cursor: 'pointer',
           transition: 'border .3s ease-in-out',
-          width: '60%', // Set width to 60%
+          width: '60%',
           margin: '0 auto',
           marginBottom: '20px',
           '&:hover': {

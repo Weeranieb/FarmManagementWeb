@@ -7,12 +7,18 @@ interface DateSelectProps {
   label: string
   value: Dayjs | null
   onChange: (date: Dayjs | null) => void
+  sx?: any
 }
 
-const DateSelect: React.FC<DateSelectProps> = ({ label, value, onChange }) => {
+const DateSelect: React.FC<DateSelectProps> = ({
+  label,
+  value,
+  onChange,
+  sx,
+}) => {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <DatePicker label={label} value={value} onChange={onChange} />
+      <DatePicker label={label} value={value} onChange={onChange} sx={sx} />
     </LocalizationProvider>
   )
 }
