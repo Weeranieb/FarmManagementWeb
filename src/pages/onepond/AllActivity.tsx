@@ -12,30 +12,25 @@ import {
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { DataGrid, GridSortModel } from '@mui/x-data-grid'
 import { columns } from './ActivityColumns'
+import { columns as historyColumns } from './HistoryColumns'
 
 const rows = [
   {
     id: '1.',
-    type: 'เหยื่อสด',
-    date: 'สด',
+    type: 'เติม',
+    date: '02/08/2566',
     totalWeight: 400,
+    unit: 'กก.',
     createdDate: '02/08/2566',
   },
   {
     id: '2.',
-    name: 'อาหารเม็ด',
-    code: 'เม็ด',
-    price: 940,
-    unit: 'ถุง',
-    priceUpdatedDate: '02/08/2566',
+    type: 'ย้าย',
+    date: '02/08/2566',
+    totalWeight: 400,
+    unit: 'กก.',
+    createdDate: '02/08/2566',
   },
-]
-
-// Define the columns for "ประวัติบ่อ"
-const historyColumns = [
-  { field: 'id', headerName: 'ID', width: 90 },
-  { field: 'date', headerName: 'วันที่', width: 150 },
-  { field: 'netIncome', headerName: 'รายได้สุทธิ', width: 150 },
 ]
 
 // Define the rows for "ประวัติบ่อ"

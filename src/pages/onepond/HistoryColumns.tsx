@@ -9,45 +9,25 @@ const handleInfoClick = () => {
 export const columns: GridColDef[] = [
   {
     field: 'id',
-    headerName: '',
-    flex: 0.05,
+    headerName: 'Id',
+    flex: 0.1,
     hideSortIcons: true,
-    align: 'right',
-  },
-  {
-    field: 'type',
-    headerName: 'กิจกรรม',
-    flex: 0.2,
-    headerAlign: 'center',
     align: 'center',
+    headerAlign: 'center',
   },
   {
     field: 'date',
     headerName: 'วันที่',
-    flex: 0.25,
+    flex: 0.4,
     headerAlign: 'center',
     align: 'center',
   },
   {
-    field: 'totalWeight',
-    headerName: 'น้ำหนักรวม',
-    flex: 0.25,
+    field: 'netIncome',
+    headerName: 'รายได้สุทธิ',
+    flex: 0.35,
     headerAlign: 'center',
     align: 'center',
-  },
-  {
-    field: 'unit',
-    headerName: 'หน่วย',
-    flex: 0.2,
-    headerAlign: 'center',
-    align: 'center',
-  },
-  {
-    field: 'createdDate',
-    headerName: 'เพิ่มข้อมูลวันที่',
-    flex: 0.25,
-    align: 'center',
-    headerAlign: 'center',
   },
   {
     field: 'info',
@@ -55,7 +35,7 @@ export const columns: GridColDef[] = [
     align: 'right',
     hideSortIcons: true,
     disableColumnMenu: true,
-    flex: 0.05,
+    flex: 0.15,
     renderCell: (params) => {
       if (params.field === 'info') {
         return (
