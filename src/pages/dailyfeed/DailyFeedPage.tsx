@@ -62,19 +62,21 @@ const DailyFeed: React.FC = () => {
         sx={{
           backgroundColor: '#f9f9f9',
           padding: 3,
-          borderRadius: 1,
-          boxShadow: 1,
+          borderRadius: 5,
           flex: 1,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           minHeight: '200px',
-          border: '2px dashed #2196F3',
+          border: '2px dashed #ccc',
           cursor: 'pointer',
           transition: 'border .3s ease-in-out',
+          width: '60%', // Set width to 60%
+          margin: '0 auto',
+
           '&:hover': {
-            border: '2px dashed #0D47A1',
+            border: '2px dashed #2196F3',
           },
         }}
         {...getRootProps()}
