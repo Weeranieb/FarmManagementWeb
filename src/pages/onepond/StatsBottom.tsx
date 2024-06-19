@@ -1,5 +1,12 @@
 import React from 'react'
-import { Grid, Card, CardContent, CardHeader } from '@mui/material'
+import {
+  Grid,
+  Card,
+  CardContent,
+  CardHeader,
+  Box,
+  Typography,
+} from '@mui/material'
 import { LineChart, PieChart } from '@mui/x-charts'
 
 const StatsBottom: React.FC = () => {
@@ -7,7 +14,30 @@ const StatsBottom: React.FC = () => {
     <Grid container spacing={1}>
       <Grid item xs={8}>
         <Card sx={{ height: '100%' }}>
-          <CardHeader title='สรุป' />
+          <CardHeader
+            title={
+              <Box
+                display='flex'
+                alignItems='center'
+                justifyContent='space-between'
+                width='100%'
+              >
+                <Typography variant='h5'>สรุป</Typography>
+                <Box display='flex' alignItems='center'>
+                  <Box
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      backgroundColor: '#fbb4ae',
+                      mr: 0.5,
+                    }}
+                  />
+                  <Typography variant='body2'>รายรับ (แสนบาท)</Typography>
+                </Box>
+              </Box>
+            }
+          />
           <CardContent sx={{ paddingTop: 0 }}>
             <LineChart
               xAxis={[
@@ -20,13 +50,11 @@ const StatsBottom: React.FC = () => {
               series={[
                 {
                   data: [2, 5.5, 2, 8.5, 1.5, 5],
-                  // label: 'รายจ่าย',
                 },
               ]}
               height={300}
               colors={['#fbb4ae']}
               grid={{ vertical: true, horizontal: true }}
-              // margin={{ top: 40 }}
               margin={{ top: 10 }}
             />
           </CardContent>
@@ -34,7 +62,18 @@ const StatsBottom: React.FC = () => {
       </Grid>
       <Grid item xs={4}>
         <Card sx={{ height: '100%' }}>
-          <CardHeader title='% รายจ่าย' />
+          <CardHeader
+            title={
+              <Box
+                display='flex'
+                alignItems='center'
+                justifyContent='space-between'
+                width='100%'
+              >
+                <Typography variant='h5'>% รายจ่าย</Typography>
+              </Box>
+            }
+          />
           <CardContent sx={{ paddingTop: 0 }}>
             <PieChart
               colors={['#fbb4ae', '#b3cde3', '#ccebc5']}
