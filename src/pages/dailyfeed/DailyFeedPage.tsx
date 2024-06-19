@@ -24,7 +24,7 @@ const DailyFeed: React.FC = () => {
   const [openDialog, setOpenDialog] = useState(false)
   const [file, setFile] = useState<File | null>(null)
 
-  const farms = ['Farm 1', 'Farm 2', 'Farm 3'] // Example farm names
+  const farms = ['Farm 1', 'Farm 2', 'Farm 3']
 
   const onDrop = (acceptedFiles: File[]) => {
     setFile(acceptedFiles[0])
@@ -115,7 +115,7 @@ const DailyFeed: React.FC = () => {
         alignItems='center'
         justifyContent='center'
         width={'50%'}
-        sx={{ margin: '20px auto' }} // Center the grid horizontally
+        sx={{ margin: '20px auto' }}
       >
         <Grid item xs={5}>
           <Divider />
