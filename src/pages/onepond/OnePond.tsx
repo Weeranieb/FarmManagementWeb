@@ -34,13 +34,11 @@ const OnePond: React.FC = () => {
       <Box mb={3}>
         <StatsTop />
       </Box>
-
-      <Box mb={3}>
-        <StatsBottom />
-      </Box>
-
       <Box mb={3}>
         <AllActivity />
+      </Box>
+      <Box mb={3}>
+        <StatsBottom />
       </Box>
     </Box>
   )
