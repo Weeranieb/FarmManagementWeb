@@ -2,8 +2,9 @@ import React from 'react'
 import { useParams } from 'react-router-dom'
 import { Box, Typography, Stack } from '@mui/material'
 import StatsTop from './StatsTop'
-import StatsBottom from './StatsBottom'
+// import StatsBottom from './StatsBottom'
 import ActiveButton from '../../components/ActiveButton'
+import AllActivity from './AllActivity'
 
 const OnePond: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -29,8 +30,13 @@ const OnePond: React.FC = () => {
           <ActiveButton isActive={true} />
         </Stack>
       </Box>
-      <StatsTop />
-      <StatsBottom />
+      <Box>
+        <StatsTop />
+      </Box>
+      {/* <StatsBottom /> */}
+      <Box>
+        <AllActivity />
+      </Box>
     </Box>
   )
 }

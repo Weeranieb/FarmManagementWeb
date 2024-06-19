@@ -63,7 +63,7 @@ export const columns: GridColDef[] = [
   },
   {
     field: 'priceUpdatedDate',
-    headerName: 'อัคเดทวันที่',
+    headerName: 'อัปเดทวันที่',
     flex: 0.15,
   },
   {

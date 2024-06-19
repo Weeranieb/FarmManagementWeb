@@ -15,7 +15,7 @@ const StatsTop: React.FC = () => {
         <Card
           key={index}
           style={{
-            margin: '10px',
+            margin: '5px',
             width: 'calc(25% - 30px)',
             borderRadius: '10px',
             backgroundColor: '#FAF8EE',
@@ -27,10 +27,10 @@ const StatsTop: React.FC = () => {
         >
           <CardContent>
             <Typography
-              variant='subtitle1'
+              variant='subtitle2'
               component='div'
               style={{
-                marginBottom: '12px',
+                marginBottom: '8px',
                 fontWeight: 'bold',
                 color: '#555',
               }}
@@ -38,7 +38,7 @@ const StatsTop: React.FC = () => {
               {card.title}
             </Typography>
             <Typography
-              variant='h5'
+              variant='h6'
               color='text.primary'
               style={{ color: '#333', textAlign: 'center' }}
             >
