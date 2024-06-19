@@ -12,7 +12,8 @@ import {
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { DataGrid, GridSortModel } from '@mui/x-data-grid'
 import { columns } from './ActivityColumns'
-import { columns as historyColumns } from './HistoryColumns'
+import { getColumns as getHistoryColumns } from './HistoryColumns'
+import { useNavigate } from 'react-router-dom'
 
 const rows = [
   {
@@ -41,6 +42,12 @@ const historyRows = [
 ]
 
 const AllActivity: React.FC = () => {
+  const navigate = useNavigate()
+
+  const handleHistoryClick = (id: number) => {
+    navigate(`/pond/${id}`)
+  }
+
   const [initialSortModel, setInitialSortModel] = React.useState<GridSortModel>(
     [
       {
@@ -159,7 +166,7 @@ const AllActivity: React.FC = () => {
             <Box sx={{ flex: 1 }}>
               <DataGrid
                 rows={historyRows}
-                columns={historyColumns}
+                columns={getHistoryColumns(handleHistoryClick)}
                 sortModel={initialSortModel}
                 onSortModelChange={handleSortModelChange}
                 sx={{

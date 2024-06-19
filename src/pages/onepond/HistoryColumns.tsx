@@ -1,12 +1,11 @@
+import React from 'react'
 import { GridColDef } from '@mui/x-data-grid'
 import { Box } from '@mui/material'
-import { Info as InfoIcon } from '@mui/icons-material'
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 
-const handleInfoClick = () => {
-  console.log('Info icon clicked') // Implement your logic here
-}
-
-export const columns: GridColDef[] = [
+export const getColumns = (
+  handleInfoClick: (id: number) => void
+): GridColDef[] => [
   {
     field: 'id',
     headerName: 'Id',
@@ -30,25 +29,22 @@ export const columns: GridColDef[] = [
     align: 'center',
   },
   {
-    field: 'info',
+    field: 'next',
     headerName: '',
     align: 'right',
     hideSortIcons: true,
     disableColumnMenu: true,
     flex: 0.15,
     renderCell: (params) => {
-      if (params.field === 'info') {
-        return (
-          <Box display='flex' alignItems='center'>
-            <InfoIcon
-              color='disabled'
-              style={{ cursor: 'pointer' }}
-              onClick={handleInfoClick}
-            />
-          </Box>
-        )
-      }
-      return params.value
+      return (
+        <Box display='flex' alignItems='center'>
+          <ArrowForwardIcon
+            color='disabled'
+            style={{ cursor: 'pointer' }}
+            onClick={() => handleInfoClick(params.row.id)} // Pass the row ID to the click handler
+          />
+        </Box>
+      )
     },
   },
 ]
