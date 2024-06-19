@@ -23,6 +23,7 @@ const Search: React.FC<SearchProps> = ({
     <Box display='flex' alignItems='center' justifyContent='center' p={2}>
       <TextField
         label='ประเภท'
+        name='type'
         variant='outlined'
         size='medium'
         sx={{ width: 150, mr: 3 }}
@@ -37,6 +38,7 @@ const Search: React.FC<SearchProps> = ({
 
       <TextField
         label='ฟาร์ม'
+        name='farm'
         variant='outlined'
         size='medium'
         sx={{ width: 150, mr: 3 }}
