@@ -1,11 +1,11 @@
 import { Box, Button, Typography } from '@mui/material'
 import React from 'react'
 
-const handleSearch = () => {
-  console.log('Search')
+interface DownloadFormProps {
+  handleDialog: () => void
 }
 
-const DownloadForm = () => {
+const DownloadForm: React.FC<DownloadFormProps> = ({ handleDialog }) => {
   return (
     <Box
       sx={{
@@ -25,7 +25,7 @@ const DownloadForm = () => {
       <Button
         variant='contained'
         color='primary'
-        onClick={handleSearch}
+        onClick={handleDialog}
         sx={{ height: '100%', minHeight: '40px', marginRight: '20px' }}
       >
         <Typography variant='body1'>รายเดือน</Typography>
@@ -33,7 +33,7 @@ const DownloadForm = () => {
       <Button
         variant='contained'
         color='primary'
-        onClick={handleSearch}
+        onClick={handleDialog}
         sx={{ height: '100%', minHeight: '40px' }}
       >
         <Typography variant='body1'>รายปี</Typography>

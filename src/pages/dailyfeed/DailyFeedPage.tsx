@@ -15,6 +15,7 @@ import dayjs, { Dayjs } from 'dayjs'
 import Search from './Search'
 import DownloadForm from './DownloadForm'
 import Upload from './Upload'
+import DialogDownloadForm from './DialogDownloadForm'
 
 export interface SearchDailyFeedProps {
   date: string
@@ -29,6 +30,11 @@ const DailyFeed: React.FC = () => {
     type: '',
   })
   const [openDialog, setOpenDialog] = useState(false)
+  const [dialogOpenDownloadForm, setDialogOpenDownloadForm] =
+    React.useState(false)
+  const handleDialogDownloadFormClose = () => {
+    setDialogOpenDownloadForm(false)
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -46,8 +52,16 @@ const DailyFeed: React.FC = () => {
     }))
   }
 
+  const handleFormSubmitDownloadForm = (data: SearchDailyFeedProps) => {
+    console.log(data)
+  }
+
   const handleSearch = () => {
     setOpenDialog(true)
+  }
+
+  const handleOpenDialogDownloadForm = () => {
+    setDialogOpenDownloadForm(true)
   }
 
   const handleCloseDialog = () => {
@@ -104,7 +118,7 @@ const DailyFeed: React.FC = () => {
       </Grid>
 
       {/* Text and Buttons Section */}
-      <DownloadForm />
+      <DownloadForm handleDialog={handleOpenDialogDownloadForm} />
 
       {/* Dropzone Section */}
       <Upload />
@@ -121,6 +135,12 @@ const DailyFeed: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <DialogDownloadForm
+        open={dialogOpenDownloadForm}
+        onClose={handleDialogDownloadFormClose}
+        onSubmit={handleFormSubmitDownloadForm}
+      />
     </Box>
   )
 }
