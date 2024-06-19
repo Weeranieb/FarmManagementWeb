@@ -64,7 +64,7 @@ const DailyFeed: React.FC = () => {
         <TextField
           label='ประเภท'
           variant='outlined'
-          size='small'
+          size='medium'
           sx={{ width: 170, mr: 3 }}
           value={selectedType}
           onChange={(e) => setSelectedType(e.target.value)}
@@ -78,7 +78,7 @@ const DailyFeed: React.FC = () => {
         <TextField
           label='ฟาร์ม'
           variant='outlined'
-          size='small'
+          size='medium'
           sx={{ width: 150, mr: 3 }}
           value={selectedFarm}
           onChange={(e) => setSelectedFarm(e.target.value)}
@@ -134,34 +134,36 @@ const DailyFeed: React.FC = () => {
 
       {/* Text and Buttons Section */}
       <Box
-        sx={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: '40px',
+          marginTop: '40px',
+        }}
       >
         <Typography
           variant='body1'
-          sx={{ textAlign: 'center', marginBottom: '10px' }}
+          sx={{ textAlign: 'center', marginRight: '10px' }}
         >
           ดาวน์โหลดฟอร์ม:
         </Typography>
-        <Box sx={{ margin: '0 10px' }}>
-          <Button
-            variant='contained'
-            color='primary'
-            onClick={handleSearch}
-            sx={{ height: '100%', minHeight: '40px' }}
-          >
-            ฟอร์มรายเดือน
-          </Button>
-        </Box>
-        <Box sx={{ margin: '0 10px' }}>
-          <Button
-            variant='contained'
-            color='primary'
-            onClick={handleSearch}
-            sx={{ height: '100%', minHeight: '40px' }}
-          >
-            ฟอร์มรายปี
-          </Button>
-        </Box>
+        <Button
+          variant='contained'
+          color='primary'
+          onClick={handleSearch}
+          sx={{ height: '100%', minHeight: '40px', marginRight: '20px' }}
+        >
+          <Typography variant='body1'>รายเดือน</Typography>
+        </Button>
+        <Button
+          variant='contained'
+          color='primary'
+          onClick={handleSearch}
+          sx={{ height: '100%', minHeight: '40px' }}
+        >
+          <Typography variant='body1'>รายปี</Typography>
+        </Button>
       </Box>
 
       {/* Dropzone Section */}
@@ -175,7 +177,7 @@ const DailyFeed: React.FC = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          minHeight: '200px',
+          minHeight: '300px',
           border: '2px dashed #ccc',
           cursor: 'pointer',
           transition: 'border .3s ease-in-out',
