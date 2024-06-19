@@ -12,7 +12,7 @@ const StyledButton = styled(Button, {
   backgroundColor: isActive
     ? theme.palette.primary.main
     : theme.palette.grey[400],
-  color: theme.palette.text.primary,
+  color: isActive ? theme.palette.text.secondary : theme.palette.text.primary,
   borderRadius: '20px',
   '&:hover': {
     backgroundColor: isActive
