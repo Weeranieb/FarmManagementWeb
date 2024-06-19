@@ -10,8 +10,6 @@ import {
   TextField,
   Typography,
   MenuItem,
-  Grid,
-  Divider,
 } from '@mui/material'
 import { Dayjs } from 'dayjs'
 import { useDropzone } from 'react-dropzone'
@@ -19,7 +17,8 @@ import DateSelect from '../../components/DateSelect'
 
 const DailyFeed: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null)
-  const [selectedFarm, setSelectedFarm] = useState('')
+  const [selectedFarm, setSelectedFarm] = useState<string>('')
+  const [selectedType, setSelectedType] = useState<string>('')
   const [openDialog, setOpenDialog] = useState(false)
   const [file, setFile] = useState<File | null>(null)
 
@@ -58,9 +57,59 @@ const DailyFeed: React.FC = () => {
         เหยื่อปลารายวัน
       </Typography>
 
+      {/* Filters Section */}
+      <Box display='flex' alignItems='center' justifyContent='center' p={2}>
+        <TextField
+          label='ประเภท'
+          variant='outlined'
+          size='small'
+          sx={{ width: 170, mr: 3 }}
+          value={selectedType}
+          onChange={(e) => setSelectedType(e.target.value)}
+          select
+        >
+          <MenuItem value=''>ทั้งหมด</MenuItem>
+          <MenuItem value='เหยื่อสด'>เหยื่อสด</MenuItem>
+          <MenuItem value='อาหารเม็ด'>อาหารเม็ด</MenuItem>
+        </TextField>
+
+        <TextField
+          label='ฟาร์ม'
+          variant='outlined'
+          size='small'
+          sx={{ width: 150, mr: 3 }}
+          value={selectedFarm}
+          onChange={(e) => setSelectedFarm(e.target.value)}
+          select
+        >
+          <MenuItem value=''>ทั้งหมด</MenuItem>
+          {farms.map((farm, index) => (
+            <MenuItem key={index} value={farm}>
+              {farm}
+            </MenuItem>
+          ))}
+        </TextField>
+
+        <DateSelect
+          label='วันที่ทำ'
+          value={selectedDate}
+          onChange={(date) => setSelectedDate(date)}
+        />
+
+        <Button
+          variant='contained'
+          color='primary'
+          onClick={handleSearch}
+          sx={{ ml: 2, height: '40px' }}
+        >
+          Search
+        </Button>
+      </Box>
+
+      {/* Dropzone Section */}
       <Box
         sx={{
-          backgroundColor: '#f9f9f9',
+          backgroundColor: '#fff',
           padding: 3,
           borderRadius: 5,
           flex: 1,
@@ -74,7 +123,7 @@ const DailyFeed: React.FC = () => {
           transition: 'border .3s ease-in-out',
           width: '60%', // Set width to 60%
           margin: '0 auto',
-
+          marginBottom: '20px',
           '&:hover': {
             border: '2px dashed #2196F3',
           },
@@ -92,7 +141,7 @@ const DailyFeed: React.FC = () => {
               style={{ width: '100px', marginBottom: '10px' }}
             />
             <Typography variant='h6'>
-              Select a file or a drag and drop here
+              Select a file or drag and drop here
             </Typography>
             <Typography variant='body2' sx={{ color: 'grey.500' }}>
               .xlsx, file size no more than 10 MB
@@ -106,6 +155,7 @@ const DailyFeed: React.FC = () => {
         )}
       </Box>
 
+      {/* Dialog for Search Result */}
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>Search Result</DialogTitle>
         <DialogContent>
