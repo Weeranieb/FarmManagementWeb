@@ -29,22 +29,6 @@ const rows = [
     unit: 'ถุง',
     priceUpdatedDate: '02/08/2566',
   },
-  {
-    id: '2.',
-    name: 'อาหารเม็ด',
-    code: 'เม็ด',
-    price: 940,
-    unit: 'ถุง',
-    priceUpdatedDate: '02/08/2566',
-  },
-  {
-    id: '2.',
-    name: 'อาหารเม็ด',
-    code: 'เม็ด',
-    price: 940,
-    unit: 'ถุง',
-    priceUpdatedDate: '02/08/2566',
-  },
 ]
 
 // Define the columns for "ประวัติบ่อ"
@@ -87,8 +71,8 @@ const AllActivity: React.FC = () => {
 
   return (
     <Grid container spacing={2}>
-      <Grid item xs={8}>
-        <Card sx={{ boxSizing: 'border-box' }}>
+      <Grid item xs={8} sx={{ display: 'flex', flexDirection: 'column' }}>
+        <Card sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           <CardHeader
             title='กิจกรรมทั้งหมด'
             action={
@@ -112,8 +96,15 @@ const AllActivity: React.FC = () => {
             <MenuItem onClick={handleClose}>Action 2</MenuItem>
             <MenuItem onClick={handleClose}>Action 3</MenuItem>
           </Menu>
-          <CardContent sx={{ overflow: 'hidden' }}>
-            <Box sx={{ height: 'calc(100% - 30px)', overflow: 'auto' }}>
+          <CardContent
+            sx={{
+              flex: 1,
+              // overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <Box sx={{ flex: 1 }}>
               <DataGrid
                 rows={rows}
                 columns={columns}
@@ -137,8 +128,8 @@ const AllActivity: React.FC = () => {
           </CardContent>
         </Card>
       </Grid>
-      <Grid item xs={4}>
-        <Card sx={{ boxSizing: 'border-box' }}>
+      <Grid item xs={4} sx={{ display: 'flex', flexDirection: 'column' }}>
+        <Card sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           <CardHeader
             title='ประวัติบ่อ'
             action={
@@ -162,8 +153,15 @@ const AllActivity: React.FC = () => {
             <MenuItem onClick={handleClose}>Action 2</MenuItem>
             <MenuItem onClick={handleClose}>Action 3</MenuItem>
           </Menu>
-          <CardContent sx={{ overflow: 'hidden' }}>
-            <Box sx={{ height: 'calc(100% - 30px)', overflow: 'auto' }}>
+          <CardContent
+            sx={{
+              flex: 1,
+              // overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <Box sx={{ flex: 1 }}>
               <DataGrid
                 rows={historyRows}
                 columns={historyColumns}
