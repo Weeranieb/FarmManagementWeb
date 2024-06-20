@@ -23,6 +23,8 @@ interface StyledDialogWrapperProps extends DialogProps {
 const StyledDialog = styled(Dialog)<StyledDialogWrapperProps>(({ theme }) => ({
   '& .MuiPaper-root': {
     borderRadius: 50,
+    maxWidth: 'md', // Set the maximum width to medium (or 'sm', 'lg', 'xl' as required)
+    width: '50%', // Make the dialog use full width within the maxWidth constraint
   },
 }))
 
@@ -72,27 +74,25 @@ const DialogWrapper: React.FC<StyledDialogWrapperProps> = ({
   children,
 }) => {
   return (
-    <StyledDialog open={open} onClose={onClose}>
+    <StyledDialog open={open} onClose={onClose} fullWidth maxWidth='md'>
       <StyledDialogTitle>
         {title}
         <IconButton edge='end' color='inherit' onClick={onClose}>
           <CloseIcon />
         </IconButton>
       </StyledDialogTitle>
-      <StyledDialogContent>
-        {children}
-        <StyledDialogActions>
-          <Grid container justifyContent='center'>
-            <CustomButton
-              onClick={handleFormSubmit}
-              color='primary'
-              variant='contained'
-            >
-              บันทึก
-            </CustomButton>
-          </Grid>
-        </StyledDialogActions>
-      </StyledDialogContent>
+      <StyledDialogContent>{children}</StyledDialogContent>
+      <StyledDialogActions>
+        <Grid container justifyContent='center'>
+          <CustomButton
+            onClick={handleFormSubmit}
+            color='primary'
+            variant='contained'
+          >
+            บันทึก
+          </CustomButton>
+        </Grid>
+      </StyledDialogActions>
     </StyledDialog>
   )
 }

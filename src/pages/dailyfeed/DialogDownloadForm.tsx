@@ -8,7 +8,7 @@ import {
   SelectChangeEvent,
 } from '@mui/material'
 import dayjs, { Dayjs } from 'dayjs'
-import DateSelect from '../../components/DateSelect'
+import YearMonthSelect from '../../components/YearMonthSelect'
 import DialogWrapper from '../../components/DialogWrapper'
 
 interface DialogDownloadFormProps {
@@ -62,7 +62,7 @@ const DialogDownloadForm: React.FC<DialogDownloadFormProps> = ({
       title='กรอกข้อมูล'
       handleFormSubmit={handleFormSubmit}
     >
-      <Grid container spacing={3}>
+      <Grid container spacing={3} alignItems='center'>
         <Grid item xs={4}>
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>ประเภท</InputLabel>
@@ -82,7 +82,7 @@ const DialogDownloadForm: React.FC<DialogDownloadFormProps> = ({
             <InputLabel>ฟาร์ม</InputLabel>
             <Select
               name='farm'
-              value={formData.type}
+              value={formData.farm}
               onChange={handleSelectChange}
               label='ฟาร์ม'
             >
@@ -94,7 +94,7 @@ const DialogDownloadForm: React.FC<DialogDownloadFormProps> = ({
         </Grid>
 
         <Grid item xs={4} style={{ marginTop: '8px' }}>
-          <DateSelect
+          <YearMonthSelect
             label='เดือน/ปี'
             value={dayjs(formData.date)}
             onChange={handleDateChange}

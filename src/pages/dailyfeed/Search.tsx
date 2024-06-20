@@ -65,7 +65,7 @@ const Search: React.FC<SearchProps> = ({
         variant='contained'
         color='primary'
         onClick={handleSearch}
-        sx={{ height: '100%', ml: 2, minHeight: '40px' }}
+        sx={{ height: '100%', ml: 5, minHeight: '40px' }}
       >
         Search
       </Button>
