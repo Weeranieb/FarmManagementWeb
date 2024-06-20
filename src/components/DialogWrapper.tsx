@@ -17,16 +17,19 @@ interface StyledDialogWrapperProps extends DialogProps {
   open: boolean
   onClose: () => void
   handleFormSubmit?: () => void
+  isLarge?: boolean
   children: React.ReactNode
 }
 
-const StyledDialog = styled(Dialog)<StyledDialogWrapperProps>(({ theme }) => ({
-  '& .MuiPaper-root': {
-    borderRadius: 50,
-    maxWidth: 'md', // Set the maximum width to medium (or 'sm', 'lg', 'xl' as required)
-    width: '50%', // Make the dialog use full width within the maxWidth constraint
-  },
-}))
+const StyledDialog = styled(Dialog)<StyledDialogWrapperProps>(
+  ({ theme, isLarge }) => ({
+    '& .MuiPaper-root': {
+      borderRadius: 50,
+      maxWidth: isLarge ? 'xl' : 'md',
+      width: isLarge ? '100%' : '50%',
+    },
+  })
+)
 
 const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
@@ -72,9 +75,16 @@ const DialogWrapper: React.FC<StyledDialogWrapperProps> = ({
   onClose,
   handleFormSubmit,
   children,
+  isLarge,
 }) => {
   return (
-    <StyledDialog open={open} onClose={onClose} fullWidth maxWidth='md'>
+    <StyledDialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth={isLarge ? 'xl' : 'md'}
+      isLarge={isLarge}
+    >
       <StyledDialogTitle>
         {title}
         <IconButton edge='end' color='inherit' onClick={onClose}>

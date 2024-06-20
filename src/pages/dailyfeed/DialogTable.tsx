@@ -11,11 +11,12 @@ import {
   TableHead,
   TableBody,
   Fab,
+  Box,
 } from '@mui/material'
 import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material'
 import { styled } from '@mui/system'
 import dayjs, { Dayjs } from 'dayjs'
-import LargeDialogWrapper from '../../components/LargeDialogWrapper'
+import DialogWrapper from '../../components/DialogWrapper'
 
 interface DialogTableProps {
   open: boolean
@@ -66,11 +67,12 @@ const DialogTable: React.FC<DialogTableProps> = ({
   }
 
   return (
-    <LargeDialogWrapper
+    <DialogWrapper
       open={open}
       onClose={onClose}
       title='เหยื่อสด เดือนมิ.ย. ปี 2565'
       handleFormSubmit={handleFormSubmit}
+      isLarge={true}
     >
       <Grid item xs={12}>
         <Table>
@@ -100,6 +102,7 @@ const DialogTable: React.FC<DialogTableProps> = ({
                           e.target.value
                         )
                       }
+                      sx={{ width: 50 }}
                     />
                   </CustomTableCell>
                 ))}
@@ -108,7 +111,7 @@ const DialogTable: React.FC<DialogTableProps> = ({
           </TableBody>
         </Table>
       </Grid>
-    </LargeDialogWrapper>
+    </DialogWrapper>
   )
 }
 
