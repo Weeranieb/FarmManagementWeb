@@ -21,7 +21,7 @@ interface StyledDialogWrapperProps extends DialogProps {
   children: React.ReactNode
 }
 
-const StyledDialog = styled(Dialog)<StyledDialogWrapperProps>(
+export const StyledDialog = styled(Dialog)<StyledDialogWrapperProps>(
   ({ theme, isLarge }) => ({
     '& .MuiPaper-root': {
       borderRadius: 50,
@@ -31,7 +31,7 @@ const StyledDialog = styled(Dialog)<StyledDialogWrapperProps>(
   })
 )
 
-const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
+export const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
   color: theme.palette.text.primary,
   display: 'flex',
@@ -43,19 +43,19 @@ const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
   paddingRight: theme.spacing(3),
 }))
 
-const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
+export const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
   marginTop: theme.spacing(4),
   paddingLeft: theme.spacing(5),
   paddingRight: theme.spacing(5),
   paddingBottom: theme.spacing(3),
 }))
 
-const StyledDialogActions = styled(DialogActions)(({ theme }) => ({
+export const StyledDialogActions = styled(DialogActions)(({ theme }) => ({
   paddingBottom: theme.spacing(3),
   paddingTop: theme.spacing(3),
 }))
 
-const CustomButton = styled(Button)(({ theme }) => ({
+export const CustomButton = styled(Button)(({ theme }) => ({
   fontSize: '1.1rem',
   color: theme.palette.text.primary,
   padding: theme.spacing(1.5, 4),

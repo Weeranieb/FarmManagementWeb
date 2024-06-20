@@ -1,22 +1,15 @@
 import * as React from 'react'
 import {
   TextField,
-  IconButton,
   Grid,
-  FormControl,
-  Typography,
   Table,
   TableRow,
   TableCell,
   TableHead,
   TableBody,
-  Fab,
-  Box,
 } from '@mui/material'
-import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material'
 import { styled } from '@mui/system'
-import dayjs, { Dayjs } from 'dayjs'
-import DialogWrapper from '../../components/DialogWrapper'
+import DialogWrapperWithEdit from '../../components/DialogWrapperWithEdit'
 
 interface DialogTableProps {
   open: boolean
@@ -66,12 +59,17 @@ const DialogTable: React.FC<DialogTableProps> = ({
     onClose()
   }
 
+  const handleEdit = () => {
+    console.log('edit')
+  }
+
   return (
-    <DialogWrapper
+    <DialogWrapperWithEdit
       open={open}
       onClose={onClose}
       title='เหยื่อสด เดือนมิ.ย. ปี 2565'
       handleFormSubmit={handleFormSubmit}
+      handleEdit={handleEdit}
       isLarge={true}
     >
       <Grid item xs={12}>
@@ -111,7 +109,7 @@ const DialogTable: React.FC<DialogTableProps> = ({
           </TableBody>
         </Table>
       </Grid>
-    </DialogWrapper>
+    </DialogWrapperWithEdit>
   )
 }
 
