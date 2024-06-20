@@ -10,29 +10,34 @@ import {
 import dayjs, { Dayjs } from 'dayjs'
 import YearMonthSelect from '../../components/YearMonthSelect'
 import DialogWrapper from '../../components/DialogWrapper'
+import { DownloadFormInput } from './DailyFeedPage'
 
 interface DialogDownloadFormProps {
   open: boolean
   onClose: () => void
   onSubmit: (data: DownloadFormInput) => void
-}
-
-interface DownloadFormInput {
-  date: string
-  farm: string
-  type: string
+  downloadType: string //'year' | 'month' | ''
 }
 
 const DialogDownloadForm: React.FC<DialogDownloadFormProps> = ({
   open,
   onClose,
   onSubmit,
+  downloadType,
 }) => {
   const [formData, setFormData] = React.useState<DownloadFormInput>({
     farm: '',
     type: '',
     date: dayjs().format('YYYY-MM-DD'),
+    downloadType: '',
   })
+
+  React.useEffect(() => {
+    setFormData((prevData) => ({
+      ...prevData,
+      downloadType,
+    }))
+  }, [downloadType])
 
   const handleDateChange = (date: Dayjs | null) => {
     const formattedDate = date ? date.format('YYYY-MM-DD') : ''
@@ -51,6 +56,7 @@ const DialogDownloadForm: React.FC<DialogDownloadFormProps> = ({
   }
 
   const handleFormSubmit = () => {
+    console.log(formData)
     onSubmit(formData)
     onClose()
   }

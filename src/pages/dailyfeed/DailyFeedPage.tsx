@@ -23,11 +23,24 @@ export interface SearchDailyFeedProps {
   type: string
 }
 
+export interface DownloadFormInput {
+  date: string
+  farm: string
+  type: string
+  downloadType: string //'year' | 'month' | ''
+}
 const DailyFeed: React.FC = () => {
   const [formData, setFormData] = useState<SearchDailyFeedProps>({
     date: dayjs().format('YYYY-MM-DD'),
     farm: '',
     type: '',
+  })
+
+  const [downloadFormData, setDownloadFormData] = useState<DownloadFormInput>({
+    date: dayjs().format('YYYY-MM-DD'),
+    farm: '',
+    type: '',
+    downloadType: '',
   })
   const [openDialog, setOpenDialog] = useState(false)
   const [dialogOpenDownloadForm, setDialogOpenDownloadForm] = useState(false)
@@ -44,6 +57,16 @@ const DailyFeed: React.FC = () => {
     }))
   }
 
+  const handleInputChangeDownloadForm = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { name, value } = e.target
+    setDownloadFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }))
+  }
+
   const handleDateChange = (date: Dayjs | null) => {
     const formattedDate = date ? date.format('YYYY-MM-DD') : ''
     setFormData((prevData) => ({
@@ -52,7 +75,15 @@ const DailyFeed: React.FC = () => {
     }))
   }
 
-  const handleFormSubmitDownloadForm = (data: SearchDailyFeedProps) => {
+  const handleDateChangeDownloadForm = (date: Dayjs | null) => {
+    const formattedDate = date ? date.format('YYYY-MM-DD') : ''
+    setDownloadFormData((prevData) => ({
+      ...prevData,
+      date: formattedDate,
+    }))
+  }
+
+  const handleFormSubmitDownloadForm = (data: DownloadFormInput) => {
     console.log(data)
   }
 
@@ -61,7 +92,7 @@ const DailyFeed: React.FC = () => {
   }
 
   const handleOpenDialogDownloadForm = (downloadType: string) => {
-    setFormData((prevData) => ({
+    setDownloadFormData((prevData) => ({
       ...prevData,
       downloadType,
     }))
@@ -144,6 +175,7 @@ const DailyFeed: React.FC = () => {
         open={dialogOpenDownloadForm}
         onClose={handleDialogDownloadFormClose}
         onSubmit={handleFormSubmitDownloadForm}
+        downloadType={downloadFormData.downloadType}
       />
     </Box>
   )
