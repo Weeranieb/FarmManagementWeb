@@ -15,7 +15,7 @@ import {
 import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material'
 import { styled } from '@mui/system'
 import dayjs, { Dayjs } from 'dayjs'
-import DialogWrapper from '../../components/DialogWrapper'
+import LargeDialogWrapper from '../../components/LargeDialogWrapper'
 
 interface DialogTableProps {
   open: boolean
@@ -43,7 +43,7 @@ const DialogTable: React.FC<DialogTableProps> = ({
   onClose,
   onSubmit,
 }) => {
-  const initialData = Array.from({ length: 30 }, () => Array(10).fill(''))
+  const initialData = Array.from({ length: 30 }, () => Array(15).fill(''))
 
   const [tableData, setTableData] = React.useState<string[][]>(initialData)
 
@@ -66,58 +66,49 @@ const DialogTable: React.FC<DialogTableProps> = ({
   }
 
   return (
-    <DialogWrapper
+    <LargeDialogWrapper
       open={open}
       onClose={onClose}
       title='เหยื่อสด เดือนมิ.ย. ปี 2565'
       handleFormSubmit={handleFormSubmit}
     >
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <Typography variant='h5' style={{ fontWeight: 'bold' }}>
-            ตารางบ่อและวัน
-          </Typography>
-        </Grid>
-      </Grid>
-      <Grid>
-        <Grid item xs={12}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell style={{ width: '5%' }}>วัน</TableCell>
-                {[...Array(10)].map((_, index) => (
-                  <HeaderTableCell key={index}>{`บ่อ ${
-                    index + 1
-                  }`}</HeaderTableCell>
+      <Grid item xs={12}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <HeaderTableCell style={{ width: '5%' }}>วัน</HeaderTableCell>
+              {[...Array(15)].map((_, index) => (
+                <HeaderTableCell key={index}>{`บ่อ ${
+                  index + 1
+                }`}</HeaderTableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {tableData.map((row, rowIndex) => (
+              <TableRow key={rowIndex}>
+                <CustomTableCell>{rowIndex + 1}</CustomTableCell>
+                {row.map((cell, colIndex) => (
+                  <CustomTableCell key={colIndex}>
+                    <TextField
+                      value={cell}
+                      onChange={(e) =>
+                        handleTableDataChange(
+                          rowIndex,
+                          colIndex,
+                          e.target.value
+                        )
+                      }
+                    />
+                  </CustomTableCell>
                 ))}
               </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {tableData.map((row, rowIndex) => (
-                <TableRow key={rowIndex}>
-                  <CustomTableCell>{rowIndex + 1}</CustomTableCell>
-                  {row.map((cell, colIndex) => (
-                    <CustomTableCell key={colIndex}>
-                      <TextField
-                        value={cell}
-                        onChange={(e) =>
-                          handleTableDataChange(
-                            rowIndex,
-                            colIndex,
-                            e.target.value
-                          )
-                        }
-                      />
-                    </CustomTableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Grid>
+            ))}
+          </TableBody>
+        </Table>
       </Grid>
-    </DialogWrapper>
+    </LargeDialogWrapper>
   )
 }
 
