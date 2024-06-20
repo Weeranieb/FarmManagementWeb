@@ -27,7 +27,7 @@ export interface DownloadFormInput {
   date: string
   farm: string
   type: string
-  downloadType: string //'year' | 'month' | ''
+  downloadType: 'year' | 'month' | ''
 }
 const DailyFeed: React.FC = () => {
   const [formData, setFormData] = useState<SearchDailyFeedProps>({
@@ -57,27 +57,9 @@ const DailyFeed: React.FC = () => {
     }))
   }
 
-  const handleInputChangeDownloadForm = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const { name, value } = e.target
-    setDownloadFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }))
-  }
-
   const handleDateChange = (date: Dayjs | null) => {
     const formattedDate = date ? date.format('YYYY-MM-DD') : ''
     setFormData((prevData) => ({
-      ...prevData,
-      date: formattedDate,
-    }))
-  }
-
-  const handleDateChangeDownloadForm = (date: Dayjs | null) => {
-    const formattedDate = date ? date.format('YYYY-MM-DD') : ''
-    setDownloadFormData((prevData) => ({
       ...prevData,
       date: formattedDate,
     }))
@@ -91,7 +73,7 @@ const DailyFeed: React.FC = () => {
     setOpenDialog(true)
   }
 
-  const handleOpenDialogDownloadForm = (downloadType: string) => {
+  const handleOpenDialogDownloadForm = (downloadType: 'year' | 'month') => {
     setDownloadFormData((prevData) => ({
       ...prevData,
       downloadType,

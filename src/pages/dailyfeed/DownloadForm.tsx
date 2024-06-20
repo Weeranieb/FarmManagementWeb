@@ -2,7 +2,7 @@ import { Box, Button, Typography } from '@mui/material'
 import React from 'react'
 
 interface DownloadFormProps {
-  handleDialog: (downloadType: string) => void
+  handleDialog: (downloadType: 'year' | 'month') => void
 }
 
 const DownloadForm: React.FC<DownloadFormProps> = ({ handleDialog }) => {

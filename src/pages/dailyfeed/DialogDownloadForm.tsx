@@ -16,7 +16,7 @@ interface DialogDownloadFormProps {
   open: boolean
   onClose: () => void
   onSubmit: (data: DownloadFormInput) => void
-  downloadType: string //'year' | 'month' | ''
+  downloadType: 'year' | 'month' | ''
 }
 
 const DialogDownloadForm: React.FC<DialogDownloadFormProps> = ({
