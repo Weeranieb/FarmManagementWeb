@@ -30,8 +30,8 @@ const DailyFeed: React.FC = () => {
     type: '',
   })
   const [openDialog, setOpenDialog] = useState(false)
-  const [dialogOpenDownloadForm, setDialogOpenDownloadForm] =
-    React.useState(false)
+  const [dialogOpenDownloadForm, setDialogOpenDownloadForm] = useState(false)
+
   const handleDialogDownloadFormClose = () => {
     setDialogOpenDownloadForm(false)
   }
@@ -60,7 +60,11 @@ const DailyFeed: React.FC = () => {
     setOpenDialog(true)
   }
 
-  const handleOpenDialogDownloadForm = () => {
+  const handleOpenDialogDownloadForm = (downloadType: string) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      downloadType,
+    }))
     setDialogOpenDownloadForm(true)
   }
 

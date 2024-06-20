@@ -38,7 +38,7 @@ const DialogDownloadForm: React.FC<DialogDownloadFormProps> = ({
     const formattedDate = date ? date.format('YYYY-MM-DD') : ''
     setFormData((prevData) => ({
       ...prevData,
-      paymentDate: formattedDate,
+      date: formattedDate,
     }))
   }
 

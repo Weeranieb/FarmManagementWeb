@@ -2,7 +2,7 @@ import { Box, Button, Typography } from '@mui/material'
 import React from 'react'
 
 interface DownloadFormProps {
-  handleDialog: () => void
+  handleDialog: (downloadType: string) => void
 }
 
 const DownloadForm: React.FC<DownloadFormProps> = ({ handleDialog }) => {
@@ -25,7 +25,7 @@ const DownloadForm: React.FC<DownloadFormProps> = ({ handleDialog }) => {
       <Button
         variant='contained'
         color='primary'
-        onClick={handleDialog}
+        onClick={() => handleDialog('month')}
         sx={{ height: '100%', minHeight: '40px', marginRight: '20px' }}
       >
         <Typography variant='body1'>รายเดือน</Typography>
@@ -33,7 +33,7 @@ const DownloadForm: React.FC<DownloadFormProps> = ({ handleDialog }) => {
       <Button
         variant='contained'
         color='primary'
-        onClick={handleDialog}
+        onClick={() => handleDialog('year')}
         sx={{ height: '100%', minHeight: '40px' }}
       >
         <Typography variant='body1'>รายปี</Typography>
