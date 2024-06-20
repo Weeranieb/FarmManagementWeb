@@ -16,6 +16,7 @@ import Search from './Search'
 import DownloadForm from './DownloadForm'
 import Upload from './Upload'
 import DialogDownloadForm from './DialogDownloadForm'
+import DialogTable from './DialogTable'
 
 export interface SearchDailyFeedProps {
   date: string
@@ -69,7 +70,12 @@ const DailyFeed: React.FC = () => {
     console.log(data)
   }
 
-  const handleSearch = () => {
+  const handleFormSubmitTable = () => {
+    // setOpenDialog(true)
+    console.log(formData)
+  }
+
+  const handleOpenDialogTable = () => {
     setOpenDialog(true)
   }
 
@@ -107,7 +113,7 @@ const DailyFeed: React.FC = () => {
         searchFormData={formData}
         handleInputChange={handleInputChange}
         handleDateChange={handleDateChange}
-        handleSearch={handleSearch}
+        handleDialogSearch={handleOpenDialogTable}
       />
 
       {/* Divider and Text Section */}
@@ -141,7 +147,7 @@ const DailyFeed: React.FC = () => {
       <Upload />
 
       {/* Dialog for Search Result */}
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
+      {/* <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>Search Result</DialogTitle>
         <DialogContent>
           <DialogContentText>Display search results here.</DialogContentText>
@@ -151,8 +157,14 @@ const DailyFeed: React.FC = () => {
             Close
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
+      <DialogTable
+        open={openDialog}
+        onClose={handleCloseDialog}
+        onSubmit={handleFormSubmitTable}
+      />
 
+      {/* Dialog for Download Form Result */}
       <DialogDownloadForm
         open={dialogOpenDownloadForm}
         onClose={handleDialogDownloadFormClose}

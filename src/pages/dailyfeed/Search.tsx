@@ -8,14 +8,14 @@ interface SearchProps {
   searchFormData: SearchDailyFeedProps
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   handleDateChange: (date: Dayjs | null) => void
-  handleSearch: () => void
+  handleDialogSearch: () => void
 }
 
 const Search: React.FC<SearchProps> = ({
   searchFormData,
   handleInputChange,
   handleDateChange,
-  handleSearch,
+  handleDialogSearch,
 }) => {
   const farms = ['Farm 1', 'Farm 2', 'Farm 3']
 
@@ -64,7 +64,7 @@ const Search: React.FC<SearchProps> = ({
       <Button
         variant='contained'
         color='primary'
-        onClick={handleSearch}
+        onClick={handleDialogSearch}
         sx={{ height: '100%', ml: 5, minHeight: '40px' }}
       >
         Search
