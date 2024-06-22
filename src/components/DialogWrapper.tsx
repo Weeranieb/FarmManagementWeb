@@ -44,9 +44,9 @@ export const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
 }))
 
 export const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
-  marginTop: theme.spacing(4),
-  paddingLeft: theme.spacing(5),
-  paddingRight: theme.spacing(5),
+  marginTop: theme.spacing(2),
+  // paddingLeft: theme.spacing(5),
+  paddingRight: theme.spacing(6),
   paddingBottom: theme.spacing(3),
 }))
 

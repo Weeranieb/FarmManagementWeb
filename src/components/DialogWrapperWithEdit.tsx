@@ -47,7 +47,7 @@ const DialogWrapperWithEdit: React.FC<DialogWrapperWithEditProps> = ({
         <Grid container justifyContent='flex-end' spacing={1}>
           <Grid item>
             <CustomButton
-              onClick={handleFormSubmit}
+              onClick={handleEdit}
               color='primary'
               variant='contained'
               style={{ marginRight: 10 }}
@@ -57,7 +57,7 @@ const DialogWrapperWithEdit: React.FC<DialogWrapperWithEditProps> = ({
           </Grid>
           <Grid item>
             <CustomButton
-              onClick={handleEdit}
+              onClick={handleFormSubmit}
               color='primary'
               variant='contained'
               style={{ marginRight: 30 }}

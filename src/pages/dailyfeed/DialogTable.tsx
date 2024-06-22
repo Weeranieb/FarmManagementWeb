@@ -72,8 +72,8 @@ const DialogTable: React.FC<DialogTableProps> = ({
       handleEdit={handleEdit}
       isLarge={true}
     >
-      <Grid item xs={12}>
-        <Table>
+      <Grid item xs={12} sx={{ paddingLeft: 0 }}>
+        <Table sx={{ marginLeft: 0 }}>
           <TableHead>
             <TableRow>
               <HeaderTableCell style={{ width: '5%' }}>วัน</HeaderTableCell>
