@@ -26,7 +26,12 @@ const DownloadForm: React.FC<DownloadFormProps> = ({ handleDialog }) => {
         variant='contained'
         color='primary'
         onClick={() => handleDialog('month')}
-        sx={{ height: '100%', minHeight: '40px', marginRight: '20px' }}
+        sx={{
+          height: '100%',
+          minHeight: '40px',
+          marginRight: '20px',
+          minWidth: '100px',
+        }}
       >
         <Typography variant='body1'>รายเดือน</Typography>
       </Button>
@@ -34,7 +39,7 @@ const DownloadForm: React.FC<DownloadFormProps> = ({ handleDialog }) => {
         variant='contained'
         color='primary'
         onClick={() => handleDialog('year')}
-        sx={{ height: '100%', minHeight: '40px' }}
+        sx={{ height: '100%', minHeight: '40px', minWidth: '100px' }}
       >
         <Typography variant='body1'>รายปี</Typography>
       </Button>
