@@ -136,17 +136,6 @@ const DailyFeed: React.FC = () => {
       <Upload />
 
       {/* Dialog for Search Result */}
-      {/* <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>Search Result</DialogTitle>
-        <DialogContent>
-          <DialogContentText>Display search results here.</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color='primary'>
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog> */}
       <DialogTable
         open={openDialog}
         onClose={handleCloseDialog}
