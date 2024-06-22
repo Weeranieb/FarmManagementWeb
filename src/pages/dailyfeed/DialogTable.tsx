@@ -22,6 +22,8 @@ const CustomTableCell = styled(TableCell)(({ theme }) => ({
   borderBottom: '1px solid lightgrey',
   borderRight: '1px solid lightgrey',
   textAlign: 'center',
+  height: '50px',
+  padding: '5px 16px',
   '&:last-child': {
     borderRight: 0,
   },
