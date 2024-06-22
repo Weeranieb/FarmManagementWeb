@@ -113,7 +113,7 @@ const DailyFeed: React.FC = () => {
         width={'50%'}
         sx={{ margin: '20px auto' }}
       >
-        <Grid item xs={5}>
+        <Grid item xs={5} sx={{ paddingRight: '16px' }}>
           <Divider />
         </Grid>
         <Grid item xs={2}>
@@ -124,7 +124,7 @@ const DailyFeed: React.FC = () => {
             อัปโหลด
           </Typography>
         </Grid>
-        <Grid item xs={5}>
+        <Grid item xs={5} sx={{ paddingLeft: '16px' }}>
           <Divider />
         </Grid>
       </Grid>
