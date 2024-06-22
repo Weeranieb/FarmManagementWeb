@@ -7,9 +7,10 @@ import {
   TableCell,
   TableHead,
   TableBody,
+  Typography,
 } from '@mui/material'
 import { styled } from '@mui/system'
-import DialogWrapperWithEdit from '../../components/DialogWrapperWithEdit'
+import DialogWrapperWithCancel from '../../components/DialogWrapperWithCancel'
 
 interface DialogTableProps {
   open: boolean
@@ -18,18 +19,28 @@ interface DialogTableProps {
 }
 
 const CustomTableCell = styled(TableCell)(({ theme }) => ({
-  borderBottom: 'none',
+  borderBottom: '1px solid lightgrey',
+  borderRight: '1px solid lightgrey',
   textAlign: 'center',
+  '&:last-child': {
+    borderRight: 0,
+  },
   '& .MuiInputBase-input': {
     padding: '8px 10px',
     fontSize: '0.8rem',
+    textAlign: 'right',
   },
 }))
 
 const HeaderTableCell = styled(TableCell)(({ theme }) => ({
+  borderBottom: '2px solid lightgrey',
+  borderRight: '1px solid lightgrey',
   fontSize: '1.03rem',
   textAlign: 'center',
   paddingBottom: theme.spacing(1),
+  '&:last-child': {
+    borderRight: 0,
+  },
 }))
 
 const DialogTable: React.FC<DialogTableProps> = ({
@@ -40,6 +51,10 @@ const DialogTable: React.FC<DialogTableProps> = ({
   const initialData = Array.from({ length: 30 }, () => Array(15).fill(''))
 
   const [tableData, setTableData] = React.useState<string[][]>(initialData)
+  const [editing, setEditing] = React.useState<{
+    row: number
+    col: number
+  } | null>(null)
 
   const handleTableDataChange = (
     rowIndex: number,
@@ -59,17 +74,26 @@ const DialogTable: React.FC<DialogTableProps> = ({
     onClose()
   }
 
-  const handleEdit = () => {
-    console.log('edit')
+  const handleCancel = () => {
+    // refresh old value
+    onClose()
+  }
+
+  const handleCellClick = (rowIndex: number, colIndex: number) => {
+    setEditing({ row: rowIndex, col: colIndex })
+  }
+
+  const handleCellBlur = () => {
+    setEditing(null)
   }
 
   return (
-    <DialogWrapperWithEdit
+    <DialogWrapperWithCancel
       open={open}
       onClose={onClose}
       title='เหยื่อสด เดือนมิ.ย. ปี 2565'
       handleFormSubmit={handleFormSubmit}
-      handleEdit={handleEdit}
+      handleCancel={handleCancel}
       isLarge={true}
     >
       <Grid item xs={12} sx={{ paddingLeft: 0 }}>
@@ -90,18 +114,28 @@ const DialogTable: React.FC<DialogTableProps> = ({
               <TableRow key={rowIndex}>
                 <CustomTableCell>{rowIndex + 1}</CustomTableCell>
                 {row.map((cell, colIndex) => (
-                  <CustomTableCell key={colIndex}>
-                    <TextField
-                      value={cell}
-                      onChange={(e) =>
-                        handleTableDataChange(
-                          rowIndex,
-                          colIndex,
-                          e.target.value
-                        )
-                      }
-                      sx={{ width: 50 }}
-                    />
+                  <CustomTableCell
+                    key={colIndex}
+                    onClick={() => handleCellClick(rowIndex, colIndex)}
+                  >
+                    {editing?.row === rowIndex && editing?.col === colIndex ? (
+                      <TextField
+                        value={cell}
+                        onChange={(e) =>
+                          handleTableDataChange(
+                            rowIndex,
+                            colIndex,
+                            e.target.value
+                          )
+                        }
+                        onBlur={handleCellBlur}
+                        sx={{ width: 50 }}
+                        autoFocus
+                        inputProps={{ style: { textAlign: 'right' } }}
+                      />
+                    ) : (
+                      <Typography sx={{ width: 50 }}>{cell}</Typography>
+                    )}
                   </CustomTableCell>
                 ))}
               </TableRow>
@@ -109,7 +143,7 @@ const DialogTable: React.FC<DialogTableProps> = ({
           </TableBody>
         </Table>
       </Grid>
-    </DialogWrapperWithEdit>
+    </DialogWrapperWithCancel>
   )
 }
 

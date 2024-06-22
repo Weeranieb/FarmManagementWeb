@@ -14,17 +14,17 @@ interface DialogWrapperWithEditProps extends DialogProps {
   open: boolean
   onClose: () => void
   handleFormSubmit?: () => void
-  handleEdit?: () => void
+  handleCancel?: () => void
   isLarge?: boolean
   children: React.ReactNode
 }
 
-const DialogWrapperWithEdit: React.FC<DialogWrapperWithEditProps> = ({
+const DialogWrapperWithCancel: React.FC<DialogWrapperWithEditProps> = ({
   title,
   open,
   onClose,
   handleFormSubmit,
-  handleEdit,
+  handleCancel,
   isLarge,
   children,
 }) => {
@@ -47,12 +47,12 @@ const DialogWrapperWithEdit: React.FC<DialogWrapperWithEditProps> = ({
         <Grid container justifyContent='flex-end' spacing={1}>
           <Grid item>
             <CustomButton
-              onClick={handleEdit}
+              onClick={handleCancel}
               color='primary'
               variant='contained'
               style={{ marginRight: 10 }}
             >
-              แก้ไข
+              ยกเลิก
             </CustomButton>
           </Grid>
           <Grid item>
@@ -71,4 +71,4 @@ const DialogWrapperWithEdit: React.FC<DialogWrapperWithEditProps> = ({
   )
 }
 
-export default DialogWrapperWithEdit
+export default DialogWrapperWithCancel

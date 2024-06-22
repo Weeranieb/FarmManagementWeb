@@ -1,4 +1,4 @@
-import { TextField, Box, MenuItem, Button } from '@mui/material'
+import { TextField, Box, MenuItem, Button, Typography } from '@mui/material'
 import React from 'react'
 import DateSelect from '../../components/DateSelect'
 import { SearchDailyFeedProps } from './DailyFeedPage'
@@ -67,7 +67,7 @@ const Search: React.FC<SearchProps> = ({
         onClick={handleDialogSearch}
         sx={{ height: '100%', ml: 5, minHeight: '40px' }}
       >
-        Search
+        <Typography variant='body1'>ค้นหา</Typography>
       </Button>
     </Box>
   )
