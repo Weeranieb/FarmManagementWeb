@@ -10,6 +10,7 @@ import Bill from './pages/bill/BillPage'
 import Worker from './pages/worker/WorkerPage'
 import DailyFeed from './pages/dailyfeed/DailyFeedPage'
 import OnePond from './pages/onepond/OnePond'
+import PrivateRoute from './components/PrivateRoute'
 
 const App: React.FC = () => {
   return (
@@ -21,7 +22,7 @@ const App: React.FC = () => {
           element={
             <Layout>
               <Routes>
-                <Route path='/' element={<HomePage />} />
+                {/* <Route path='/' element={<HomePage />} /> */}
                 <Route path='/farms' element={<FarmsPage />} />
                 <Route path='/activity' element={<ActivityPage />} />
                 <Route path='/feed' element={<Feed />} />
@@ -29,9 +30,10 @@ const App: React.FC = () => {
                 <Route path='worker' element={<Worker />} />
                 <Route path='dailyFeed' element={<DailyFeed />} />
                 <Route path='pond/:id' element={<OnePond />} />
-                {/* <PrivateRoute path='/home'>
-                  <HomePage />
-                </PrivateRoute> */}
+
+                <Route path='/' element={<PrivateRoute />}>
+                  <Route path='/' element={<HomePage />} />
+                </Route>
                 {/* Add more routes as needed */}
               </Routes>
             </Layout>
