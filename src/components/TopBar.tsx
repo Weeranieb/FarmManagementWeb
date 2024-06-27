@@ -19,6 +19,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import { Logout, PersonAdd, Settings } from '@mui/icons-material'
+import { ACCESS_TOKEN_NAME } from '../constant/apiConstants'
 
 const TopBar: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -134,7 +135,10 @@ const TopBar: React.FC = () => {
           </MenuItem>
           <MenuItem
             sx={{ padding: '8px 20px' }}
-            onClick={() => handleMenuItemClick('/login')}
+            onClick={() => {
+              localStorage.removeItem(ACCESS_TOKEN_NAME)
+              handleMenuItemClick('/login')
+            }}
           >
             <ListItemIcon>
               <Logout fontSize='small' />

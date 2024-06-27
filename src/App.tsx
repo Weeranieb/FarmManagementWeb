@@ -29,6 +29,9 @@ const App: React.FC = () => {
                 <Route path='worker' element={<Worker />} />
                 <Route path='dailyFeed' element={<DailyFeed />} />
                 <Route path='pond/:id' element={<OnePond />} />
+                {/* <PrivateRoute path='/home'>
+                  <HomePage />
+                </PrivateRoute> */}
                 {/* Add more routes as needed */}
               </Routes>
             </Layout>
