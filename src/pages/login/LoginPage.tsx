@@ -16,6 +16,7 @@ import {
   ACCESS_TOKEN_NAME,
   LOGIN_DATA,
 } from '../../constants/localStorageConstants'
+import { API_BASE_URL } from '../../constants/envConstants'
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
@@ -60,6 +61,7 @@ const LoginPage = () => {
     }
     // set token in local storage
     // TODO replace 'access_token' with actual token
+    console.log('this is url :', API_BASE_URL)
     localStorage.setItem(ACCESS_TOKEN_NAME, 'access_token')
     navigate('/')
   }
