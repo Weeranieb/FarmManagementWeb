@@ -23,16 +23,23 @@ const App: React.FC = () => {
             <Layout>
               <Routes>
                 {/* <Route path='/' element={<HomePage />} /> */}
-                <Route path='/farms' element={<FarmsPage />} />
-                <Route path='/activity' element={<ActivityPage />} />
+                {/* <Route path='/farms' element={<FarmsPage />} /> */}
+                {/* <Route path='/activity' element={<ActivityPage />} />
                 <Route path='/feed' element={<Feed />} />
                 <Route path='bill' element={<Bill />} />
                 <Route path='worker' element={<Worker />} />
                 <Route path='dailyFeed' element={<DailyFeed />} />
-                <Route path='pond/:id' element={<OnePond />} />
+                <Route path='pond/:id' element={<OnePond />} /> */}
 
-                <Route path='/' element={<PrivateRoute />}>
+                <Route element={<PrivateRoute />}>
                   <Route path='/' element={<HomePage />} />
+                  <Route path='/farms' element={<FarmsPage />} />
+                  <Route path='/activity' element={<ActivityPage />} />
+                  <Route path='/feed' element={<Feed />} />
+                  <Route path='bill' element={<Bill />} />
+                  <Route path='worker' element={<Worker />} />
+                  <Route path='dailyFeed' element={<DailyFeed />} />
+                  <Route path='pond/:id' element={<OnePond />} />
                 </Route>
                 {/* Add more routes as needed */}
               </Routes>

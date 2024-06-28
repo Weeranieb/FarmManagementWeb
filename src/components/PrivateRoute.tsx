@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from 'react-router-dom'
-import { ACCESS_TOKEN_NAME } from '../constant/apiConstants' // Assuming typo fix
+import { ACCESS_TOKEN_NAME } from '../constants/localStorageConstants'
 
 const PrivateRoute = () => {
   const isAuth = localStorage.getItem(ACCESS_TOKEN_NAME)

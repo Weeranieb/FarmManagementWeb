@@ -19,7 +19,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import { Logout, PersonAdd, Settings } from '@mui/icons-material'
-import { ACCESS_TOKEN_NAME } from '../constant/apiConstants'
+import { ACCESS_TOKEN_NAME } from '../constants/localStorageConstants'
 
 const TopBar: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)

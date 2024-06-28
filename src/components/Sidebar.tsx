@@ -22,6 +22,7 @@ import DarkModeIcon from '@mui/icons-material/DarkMode'
 import LightModeIcon from '@mui/icons-material/LightMode'
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom'
 import SidebarHeader from './SidebarHeader'
+import { ACCESS_TOKEN_NAME } from '../constants/localStorageConstants'
 
 const Sidebar: React.FC = () => {
   const [isSubMenuOpen, setIsSubMenuOpen] = useState(false)
@@ -190,6 +191,9 @@ const Sidebar: React.FC = () => {
                 if (item.text === 'กรอกข้อมูล') {
                   handleSubMenuToggle()
                 } else {
+                  if (item.text === 'ออกจากระบบ') {
+                    localStorage.removeItem(ACCESS_TOKEN_NAME)
+                  }
                   navigate(item.route)
                 }
               }}

@@ -12,6 +12,10 @@ import {
 } from '@mui/material'
 import { Visibility, VisibilityOff } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
+import {
+  ACCESS_TOKEN_NAME,
+  LOGIN_DATA,
+} from '../../constants/localStorageConstants'
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
@@ -50,10 +54,13 @@ const LoginPage = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (rememberMe) {
-      localStorage.setItem('loginData', JSON.stringify(loginData))
+      localStorage.setItem(LOGIN_DATA, JSON.stringify(loginData))
     } else {
-      localStorage.removeItem('loginData')
+      localStorage.removeItem(LOGIN_DATA)
     }
+    // set token in local storage
+    // TODO replace 'access_token' with actual token
+    localStorage.setItem(ACCESS_TOKEN_NAME, 'access_token')
     navigate('/')
   }
 
