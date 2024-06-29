@@ -1,7 +1,23 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Box, Typography } from '@mui/material'
+import { getClientApi } from '../../services/client.service'
 
 const HomePage: React.FC = () => {
+  const [farmName, setFarmName] = React.useState('')
+
+  const getFarmName = async () => {
+    const data = await getClientApi()
+    if (data.result) {
+      setFarmName(data.data.name)
+    } else {
+      console.warn('Farm name not found in API response')
+    }
+  }
+
+  useEffect(() => {
+    getFarmName()
+  }, [])
+
   return (
     <Box
       sx={{
@@ -34,7 +50,7 @@ const HomePage: React.FC = () => {
           },
         }}
       >
-        ยินดีต้อนรับสู่บุญมาฟาร์ม
+        ยินดีต้อนรับสู่{farmName}
       </Typography>
     </Box>
   )

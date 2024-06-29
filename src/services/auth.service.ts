@@ -12,7 +12,6 @@ const loginApi = async (
       password,
     })
     .then((res) => {
-      console.log(res)
       return res.data
     })
 }
