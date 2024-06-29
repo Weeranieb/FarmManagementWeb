@@ -1,7 +1,8 @@
 import axios from 'axios'
 import { API_BASE_URL } from '../constants/envConstants'
+import { store } from '../redux/store'
 
-const axiosInsance = axios.create({
+const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
   headers: {
@@ -10,17 +11,17 @@ const axiosInsance = axios.create({
 })
 
 // Add a request interceptor
-// baseService.interceptors.request.use(
-//   (config) => {
-//     const token = 'xxx'
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`
-//     }
-//     return config
-//   },
-//   (error) => {
-//     return Promise.reject(error)
-//   }
-// )
+axiosInstance.interceptors.request.use(
+  async (config) => {
+    const accessToken = store.getState().user.accessToken
+    if (accessToken) {
+      config.headers['Authorization'] = 'Bearer ' + accessToken
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
 
-export default axiosInsance
+export default axiosInstance
