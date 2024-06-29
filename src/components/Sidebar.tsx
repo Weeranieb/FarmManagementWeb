@@ -22,7 +22,10 @@ import DarkModeIcon from '@mui/icons-material/DarkMode'
 import LightModeIcon from '@mui/icons-material/LightMode'
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom'
 import SidebarHeader from './SidebarHeader'
-import { ACCESS_TOKEN_NAME } from '../constants/localStorageConstants'
+import {
+  ACCESS_TOKEN_NAME,
+  EXPIRED_DATE,
+} from '../constants/localStorageConstants'
 import { useDispatch } from 'react-redux'
 import { clearUser } from '../redux/reducers/user'
 
@@ -197,6 +200,7 @@ const Sidebar: React.FC = () => {
                   if (item.text === 'ออกจากระบบ') {
                     dispatch(clearUser())
                     localStorage.removeItem(ACCESS_TOKEN_NAME)
+                    localStorage.removeItem(EXPIRED_DATE)
                   }
                   navigate(item.route)
                 }

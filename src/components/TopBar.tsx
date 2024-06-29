@@ -19,7 +19,10 @@ import {
 import { useNavigate } from 'react-router-dom'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import { Logout, PersonAdd, Settings } from '@mui/icons-material'
-import { ACCESS_TOKEN_NAME } from '../constants/localStorageConstants'
+import {
+  ACCESS_TOKEN_NAME,
+  EXPIRED_DATE,
+} from '../constants/localStorageConstants'
 import { useDispatch } from 'react-redux'
 import { clearUser } from '../redux/reducers/user'
 
@@ -141,6 +144,7 @@ const TopBar: React.FC = () => {
             onClick={() => {
               dispatch(clearUser())
               localStorage.removeItem(ACCESS_TOKEN_NAME)
+              localStorage.removeItem(EXPIRED_DATE)
               handleMenuItemClick('/login')
             }}
           >

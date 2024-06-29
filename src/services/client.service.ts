@@ -4,7 +4,6 @@ import api from './apiClient'
 
 const getClientApi = async (): Promise<BaseResponse<Client>> => {
   return api.get('/client').then((res) => {
-    console.log(res)
     return res.data
   })
 }

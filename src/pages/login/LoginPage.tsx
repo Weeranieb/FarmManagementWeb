@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import {
   ACCESS_TOKEN_NAME,
+  EXPIRED_DATE,
   LOGIN_DATA,
 } from '../../constants/localStorageConstants'
 import { loginApi } from '../../services/auth.service'
@@ -82,6 +83,7 @@ const LoginPage = () => {
     if (data.result) {
       // update local storage and redux store
       localStorage.setItem(ACCESS_TOKEN_NAME, data.data.accessToken)
+      localStorage.setItem(EXPIRED_DATE, data.data.expiredAt)
       dispatch(setUser(data.data))
       navigate('/')
     } else {

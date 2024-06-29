@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { AuthorizeResult } from '../../models/schema/auth'
-// import { ACCESS_TOKEN_NAME } from "../../constants/localStorageConstants"
+import { User } from '../../models/schema/user'
 
 const initialState: AuthorizeResult = {
   accessToken: '',
@@ -21,13 +21,22 @@ export const userSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action: PayloadAction<AuthorizeResult>) => {
-      console.log('setUser', action.payload)
       state.accessToken = action.payload.accessToken
       state.expiredAt = action.payload.expiredAt
       state.user = action.payload.user
     },
+    setToken: (state, action: PayloadAction<Partial<AuthorizeResult>>) => {
+      if (action.payload.accessToken !== undefined) {
+        state.accessToken = action.payload.accessToken
+      }
+      if (action.payload.expiredAt !== undefined) {
+        state.expiredAt = action.payload.expiredAt
+      }
+    },
+    setUserData: (state, action: PayloadAction<User>) => {
+      state.user = action.payload
+    },
     clearUser: (state) => {
-      console.log('clearUser')
       state.accessToken = ''
       state.expiredAt = ''
       state.user = {
@@ -38,19 +47,11 @@ export const userSlice = createSlice({
         lastName: '',
         userLevel: 0,
         contactNumber: '',
-        delflag: false,
-        createdDate: '',
-        createdBy: '',
-        updatedDate: '',
-        updatedBy: '',
       }
-
-      // Clear all user data in localStorage
-      // localStorage.removeItem(ACCESS_TOKEN_NAME)
     },
   },
 })
 
-export const { setUser, clearUser } = userSlice.actions
+export const { setUser, setToken, setUserData, clearUser } = userSlice.actions
 
 export default userSlice.reducer
