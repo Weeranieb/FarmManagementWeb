@@ -16,7 +16,9 @@ import {
   ACCESS_TOKEN_NAME,
   LOGIN_DATA,
 } from '../../constants/localStorageConstants'
-import { API_BASE_URL } from '../../constants/envConstants'
+import { loginApi } from '../../services/auth.service'
+import { BaseResponse } from '../../models/api/baseResponse'
+import { AuthorizeResult } from '../../models/schema/auth'
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
@@ -52,17 +54,20 @@ const LoginPage = () => {
     setRememberMe(e.target.checked)
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (rememberMe) {
       localStorage.setItem(LOGIN_DATA, JSON.stringify(loginData))
     } else {
       localStorage.removeItem(LOGIN_DATA)
     }
-    // set token in local storage
-    // TODO replace 'access_token' with actual token
-    console.log('this is url :', API_BASE_URL)
-    localStorage.setItem(ACCESS_TOKEN_NAME, 'access_token')
+
+    // call login api
+    const data: BaseResponse<AuthorizeResult> = await loginApi(
+      loginData.email,
+      loginData.password
+    )
+    localStorage.setItem(ACCESS_TOKEN_NAME, data.data.accessToken)
     navigate('/')
   }
 
