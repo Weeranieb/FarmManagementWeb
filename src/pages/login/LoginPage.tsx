@@ -67,6 +67,8 @@ const LoginPage = () => {
       loginData.email,
       loginData.password
     )
+
+    //update redux store
     localStorage.setItem(ACCESS_TOKEN_NAME, data.data.accessToken)
     navigate('/')
   }
