@@ -29,6 +29,7 @@ const LoginPage = () => {
     password: '',
   })
   const [rememberMe, setRememberMe] = useState(false)
+  const [errorText, setErrorText] = useState('')
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
@@ -59,6 +60,13 @@ const LoginPage = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
+    // Check for empty fields
+    if (!loginData.username || !loginData.password) {
+      setErrorText('*กรุณากรอกข้อมูลให้ครบถ้วน')
+      return
+    }
+
     if (rememberMe) {
       localStorage.setItem(LOGIN_DATA, JSON.stringify(loginData))
     } else {
@@ -71,10 +79,15 @@ const LoginPage = () => {
       loginData.password
     )
 
-    // update local storage and redux store
-    localStorage.setItem(ACCESS_TOKEN_NAME, data.data.accessToken)
-    dispatch(setUser(data.data))
-    navigate('/')
+    if (data.result) {
+      // update local storage and redux store
+      localStorage.setItem(ACCESS_TOKEN_NAME, data.data.accessToken)
+      dispatch(setUser(data.data))
+      navigate('/')
+    } else {
+      // handle login failure
+      setErrorText('*ชื่อผู้ใช้งานหรือพาสเวิร์ดไม่ถูกต้อง')
+    }
   }
 
   return (
@@ -159,11 +172,16 @@ const LoginPage = () => {
           }}
           autoComplete='current-password'
         />
+        {errorText && (
+          <Typography color='error' sx={{ mt: 1 }}>
+            {errorText}
+          </Typography>
+        )}
         <Button
           type='submit'
           variant='contained'
           color='primary'
-          sx={{ mb: 1, color: 'white' }}
+          sx={{ mt: 2, color: 'white' }}
           fullWidth
         >
           Sign in
