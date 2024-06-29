@@ -25,28 +25,26 @@ const HomePage: React.FC = () => {
         padding: 3,
         borderRadius: 1,
         pt: 30,
-        // boxShadow: 3, // Adding shadow to make the box more attractive
-        textAlign: 'center', // Center align the text
+        textAlign: 'center',
       }}
     >
       <Typography
-        variant='h2' // Make the text larger
+        variant='h2'
         gutterBottom
         sx={{
-          fontWeight: 'bold', // Make the text bold
-          // color: '#2E3B55', // Change the color to a more attractive one
+          fontWeight: 'bold',
           marginBottom: 2,
           position: 'relative',
           '::after': {
             content: '""',
             display: 'block',
-            width: '70%', // Slightly longer than the text
-            height: '4px', // Adjust the height of the line
-            backgroundColor: '#d0d0d0', // Line color
+            width: '70%',
+            height: '4px',
+            backgroundColor: '#d0d0d0',
             position: 'absolute',
             left: '50%',
             transform: 'translateX(-50%)',
-            bottom: '-30px', // Adjust the vertical position of the line
+            bottom: '-30px',
           },
         }}
       >
