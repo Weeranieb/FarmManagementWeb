@@ -5,14 +5,18 @@ import App from './App'
 import reportWebVitals from './reportWebVitals'
 import { CssBaseline, ThemeProvider } from '@mui/material'
 import { lightTheme } from './theme'
+import { Provider } from 'react-redux'
+import { store } from './redux/store'
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(
   <React.StrictMode>
-    <ThemeProvider theme={lightTheme}>
-      <CssBaseline />
-      <App />
-    </ThemeProvider>
+    <Provider store={store}>
+      <ThemeProvider theme={lightTheme}>
+        <CssBaseline />
+        <App />
+      </ThemeProvider>
+    </Provider>
   </React.StrictMode>
 )
 

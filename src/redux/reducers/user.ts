@@ -21,11 +21,13 @@ export const userSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action: PayloadAction<AuthorizeResult>) => {
+      console.log('setUser', action.payload)
       state.accessToken = action.payload.accessToken
       state.expiredAt = action.payload.expiredAt
       state.user = action.payload.user
     },
     clearUser: (state) => {
+      console.log('clearUser')
       state.accessToken = ''
       state.expiredAt = ''
       state.user = {

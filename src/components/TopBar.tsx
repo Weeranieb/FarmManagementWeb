@@ -20,6 +20,8 @@ import { useNavigate } from 'react-router-dom'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import { Logout, PersonAdd, Settings } from '@mui/icons-material'
 import { ACCESS_TOKEN_NAME } from '../constants/localStorageConstants'
+import { useDispatch } from 'react-redux'
+import { clearUser } from '../redux/reducers/user'
 
 const TopBar: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -29,6 +31,7 @@ const TopBar: React.FC = () => {
     { id: 2, message: 'Server downtime scheduled', path: '/settings' },
   ])
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   const handleClickProfile = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
@@ -136,6 +139,7 @@ const TopBar: React.FC = () => {
           <MenuItem
             sx={{ padding: '8px 20px' }}
             onClick={() => {
+              dispatch(clearUser())
               localStorage.removeItem(ACCESS_TOKEN_NAME)
               handleMenuItemClick('/login')
             }}

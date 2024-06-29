@@ -12,6 +12,7 @@ import {
 } from '@mui/material'
 import { Visibility, VisibilityOff } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
 import {
   ACCESS_TOKEN_NAME,
   LOGIN_DATA,
@@ -19,18 +20,20 @@ import {
 import { loginApi } from '../../services/auth.service'
 import { BaseResponse } from '../../models/api/baseResponse'
 import { AuthorizeResult } from '../../models/schema/auth'
+import { setUser } from '../../redux/reducers/user'
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [loginData, setLoginData] = useState({
-    email: '',
+    username: '',
     password: '',
   })
   const [rememberMe, setRememberMe] = useState(false)
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   useEffect(() => {
-    const storedLoginData = localStorage.getItem('loginData')
+    const storedLoginData = localStorage.getItem(LOGIN_DATA)
     if (storedLoginData) {
       setLoginData(JSON.parse(storedLoginData))
       setRememberMe(true)
@@ -64,12 +67,13 @@ const LoginPage = () => {
 
     // call login api
     const data: BaseResponse<AuthorizeResult> = await loginApi(
-      loginData.email,
+      loginData.username,
       loginData.password
     )
 
-    //update redux store
+    // update local storage and redux store
     localStorage.setItem(ACCESS_TOKEN_NAME, data.data.accessToken)
+    dispatch(setUser(data.data))
     navigate('/')
   }
 
@@ -124,9 +128,10 @@ const LoginPage = () => {
           variant='outlined'
           fullWidth
           required
-          name='email'
-          value={loginData.email}
+          name='username'
+          value={loginData.username}
           onChange={handleChange}
+          autoComplete='username'
         />
         <TextField
           sx={{ marginBottom: 3 }}
@@ -152,6 +157,7 @@ const LoginPage = () => {
               </InputAdornment>
             ),
           }}
+          autoComplete='current-password'
         />
         <Button
           type='submit'
