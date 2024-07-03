@@ -5,14 +5,6 @@ import api from './apiClient'
 const getFarmWithActiveApi = async (
   farmId: number
 ): Promise<BaseResponse<FarmWithActive[]>> => {
-  return api.get(`/activepond/list/${farmId}`).then((res) => {
-    return res.data
-  })
-}
-
-const getAnotherFarmWithActiveApi = async (
-  farmId: number
-): Promise<BaseResponse<FarmWithActive[]>> => {
   const url = 'activepond'
   return api
     .get(url, {
@@ -25,4 +17,4 @@ const getAnotherFarmWithActiveApi = async (
     })
 }
 
-export { getFarmWithActiveApi, getAnotherFarmWithActiveApi }
+export { getFarmWithActiveApi }
