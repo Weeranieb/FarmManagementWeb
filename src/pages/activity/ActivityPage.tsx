@@ -206,6 +206,7 @@ const Activity: React.FC = () => {
           rows={filteredRows}
           columns={columns}
           sortModel={initialSortModel}
+          autoPageSize={true}
           onSortModelChange={handleSortModelChange}
           sx={{
             '& .MuiDataGrid-columnHeaders': {
