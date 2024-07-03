@@ -23,12 +23,14 @@ import {
   ACCESS_TOKEN_NAME,
   EXPIRED_DATE,
 } from '../constants/localStorageConstants'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { clearUser } from '../redux/reducers/user'
+import { RootState } from '../redux/store'
 
 const TopBar: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [notificationEl, setNotificationEl] = useState<null | HTMLElement>(null)
+  const dataUser = useSelector((state: RootState) => state.user)
   const [notifications, setNotifications] = useState([
     { id: 1, message: 'New message received', path: '/' },
     { id: 2, message: 'Server downtime scheduled', path: '/settings' },
@@ -78,7 +80,7 @@ const TopBar: React.FC = () => {
           sx={{ width: 32, height: 32, cursor: 'pointer' }}
           onClick={handleClickProfile}
         >
-          U
+          {dataUser.user.firstName[0]}
         </Avatar>
         <Menu
           anchorEl={anchorEl}
@@ -117,7 +119,7 @@ const TopBar: React.FC = () => {
             sx={{ padding: '8px 20px' }}
             onClick={() => handleMenuItemClick('/profile')}
           >
-            <Avatar>U</Avatar>
+            <Avatar>{dataUser.user.firstName[0]}</Avatar>
             โปรไฟล์
           </MenuItem>
           <MenuItem

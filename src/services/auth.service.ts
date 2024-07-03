@@ -7,7 +7,7 @@ const loginApi = async (
   password: string
 ): Promise<BaseResponse<AuthorizeResult>> => {
   return api
-    .post('/auth/login', {
+    .post('auth/login', {
       username,
       password,
     })

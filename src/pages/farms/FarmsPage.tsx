@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Grid,
   Box,
@@ -10,59 +10,57 @@ import {
   Button,
 } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
+import { getFarmListApi } from '../../services/farm.service'
+import { FarmWithActive } from '../../models/schema/activePond'
+import { Farm } from '../../models/schema/farm'
+import { getFarmWithActiveApi } from '../../services/activePond.service'
 
 const FarmsPage = () => {
-  const farms = [
-    {
-      name: 'ฟาร์ม 1',
-      ponds: [
-        { name: 'บ่อ 1', id: 1 },
-        { name: 'บ่อ 2', id: 2 },
-        { name: 'บ่อ 3', id: 3 },
-        { name: 'บ่อ 4', id: 4 },
-        { name: 'บ่อ 5', id: 5 },
-        { name: 'บ่อ 6', id: 6 },
-        { name: 'บ่อ 7', id: 7 },
-        { name: 'บ่อ 8', id: 8 },
-        { name: 'บ่อ 9', id: 9 },
-        { name: 'บ่อ 10', id: 10 },
-      ],
-    },
-    {
-      name: 'ฟาร์ม 2',
-      ponds: [
-        { name: 'บ่อ 1', id: 1 },
-        { name: 'บ่อ 2', id: 2 },
-      ],
-    },
-    {
-      name: 'ฟาร์ม 3',
-      ponds: [
-        { name: 'บ่อ 1', id: 1 },
-        { name: 'บ่อ 2', id: 2 },
-      ],
-    },
-    {
-      name: 'ฟาร์ม 4',
-      ponds: [
-        { name: 'บ่อ 1', id: 1 },
-        { name: 'บ่อ 2', id: 2 },
-      ],
-    },
-  ]
-
-  const navigate = useNavigate()
+  const [farms, setFarms] = useState<Farm[]>([])
+  const [activePonds, setActivePonds] = useState<FarmWithActive[]>([])
   const [selectedFarm, setSelectedFarm] = useState<number | null>(null)
   const [selectedPond, setSelectedPond] = useState<number | null>(null)
+  const navigate = useNavigate()
 
-  const handleFarmClick = (index: number) => {
-    setSelectedFarm(index)
+  const getListFarms = async () => {
+    const farmList = await getFarmListApi()
+    console.log('farm list', farmList.data)
+    setFarms(farmList.data)
+  }
+
+  const getActivePond = async (farmId: number) => {
+    console.log('farm id', farmId)
+    const activePondList = await getFarmWithActiveApi(farmId)
+    console.log('active pond list', activePondList.data)
+    setActivePonds(activePondList.data)
+  }
+
+  useEffect(() => {
+    getListFarms()
+  }, [])
+
+  useEffect(() => {
+    if (selectedFarm !== null) {
+      getActivePond(selectedFarm)
+    }
+  }, [selectedFarm])
+
+  const handleFarmClick = (farmId: number) => {
+    setSelectedFarm(farmId)
     setSelectedPond(null)
   }
 
-  const handlePondClick = (pondIndex: number, activePondId: number) => {
-    navigate(`/pond/${activePondId}`)
-    setSelectedPond(pondIndex)
+  const handlePondClick = (
+    pondId: number,
+    hasHistory: boolean,
+    activePondId?: number
+  ) => {
+    if (!hasHistory) {
+      navigate(`/pond/${pondId}`)
+      return
+    }
+    // navigate(`/pond/${activePondId}`)
+    setSelectedPond(pondId)
   }
 
   return (
@@ -82,21 +80,19 @@ const FarmsPage = () => {
           </Typography>
           <Divider sx={{ borderBottomWidth: 2, mb: 2, color: '#D9D9D9' }} />
           <List>
-            {farms.map((farm, farmIndex) => (
+            {farms.map((farm) => (
               <ListItem
-                key={farmIndex}
-                onClick={() => handleFarmClick(farmIndex)}
+                key={farm.id}
+                onClick={() => handleFarmClick(farm.id)}
                 sx={{
                   fontSize: '1.074rem',
                   p: 1.7,
                   pl: 2,
                   borderRadius: '0.543rem',
                   backgroundColor:
-                    selectedFarm === farmIndex ? '#FAF8EE' : 'inherit',
+                    selectedFarm === farm.id ? '#FAF8EE' : 'inherit',
                   borderRight:
-                    selectedFarm === farmIndex
-                      ? '10px solid #CEBCA1'
-                      : 'inherit',
+                    selectedFarm === farm.id ? '10px solid #CEBCA1' : 'inherit',
                   '&:hover': {
                     fontWeight: 'bolder',
                     borderRadius: '0.543rem',
@@ -112,10 +108,9 @@ const FarmsPage = () => {
                   primary={farm.name}
                   primaryTypographyProps={{
                     style: {
-                      fontSize:
-                        selectedFarm === farmIndex ? '1.2rem' : 'inherit',
+                      fontSize: selectedFarm === farm.id ? '1.2rem' : 'inherit',
                       fontWeight:
-                        selectedFarm === farmIndex ? 'bolder' : 'inherit',
+                        selectedFarm === farm.id ? 'bolder' : 'inherit',
                     },
                   }}
                 />
@@ -145,11 +140,17 @@ const FarmsPage = () => {
             }}
           >
             {selectedFarm !== null &&
-              farms[selectedFarm].ponds.map((pond, pondIndex) => (
+              activePonds.map((pond, pondIndex) => (
                 <Button
-                  key={pondIndex}
+                  key={pond.id}
                   variant='outlined'
-                  onClick={() => handlePondClick(pondIndex, pond.id)}
+                  onClick={() =>
+                    handlePondClick(
+                      pond.id,
+                      pond.hasHistory,
+                      pond.activePondId as number | undefined
+                    )
+                  }
                   sx={{
                     fontSize: '1.074rem',
                     borderRadius: '50px',
@@ -158,10 +159,9 @@ const FarmsPage = () => {
                     minWidth: 'calc((100% - 60px) / 3)',
                     minHeight: '50px',
                     backgroundColor:
-                      selectedPond === pondIndex ? '#CEBCA1' : 'white',
-                    color: selectedPond === pondIndex ? 'white' : 'inherit',
-                    fontWeight:
-                      selectedPond === pondIndex ? 'bolder' : 'normal',
+                      selectedPond === pond.id ? '#CEBCA1' : 'white',
+                    color: selectedPond === pond.id ? 'white' : 'inherit',
+                    fontWeight: selectedPond === pond.id ? 'bolder' : 'normal',
                     '&:hover': {
                       fontWeight: 'bolder',
                       backgroundColor: '#CEBCA1',
