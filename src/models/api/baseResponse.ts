@@ -7,7 +7,7 @@ export interface BaseResponse<T> {
   }
 }
 
-// export interface ListPage<T> {
-//   items: Array<T>
-//   total: number
-// }
+export interface ListPage<T> {
+  items: Array<T>
+  total: number
+}

@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { DataGrid } from '@mui/x-data-grid'
+import React, { useCallback, useEffect, useState } from 'react'
+import { DataGrid, GridRowParams } from '@mui/x-data-grid'
 import {
   Box,
   TextField,
@@ -15,10 +15,14 @@ import {
   Delete as DeleteIcon,
 } from '@mui/icons-material'
 import { GridSortModel } from '@mui/x-data-grid/models/gridSortModel'
+import { GridPaginationModel } from '@mui/x-data-grid/models/gridPaginationProps'
 import DialogFill from './DialogFill'
 import DialogMove from './DialogMove'
 import DialogSell from './DialogSell'
 import { columns } from './ActivityColumns'
+import { useNavigate } from 'react-router-dom'
+import { PageOptions } from '../../models/api/pageOptions'
+import { getActivityListApi } from '../../services/activity.service'
 
 const rows = [
   {
@@ -60,19 +64,32 @@ const rows = [
 ]
 
 const Activity: React.FC = () => {
+  const navigate = useNavigate()
   const [typeFilter, setTypeFilter] = React.useState('')
   const [farmFilter, setFarmFilter] = React.useState('')
   const [dialogOpen, setDialogOpen] = React.useState(false)
+  const [isLoading, setIsLoading] = React.useState(false)
   const [selectedActivity, setSelectedActivity] = React.useState('')
+  const [pageOption, setPageOption] = useState<PageOptions>({
+    page: 0,
+    pageSize: 10,
+    orderBy: '"Id" desc',
+    keyword: '',
+  })
 
-  const [initialSortModel, setInitialSortModel] = React.useState<GridSortModel>(
-    [
-      {
-        field: 'id',
-        sort: 'desc',
-      },
-    ]
-  )
+  const handleRowDblClick = (row: GridRowParams): void => {
+    navigate(`/appowner/info/${row.id}`, {
+      replace: true,
+    })
+  }
+
+  const handlePageModelChange = async (newPageModel: GridPaginationModel) => {
+    setPageOption({
+      ...pageOption,
+      page: newPageModel.page,
+      pageSize: newPageModel.pageSize,
+    })
+  }
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -87,9 +104,17 @@ const Activity: React.FC = () => {
     setAnchorEl(null)
   }
 
-  const handleSortModelChange = (newSortModel: any) => {
-    setInitialSortModel(newSortModel)
-  }
+  const handleSortModelChange = useCallback(
+    (sortModel: GridSortModel) => {
+      if (sortModel.length && sortModel[0].field) {
+        setPageOption({
+          ...pageOption,
+          orderBy: `${sortModel[0].field} ${sortModel[0].sort}`,
+        })
+      }
+    },
+    [pageOption]
+  )
 
   const handleDialogOpen = (activity: string) => {
     setSelectedActivity(activity)
@@ -110,6 +135,17 @@ const Activity: React.FC = () => {
       (farmFilter === '' || row.farm.includes(farmFilter))
     )
   })
+
+  const getActivityList = useCallback(async () => {
+    setIsLoading(true)
+    const response = await getActivityListApi(pageOption)
+    console.log('Activity List:', response)
+    setIsLoading(false)
+  }, [pageOption])
+
+  useEffect(() => {
+    getActivityList()
+  }, [getActivityList])
 
   return (
     <Box>
@@ -135,7 +171,7 @@ const Activity: React.FC = () => {
             <TextField
               variant='outlined'
               size='small'
-              placeholder='ค้นหา'
+              placeholder='ค้นหาบ่อ'
               InputProps={{
                 startAdornment: (
                   <InputAdornment position='start'>
@@ -205,9 +241,20 @@ const Activity: React.FC = () => {
         <DataGrid
           rows={filteredRows}
           columns={columns}
-          sortModel={initialSortModel}
-          autoPageSize={true}
+          onPaginationModelChange={handlePageModelChange}
           onSortModelChange={handleSortModelChange}
+          paginationModel={{
+            pageSize: pageOption.pageSize,
+            page: pageOption.page,
+          }}
+          rowCount={rows.length || 0}
+          paginationMode='server'
+          disableRowSelectionOnClick
+          loading={isLoading}
+          autoHeight
+          onRowDoubleClick={handleRowDblClick}
+          pageSizeOptions={[10, 50, 100]}
+          pagination
           sx={{
             '& .MuiDataGrid-columnHeaders': {
               backgroundColor: '#FAF8EE',
