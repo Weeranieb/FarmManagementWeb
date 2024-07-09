@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   TextField,
   Grid,
@@ -11,6 +11,10 @@ import {
 import dayjs, { Dayjs } from 'dayjs'
 import DateSelect from '../../components/DateSelect'
 import DialogWrapper from '../../components/DialogWrapper'
+import { Farm } from '../../models/schema/farm'
+import { getFarmListApi } from '../../services/farm.service'
+import { FarmWithActive } from '../../models/schema/activePond'
+import { getFarmWithActiveApi } from '../../services/activePond.service'
 
 interface DialogFillProps {
   open: boolean
@@ -21,7 +25,7 @@ interface DialogFillProps {
 interface NewActivityData {
   pond: string
   activity: string
-  farm: string
+  farmId: number
   totalWeight: string
   unit: string
   pricePerUnit: string
@@ -29,15 +33,41 @@ interface NewActivityData {
 }
 
 const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
-  const [formData, setFormData] = React.useState<NewActivityData>({
+  const [farms, setFarms] = useState<Farm[]>([])
+  const [activePonds, setActivePonds] = useState<FarmWithActive[]>([])
+
+  useEffect(() => {
+    const getListFarms = async () => {
+      const farmList = await getFarmListApi()
+      console.log('farm list', farmList.data)
+      setFarms(farmList.data)
+    }
+
+    getListFarms()
+  }, [])
+
+  const [formData, setFormData] = useState<NewActivityData>({
     pond: '',
     activity: '',
-    farm: '',
+    farmId: 0,
     totalWeight: '',
     unit: '',
     pricePerUnit: '',
     date: dayjs().format('YYYY-MM-DD'),
   })
+
+  useEffect(() => {
+    if (formData.farmId !== 0) {
+      const getActivePond = async (farmId: number) => {
+        console.log('farm id', farmId)
+        const activePondList = await getFarmWithActiveApi(farmId)
+        console.log('active pond list', activePondList.data)
+        setActivePonds(activePondList.data)
+      }
+
+      getActivePond(formData.farmId)
+    }
+  }, [formData.farmId])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -57,12 +87,10 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
 
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target
-    if (name) {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }))
-    }
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: name === 'farmId' ? parseInt(value, 10) : value,
+    }))
   }
 
   const handleFormSubmit = () => {
@@ -82,13 +110,16 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>ฟาร์ม</InputLabel>
             <Select
-              name='farm'
-              value={formData.farm}
+              name='farmId'
+              value={formData.farmId.toString()}
               onChange={handleSelectChange}
               label='ฟาร์ม'
             >
-              <MenuItem value='Farm1'>Farm1</MenuItem>
-              <MenuItem value='Farm2'>Farm2</MenuItem>
+              {farms.map((farm) => (
+                <MenuItem key={farm.id} value={farm.id}>
+                  {farm.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>
@@ -101,8 +132,11 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
               onChange={handleSelectChange}
               label='บ่อ'
             >
-              <MenuItem value='Pond1'>Pond1</MenuItem>
-              <MenuItem value='Pond2'>Pond2</MenuItem>
+              {activePonds.map((pond) => (
+                <MenuItem key={pond.id} value={pond.id}>
+                  {pond.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>

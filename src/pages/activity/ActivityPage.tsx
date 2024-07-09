@@ -103,20 +103,11 @@ const ActivityPage: React.FC = () => {
     console.log('New Activity:', newActivity)
   }
 
-  // const filteredRows = rows.filter((row) => {
-  //   return (
-  //     (typeFilter === '' || row.activity.includes(typeFilter)) &&
-  //     (farmFilter === '' || row.farm.includes(farmFilter))
-  //   )
-  // })
-
   const getActivityList = useCallback(async () => {
     setIsLoading(true)
-    // const response = await getActivityListApi(pageOption)
     await getActivityListApi(pageOption, modeFilter, farmFilter).then((res) => {
       if (res.result) setRows(res.data.items)
     })
-    // console.log('Activity List:', response)
     setIsLoading(false)
   }, [pageOption, modeFilter, farmFilter])
 

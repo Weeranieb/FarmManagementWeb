@@ -7,6 +7,7 @@ const pairFilterMap = {
   MOVE: 'ย้าย',
   SELL: 'ขาย',
 }
+
 const ModeFilter: React.FC<FilterStringProps> = ({ value, onChange }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value)
@@ -22,9 +23,9 @@ const ModeFilter: React.FC<FilterStringProps> = ({ value, onChange }) => {
       select
     >
       <MenuItem value=''>ทั้งหมด</MenuItem>
-      {Object.entries(pairFilterMap).map(([key, value]) => (
+      {Object.entries(pairFilterMap).map(([key, val]) => (
         <MenuItem key={key} value={key}>
-          {value}
+          {val}
         </MenuItem>
       ))}
     </TextField>
