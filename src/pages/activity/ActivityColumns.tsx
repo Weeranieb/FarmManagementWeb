@@ -2,6 +2,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { Box } from '@mui/material'
 import { Info as InfoIcon, Delete as DeleteIcon } from '@mui/icons-material'
 import Swal from 'sweetalert2'
+import { timeToDate, trimPondName } from '../../utils/string'
 
 const handleInfoClick = () => {
   console.log('Info icon clicked') // Implement your logic here
@@ -32,10 +33,15 @@ export const columns: GridColDef[] = [
     flex: 0.05,
     hideSortIcons: true,
   },
-  { field: 'pond', headerName: 'บ่อ', flex: 0.15 },
-  { field: 'activity', headerName: 'กิจกรรม', flex: 0.15 },
   {
-    field: 'farm',
+    field: 'pondName',
+    headerName: 'บ่อ',
+    flex: 0.15,
+    valueFormatter: (params) => trimPondName(params.value),
+  },
+  { field: 'mode', headerName: 'กิจกรรม', flex: 0.15 },
+  {
+    field: 'farmName',
     headerName: 'ฟาร์ม',
     flex: 0.2,
     headerAlign: 'center',
@@ -49,15 +55,29 @@ export const columns: GridColDef[] = [
   },
   { field: 'unit', headerName: 'หน่วย', flex: 0.2 },
   {
-    field: 'date',
+    field: 'activityDate',
     headerName: 'วันที่ทำ',
     flex: 0.2,
+    valueFormatter: (params) => {
+      if (params.value == null) {
+        return ''
+      }
+
+      return timeToDate(params.value)
+    },
   },
   {
-    field: 'edit',
+    field: 'createdDate',
     headerName: 'เพิ่มข้อมูลวันที่',
     flex: 0.2,
     align: 'center',
+    valueFormatter: (params) => {
+      if (params.value == null) {
+        return ''
+      }
+
+      return timeToDate(params.value)
+    },
   },
   {
     field: 'info',

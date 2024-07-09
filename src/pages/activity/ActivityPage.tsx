@@ -23,6 +23,7 @@ import { columns } from './ActivityColumns'
 import { useNavigate } from 'react-router-dom'
 import { PageOptions } from '../../models/api/pageOptions'
 import { getActivityListApi } from '../../services/activity.service'
+import { Activity } from '../../models/schema/activity'
 
 const rows = [
   {
@@ -63,8 +64,9 @@ const rows = [
   },
 ]
 
-const Activity: React.FC = () => {
+const ActivityPage: React.FC = () => {
   const navigate = useNavigate()
+  const [rowActivity, setRows] = useState<Activity[]>([])
   const [typeFilter, setTypeFilter] = React.useState('')
   const [farmFilter, setFarmFilter] = React.useState('')
   const [dialogOpen, setDialogOpen] = React.useState(false)
@@ -129,16 +131,19 @@ const Activity: React.FC = () => {
     console.log('New Activity:', newActivity)
   }
 
-  const filteredRows = rows.filter((row) => {
-    return (
-      (typeFilter === '' || row.activity.includes(typeFilter)) &&
-      (farmFilter === '' || row.farm.includes(farmFilter))
-    )
-  })
+  // const filteredRows = rows.filter((row) => {
+  //   return (
+  //     (typeFilter === '' || row.activity.includes(typeFilter)) &&
+  //     (farmFilter === '' || row.farm.includes(farmFilter))
+  //   )
+  // })
 
   const getActivityList = useCallback(async () => {
     setIsLoading(true)
     const response = await getActivityListApi(pageOption)
+    await getActivityListApi(pageOption).then((res) => {
+      if (res.result) setRows(res.data.items)
+    })
     console.log('Activity List:', response)
     setIsLoading(false)
   }, [pageOption])
@@ -239,7 +244,7 @@ const Activity: React.FC = () => {
       </Box>
       <div style={{ height: 600, width: '100%' }}>
         <DataGrid
-          rows={filteredRows}
+          rows={rowActivity}
           columns={columns}
           onPaginationModelChange={handlePageModelChange}
           onSortModelChange={handleSortModelChange}
@@ -293,4 +298,4 @@ const Activity: React.FC = () => {
   )
 }
 
-export default Activity
+export default ActivityPage
