@@ -9,11 +9,7 @@ import {
   Button,
   Menu,
 } from '@mui/material'
-import {
-  Search as SearchIcon,
-  Info as InfoIcon,
-  Delete as DeleteIcon,
-} from '@mui/icons-material'
+import { Search as SearchIcon } from '@mui/icons-material'
 import { GridSortModel } from '@mui/x-data-grid/models/gridSortModel'
 import { GridPaginationModel } from '@mui/x-data-grid/models/gridPaginationProps'
 import DialogFill from './DialogFill'
@@ -23,52 +19,16 @@ import { columns } from './ActivityColumns'
 import { useNavigate } from 'react-router-dom'
 import { PageOptions } from '../../models/api/pageOptions'
 import { getActivityListApi } from '../../services/activity.service'
-import { Activity } from '../../models/schema/activity'
-
-const rows = [
-  {
-    id: 1,
-    pond: 'บ่อ 2',
-    activity: 'ย้าย',
-    farm: 'ฟาร์ม 1',
-    totalWeight: '4.3',
-    unit: 'ตัน',
-    date: '02/08/2566',
-    edit: '8/21/15',
-    info: (
-      <>
-        <InfoIcon color='disabled' />
-      </>
-    ),
-    more: (
-      <>
-        <DeleteIcon color='disabled' />
-      </>
-    ),
-  },
-  {
-    id: 2,
-    pond: 'บ่อ 3',
-    activity: 'ย้าย',
-    farm: 'ฟาร์ม 2',
-    totalWeight: '4.3',
-    unit: 'ตัน',
-    date: '02/08/2566',
-    edit: '8/21/15',
-    actions: (
-      <>
-        <InfoIcon color='disabled' />
-        <DeleteIcon color='disabled' />
-      </>
-    ),
-  },
-]
+import { ActivityList } from '../../models/schema/activity'
+import ModeFilter from './ActivityCatalogue'
+import FarmFilter from './FarmCatalogue'
 
 const ActivityPage: React.FC = () => {
   const navigate = useNavigate()
-  const [rowActivity, setRows] = useState<Activity[]>([])
-  const [typeFilter, setTypeFilter] = React.useState('')
-  const [farmFilter, setFarmFilter] = React.useState('')
+  const [rowActivity, setRows] = useState<ActivityList[]>([])
+  const [modeFilter, setModeFilter] = React.useState('')
+  const [farmFilter, setFarmFilter] = React.useState<number>(0)
+  // const [farmFilter, setFarmFilter] = useState<string | number>('')
   const [dialogOpen, setDialogOpen] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
   const [selectedActivity, setSelectedActivity] = React.useState('')
@@ -91,6 +51,18 @@ const ActivityPage: React.FC = () => {
       page: newPageModel.page,
       pageSize: newPageModel.pageSize,
     })
+  }
+
+  let keywordTimeout: NodeJS.Timeout
+  const handleSearch = (e: any) => {
+    clearTimeout(keywordTimeout)
+
+    keywordTimeout = setTimeout(async () => {
+      setPageOption((prev) => ({
+        ...prev,
+        keyword: e.target.value,
+      }))
+    }, 700)
   }
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -140,13 +112,13 @@ const ActivityPage: React.FC = () => {
 
   const getActivityList = useCallback(async () => {
     setIsLoading(true)
-    const response = await getActivityListApi(pageOption)
-    await getActivityListApi(pageOption).then((res) => {
+    // const response = await getActivityListApi(pageOption)
+    await getActivityListApi(pageOption, modeFilter, farmFilter).then((res) => {
       if (res.result) setRows(res.data.items)
     })
-    console.log('Activity List:', response)
+    // console.log('Activity List:', response)
     setIsLoading(false)
-  }, [pageOption])
+  }, [pageOption, modeFilter, farmFilter])
 
   useEffect(() => {
     getActivityList()
@@ -177,6 +149,7 @@ const ActivityPage: React.FC = () => {
               variant='outlined'
               size='small'
               placeholder='ค้นหาบ่อ'
+              onChange={handleSearch}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position='start'>
@@ -214,33 +187,8 @@ const ActivityPage: React.FC = () => {
         </Box>
       </Box>
       <Box display='flex' alignItems='center' p={2}>
-        <TextField
-          label='ประเภท'
-          variant='outlined'
-          size='small'
-          sx={{ width: 150, mr: 3 }}
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          select
-        >
-          <MenuItem value=''>ทั้งหมด</MenuItem>
-          <MenuItem value='เติม'>เติม</MenuItem>
-          <MenuItem value='ย้าย'>ย้าย</MenuItem>
-          <MenuItem value='ขาย'>ขาย</MenuItem>
-        </TextField>
-        <TextField
-          label='ฟาร์ม'
-          variant='outlined'
-          size='small'
-          sx={{ width: 150, mr: 3 }}
-          value={farmFilter}
-          onChange={(e) => setFarmFilter(e.target.value)}
-          select
-        >
-          <MenuItem value=''>ทั้งหมด</MenuItem>
-          <MenuItem value='ฟาร์ม 1'>ฟาร์ม 1</MenuItem>
-          <MenuItem value='ฟาร์ม 2'>ฟาร์ม 2</MenuItem>
-        </TextField>
+        <ModeFilter value={modeFilter} onChange={setModeFilter} />
+        <FarmFilter value={farmFilter} onChange={setFarmFilter} />
       </Box>
       <div style={{ height: 600, width: '100%' }}>
         <DataGrid
@@ -252,7 +200,7 @@ const ActivityPage: React.FC = () => {
             pageSize: pageOption.pageSize,
             page: pageOption.page,
           }}
-          rowCount={rows.length || 0}
+          rowCount={rowActivity.length || 0}
           paginationMode='server'
           disableRowSelectionOnClick
           loading={isLoading}

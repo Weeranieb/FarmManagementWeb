@@ -13,3 +13,10 @@ export interface Activity extends Base {
   pricePerUnit?: number
   activityDate: string
 }
+
+export interface ActivityList extends Activity {
+  totalWeight: number
+  unit: string
+  farmName: string
+  pondName: string
+}
