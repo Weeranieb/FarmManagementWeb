@@ -15,21 +15,12 @@ import { Farm } from '../../models/schema/farm'
 import { getFarmListApi } from '../../services/farm.service'
 import { FarmWithActive } from '../../models/schema/activePond'
 import { getFarmWithActiveApi } from '../../services/activePond.service'
+import { AddFillActivity } from '../../models/schema/activity'
 
 interface DialogFillProps {
   open: boolean
   onClose: () => void
-  onSubmit: (data: NewActivityData) => void
-}
-
-interface NewActivityData {
-  pond: string
-  activity: string
-  farmId: number
-  totalWeight: string
-  unit: string
-  pricePerUnit: string
-  date: string
+  onSubmit: (data: AddFillActivity) => void
 }
 
 const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
@@ -46,14 +37,17 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
     getListFarms()
   }, [])
 
-  const [formData, setFormData] = useState<NewActivityData>({
-    pond: '',
-    activity: '',
+  const [formData, setFormData] = useState<AddFillActivity>({
     farmId: 0,
-    totalWeight: '',
-    unit: '',
-    pricePerUnit: '',
-    date: dayjs().format('YYYY-MM-DD'),
+    pondId: 0,
+    amount: 0,
+    fishType: '',
+    fishWeight: 0,
+    pricePerUnit: 0,
+    fishUnit: '',
+    activityDate: dayjs().format('YYYY-MM-DD'),
+    additionalCost: 0,
+    isNewPond: false,
   })
 
   useEffect(() => {
@@ -89,7 +83,8 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
     const { name, value } = e.target
     setFormData((prevData) => ({
       ...prevData,
-      [name]: name === 'farmId' ? parseInt(value, 10) : value,
+      [name]:
+        name === 'farmId' || name === 'pondId' ? parseInt(value, 10) : value,
     }))
   }
 
@@ -116,7 +111,7 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
               label='ฟาร์ม'
             >
               {farms.map((farm) => (
-                <MenuItem key={farm.id} value={farm.id}>
+                <MenuItem key={farm.id} value={farm.id.toString()}>
                   {farm.name}
                 </MenuItem>
               ))}
@@ -127,64 +122,76 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>บ่อ</InputLabel>
             <Select
-              name='pond'
-              value={formData.pond}
+              name='pondId'
+              value={formData.pondId.toString()}
               onChange={handleSelectChange}
               label='บ่อ'
             >
               {activePonds.map((pond) => (
-                <MenuItem key={pond.id} value={pond.id}>
+                <MenuItem key={pond.id} value={pond.id.toString()}>
                   {pond.name}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>ปลา</InputLabel>
             <Select
-              name='activity'
-              value={formData.activity}
+              name='fishType'
+              value={formData.fishType}
               onChange={handleSelectChange}
               label='ปลา'
             >
-              <MenuItem value='Fish1'>Fish1</MenuItem>
-              <MenuItem value='Fish2'>Fish2</MenuItem>
+              <MenuItem value='Kaphong'>ปลากะพง</MenuItem>
+              <MenuItem value='Nil'>ปลานิล</MenuItem>
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <TextField
             margin='dense'
-            name='totalWeight'
-            label='น้ำหนัก'
+            name='fishWeight'
+            label='น้ำหนักเฉลี่ย'
             type='text'
             fullWidth
             variant='outlined'
-            value={formData.totalWeight}
+            value={formData.fishWeight}
             onChange={handleInputChange}
           />
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
+          <TextField
+            margin='dense'
+            name='amount'
+            label='จำนวน'
+            type='text'
+            fullWidth
+            variant='outlined'
+            value={formData.amount}
+            onChange={handleInputChange}
+          />
+        </Grid>
+        <Grid item xs={3}>
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>หน่วย</InputLabel>
             <Select
-              name='unit'
-              value={formData.unit}
+              name='fishUnit'
+              value={formData.fishUnit}
               onChange={handleSelectChange}
               label='หน่วย'
             >
-              <MenuItem value='kg'>kg</MenuItem>
-              <MenuItem value='g'>g</MenuItem>
+              <MenuItem value='Kilogram'>กิโลกรัม</MenuItem>
+              <MenuItem value='Keed'>ขีด</MenuItem>
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={4}>
           <TextField
             margin='dense'
             name='pricePerUnit'
-            label='ราคาต่อหน่วย'
+            label='ราคาต่อหน่วย (บาท/หน่วย)'
             type='text'
             fullWidth
             variant='outlined'
@@ -192,10 +199,22 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
             onChange={handleInputChange}
           />
         </Grid>
-        <Grid item xs={6} style={{ marginTop: '8px' }}>
+        <Grid item xs={4}>
+          <TextField
+            margin='dense'
+            name='additionalCost'
+            label='ค่าใช้จ่ายเพิ่มเติม (บาท)'
+            type='text'
+            fullWidth
+            variant='outlined'
+            value={formData.additionalCost}
+            onChange={handleInputChange}
+          />
+        </Grid>
+        <Grid item xs={4} style={{ marginTop: '8px' }}>
           <DateSelect
             label='วันที่ทำ'
-            value={dayjs(formData.date)}
+            value={dayjs(formData.activityDate)}
             onChange={handleDateChange}
           />
         </Grid>
