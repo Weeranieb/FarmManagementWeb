@@ -67,7 +67,7 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
     const { name, value } = e.target
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: isNaN(parseFloat(value)) ? value : parseFloat(value),
     }))
   }
 
@@ -75,7 +75,7 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
     const formattedDate = date ? date.format('YYYY-MM-DD') : ''
     setFormData((prevData) => ({
       ...prevData,
-      date: formattedDate,
+      activityDate: formattedDate,
     }))
   }
 
@@ -157,7 +157,7 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
             type='text'
             fullWidth
             variant='outlined'
-            value={formData.fishWeight}
+            value={formData.fishWeight.toString()}
             onChange={handleInputChange}
           />
         </Grid>
@@ -169,7 +169,7 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
             type='text'
             fullWidth
             variant='outlined'
-            value={formData.amount}
+            value={formData.amount.toString()}
             onChange={handleInputChange}
           />
         </Grid>
@@ -195,7 +195,7 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
             type='text'
             fullWidth
             variant='outlined'
-            value={formData.pricePerUnit}
+            value={formData.pricePerUnit.toString()}
             onChange={handleInputChange}
           />
         </Grid>
@@ -207,7 +207,7 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
             type='text'
             fullWidth
             variant='outlined'
-            value={formData.additionalCost}
+            value={formData.additionalCost?.toString() ?? ''}
             onChange={handleInputChange}
           />
         </Grid>
