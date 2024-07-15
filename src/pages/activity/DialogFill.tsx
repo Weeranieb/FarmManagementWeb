@@ -7,6 +7,8 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material'
 import dayjs, { Dayjs } from 'dayjs'
 import DateSelect from '../../components/DateSelect'
@@ -71,6 +73,14 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
     }))
   }
 
+  const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: checked,
+    }))
+  }
+
   const handleDateChange = (date: Dayjs | null) => {
     const formattedDate = date ? date.format('YYYY-MM-DD') : ''
     setFormData((prevData) => ({
@@ -101,7 +111,7 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
       handleFormSubmit={handleFormSubmit}
     >
       <Grid container spacing={3}>
-        <Grid item xs={6}>
+        <Grid item xs={5}>
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>ฟาร์ม</InputLabel>
             <Select
@@ -118,7 +128,7 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={4}>
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>บ่อ</InputLabel>
             <Select
@@ -134,6 +144,19 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
               ))}
             </Select>
           </FormControl>
+        </Grid>
+        <Grid item xs={3} container justifyContent='left' alignItems='center'>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={formData.isNewPond}
+                onChange={handleCheckbox}
+                name='isNewPond'
+                color='primary'
+              />
+            }
+            label='เปิดบ่อใหม่'
+          />
         </Grid>
         <Grid item xs={3}>
           <FormControl fullWidth variant='outlined' margin='dense'>

@@ -8,6 +8,8 @@ import {
   MenuItem,
   SelectChangeEvent,
   Typography,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material'
 import dayjs, { Dayjs } from 'dayjs'
 import DateSelect from '../../components/DateSelect'
@@ -89,6 +91,14 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
     }))
   }
 
+  const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: checked,
+    }))
+  }
+
   const handleDateChange = (date: Dayjs | null) => {
     const formattedDate = date ? date.format('YYYY-MM-DD') : ''
     setFormData((prevData) => ({
@@ -121,7 +131,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
         <Grid item xs={2} container alignItems='center' justifyContent='center'>
           <Typography variant='h6'>จาก</Typography>
         </Grid>
-        <Grid item xs={5}>
+        <Grid item xs={4}>
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>ฟาร์ม</InputLabel>
             <Select
@@ -135,13 +145,10 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
                   {farm.name}
                 </MenuItem>
               ))}
-              {/* <MenuItem key={0} value={0}>
-                -
-              </MenuItem> */}
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={5}>
+        <Grid item xs={3}>
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>บ่อ</InputLabel>
             <Select
@@ -150,24 +157,31 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
               onChange={handleSelectChange}
               label='บ่อ'
             >
-              {/* <MenuItem key={0} value={0}>
-                -
-              </MenuItem> */}
               {fromActivePonds.map((pond) => (
                 <MenuItem key={pond.id} value={pond.id.toString()}>
                   {pond.name}
                 </MenuItem>
               ))}
-              {/* <MenuItem key={0} value={0}>
-                -
-              </MenuItem> */}
             </Select>
           </FormControl>
+        </Grid>
+        <Grid item xs={3} container justifyContent='left' alignItems='center'>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={formData.isNewPond}
+                onChange={handleCheckbox}
+                name='isClose'
+                color='primary'
+              />
+            }
+            label='ปิดบ่อ'
+          />
         </Grid>
         <Grid item xs={2} container alignItems='center' justifyContent='center'>
           <Typography variant='h6'>ไปยัง</Typography>
         </Grid>
-        <Grid item xs={5}>
+        <Grid item xs={4}>
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>ฟาร์ม</InputLabel>
             <Select
@@ -181,13 +195,10 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
                   {farm.name}
                 </MenuItem>
               ))}
-              {/* <MenuItem key={0} value={0}>
-                -
-              </MenuItem> */}
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={5}>
+        <Grid item xs={3}>
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>บ่อ</InputLabel>
             <Select
@@ -201,11 +212,21 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
                   {pond.name}
                 </MenuItem>
               ))}
-              {/* <MenuItem key={0} value={0}>
-                -
-              </MenuItem> */}
             </Select>
           </FormControl>
+        </Grid>
+        <Grid item xs={3} container justifyContent='left' alignItems='center'>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={formData.isNewPond}
+                onChange={handleCheckbox}
+                name='isNewPond'
+                color='primary'
+              />
+            }
+            label='เปิดบ่อใหม่'
+          />
         </Grid>
         <Grid item xs={3}>
           <FormControl fullWidth variant='outlined' margin='dense'>
