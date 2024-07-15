@@ -15,7 +15,7 @@ interface DialogWrapperWithEditProps extends DialogProps {
   onClose: () => void
   handleFormSubmit?: () => void
   handleCancel?: () => void
-  isLarge?: boolean
+  islarge?: boolean
   children: React.ReactNode
 }
 
@@ -25,7 +25,7 @@ const DialogWrapperWithCancel: React.FC<DialogWrapperWithEditProps> = ({
   onClose,
   handleFormSubmit,
   handleCancel,
-  isLarge,
+  islarge,
   children,
 }) => {
   return (
@@ -33,8 +33,8 @@ const DialogWrapperWithCancel: React.FC<DialogWrapperWithEditProps> = ({
       open={open}
       onClose={onClose}
       fullWidth
-      maxWidth={isLarge ? 'xl' : 'md'}
-      isLarge={isLarge}
+      maxWidth={islarge ? 'xl' : 'md'}
+      islarge={islarge}
     >
       <StyledDialogTitle>
         {title}

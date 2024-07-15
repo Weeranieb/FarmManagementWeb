@@ -96,7 +96,7 @@ const DialogTable: React.FC<DialogTableProps> = ({
       title='เหยื่อสด เดือนมิ.ย. ปี 2565'
       handleFormSubmit={handleFormSubmit}
       handleCancel={handleCancel}
-      isLarge={true}
+      islarge={true}
     >
       <Grid item xs={12} sx={{ paddingLeft: 0 }}>
         <Table sx={{ marginLeft: 0 }}>

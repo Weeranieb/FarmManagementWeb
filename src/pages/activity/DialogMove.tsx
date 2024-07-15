@@ -98,18 +98,10 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
 
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target
-    if (name) {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]:
-          name === 'farmId' ||
-          name === 'pondId' ||
-          name === 'toFarmId' ||
-          name === 'toPondId'
-            ? parseInt(value, 10)
-            : value,
-      }))
-    }
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }))
   }
 
   const handleFormSubmit = () => {
@@ -142,6 +134,9 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
                   {farm.name}
                 </MenuItem>
               ))}
+              <MenuItem key={0} value={0}>
+                -
+              </MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -150,15 +145,21 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
             <InputLabel>บ่อ</InputLabel>
             <Select
               name='pondId'
-              value={formData.pondId.toString()}
+              value={formData.pondId.toString() || ''}
               onChange={handleSelectChange}
               label='บ่อ'
             >
+              <MenuItem key={0} value={0}>
+                -
+              </MenuItem>
               {fromActivePonds.map((pond) => (
                 <MenuItem key={pond.id} value={pond.id.toString()}>
                   {pond.name}
                 </MenuItem>
               ))}
+              <MenuItem key={0} value={0}>
+                -
+              </MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -179,6 +180,9 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
                   {farm.name}
                 </MenuItem>
               ))}
+              <MenuItem key={0} value={0}>
+                -
+              </MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -187,7 +191,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
             <InputLabel>บ่อ</InputLabel>
             <Select
               name='toPondId'
-              value={formData.toPondId.toString()}
+              value={formData.toPondId.toString() || ''}
               onChange={handleSelectChange}
               label='บ่อ'
             >
@@ -196,6 +200,9 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
                   {pond.name}
                 </MenuItem>
               ))}
+              <MenuItem key={0} value={0}>
+                -
+              </MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -208,8 +215,8 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
               onChange={handleSelectChange}
               label='ปลา'
             >
-              <MenuItem value='Fish1'>Fish1</MenuItem>
-              <MenuItem value='Fish2'>Fish2</MenuItem>
+              <MenuItem value='Kaphong'>ปลากะพง</MenuItem>
+              <MenuItem value='Nil'>ปลานิล</MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -234,8 +241,8 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
               onChange={handleSelectChange}
               label='หน่วย'
             >
-              <MenuItem value='kg'>kg</MenuItem>
-              <MenuItem value='g'>g</MenuItem>
+              <MenuItem value='Kilogram'>กิโลกรัม</MenuItem>
+              <MenuItem value='Keed'>ขีด</MenuItem>
             </Select>
           </FormControl>
         </Grid>
