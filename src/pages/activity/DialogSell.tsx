@@ -47,6 +47,26 @@ const AddRowFab = styled(Fab)(({ theme }) => ({
   },
 }))
 
+const SizeMap = {
+  Fish_01: 'ปลา 1',
+  Fish_02: 'ปลา 2',
+  Fish_03: 'ปลา 3',
+  Fish_04: 'ปลา 4',
+  Fish_05: 'ปลา 5',
+  Fish_06: 'ปลา 6',
+  Fish_07: 'ปลา 7',
+  Fish_08: 'ปลา 8',
+  Fish_09: 'ปลา 9',
+  Fish_10: 'ปลา 10',
+  Fish_11: 'ปลา 11',
+  Fish_12: 'ปลา 12',
+}
+
+const FishTypeMap = {
+  Kaphong: 'ปลากะพง',
+  Nil: 'ปลานิล',
+}
+
 const CustomTextField = styled(TextField)(({ theme }) => ({
   '& .MuiInputBase-input': {
     padding: '8px 10px',
@@ -83,7 +103,6 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
   useEffect(() => {
     const getListFarms = async () => {
       const farmList = await getFarmListApi()
-      console.log('farm list', farmList.data)
       setFarms(farmList.data)
     }
 
@@ -93,9 +112,7 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
   useEffect(() => {
     if (formData.farmId !== 0) {
       const getActivePond = async (farmId: number) => {
-        console.log('farm id', farmId)
         const activePondList = await getFarmWithActiveApi(farmId)
-        console.log('active pond list', activePondList.data)
         setActivePonds(activePondList.data)
       }
 
@@ -105,7 +122,12 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, checked, type } = e.target
-    const newValue = type === 'checkbox' ? checked : value
+    const newValue =
+      type === 'checkbox'
+        ? checked
+        : isNaN(parseFloat(value))
+        ? value
+        : parseFloat(value)
     setFormData((prevData) => ({
       ...prevData,
       [name]: newValue,
@@ -116,7 +138,7 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
     const formattedDate = date ? date.format('YYYY-MM-DD') : ''
     setFormData((prevData) => ({
       ...prevData,
-      date: formattedDate,
+      activityDate: formattedDate,
     }))
   }
 
@@ -125,16 +147,25 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
     if (name) {
       setFormData((prevData) => ({
         ...prevData,
-        [name]: value,
+        [name]: parseInt(value, 10),
       }))
     }
   }
 
-  const handleTableDataChange = (index: number, key: string, value: string) => {
+  const handleTableDataChange = (
+    index: number,
+    key: string,
+    value: string | number
+  ) => {
     setFormData((prevData) => {
-      const updatedSellDetail = [...prevData.sellDetails]
-      updatedSellDetail[index] = { ...updatedSellDetail[index], [key]: value }
-      return { ...prevData, tableData: updatedSellDetail }
+      const updatedSellDetails = [...prevData.sellDetails]
+      updatedSellDetails[index] = {
+        ...updatedSellDetails[index],
+        [key]: isNaN(parseFloat(value as string))
+          ? value
+          : parseFloat(value as string),
+      }
+      return { ...prevData, sellDetails: updatedSellDetails }
     })
   }
 
@@ -156,10 +187,10 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
 
   const handleRemoveRow = (index: number) => {
     setFormData((prevData) => {
-      const updatedSellDetail = prevData.sellDetails.filter(
+      const updatedSellDetails = prevData.sellDetails.filter(
         (_, i) => i !== index
       )
-      return { ...prevData, tableData: updatedSellDetail }
+      return { ...prevData, sellDetails: updatedSellDetails }
     })
   }
 
@@ -176,7 +207,7 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
       handleFormSubmit={handleFormSubmit}
     >
       <Grid container spacing={3}>
-        <Grid item xs={6}>
+        <Grid item xs={4}>
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>ฟาร์ม</InputLabel>
             <Select
@@ -193,7 +224,7 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={3}>
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>บ่อ</InputLabel>
             <Select
@@ -210,14 +241,14 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={6} style={{ marginTop: '8px' }}>
+        <Grid item xs={3} style={{ marginTop: '8px' }}>
           <DateSelect
             label='วันที่ทำ'
             value={dayjs(formData.activityDate)}
             onChange={handleDateChange}
           />
         </Grid>
-        <Grid item xs={6} container justifyContent='left' alignItems='center'>
+        <Grid item xs={2} container justifyContent='left' alignItems='center'>
           <FormControlLabel
             control={
               <Checkbox
@@ -230,8 +261,20 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
             label='ปิดบ่อ'
           />
         </Grid>
+        <Grid item xs={4}>
+          <TextField
+            margin='dense'
+            name='additionalCost'
+            label='ค่าใช้จ่ายเพิ่มเติม (บาท)'
+            type='text'
+            fullWidth
+            variant='outlined'
+            value={formData.additionalCost?.toString() ?? ''}
+            onChange={handleInputChange}
+          />
+        </Grid>
       </Grid>
-      <Grid container spacing={3} style={{ marginTop: '16px' }}>
+      <Grid container spacing={3} style={{ marginTop: '4px' }}>
         <Grid item xs={12}>
           <Table>
             <TableHead>
@@ -263,7 +306,7 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
                     width: '30%',
                   }}
                 >
-                  ราคาต่อกิโล
+                  ราคาต่อกิโลกรัม
                 </HeaderTableCell>
                 <TableCell style={{ width: '5%' }}></TableCell>
               </TableRow>
@@ -274,36 +317,62 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
                 <TableRow key={index}>
                   <CustomTableCell>{index + 1}</CustomTableCell>
                   <CustomTableCell>
-                    <CustomTextField
-                      name='fishType'
-                      value={row.fishType}
-                      onChange={(e) =>
-                        handleTableDataChange(index, 'fishType', e.target.value)
-                      }
-                    />
+                    <FormControl fullWidth margin='dense'>
+                      <Select
+                        name='fishType'
+                        value={row.fishType}
+                        size='small'
+                        onChange={(e) =>
+                          handleTableDataChange(
+                            index,
+                            'fishType',
+                            e.target.value
+                          )
+                        }
+                        label='ชนิดปลา'
+                      >
+                        {Object.entries(FishTypeMap).map(([key, value]) => (
+                          <MenuItem key={key} value={key}>
+                            {value}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </CustomTableCell>
                   <CustomTableCell>
-                    <CustomTextField
-                      name='size'
-                      value={row.size}
-                      onChange={(e) =>
-                        handleTableDataChange(index, 'size', e.target.value)
-                      }
-                    />
+                    <FormControl fullWidth margin='dense'>
+                      <Select
+                        name='size'
+                        value={row.size}
+                        size='small'
+                        onChange={(e) =>
+                          handleTableDataChange(index, 'size', e.target.value)
+                        }
+                        label='ไซส์'
+                      >
+                        {Object.entries(SizeMap).map(([key, value]) => (
+                          <MenuItem key={key} value={key}>
+                            {value}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </CustomTableCell>
                   <CustomTableCell>
-                    <CustomTextField
+                    <TextField
+                      size='small'
                       name='amount'
-                      value={row.amount}
+                      value={row.amount.toString()}
                       onChange={(e) =>
                         handleTableDataChange(index, 'amount', e.target.value)
                       }
                     />
                   </CustomTableCell>
                   <CustomTableCell>
-                    <CustomTextField
+                    <TextField
+                      size='small'
                       name='pricePerUnit'
-                      value={row.pricePerUnit}
+                      value={row.pricePerUnit.toString()}
                       onChange={(e) =>
                         handleTableDataChange(
                           index,
