@@ -1,7 +1,6 @@
 import { Base } from './base'
 
 export interface AddSellDetail {
-  sellId: number
   size: string
   fishType: string
   amount: number

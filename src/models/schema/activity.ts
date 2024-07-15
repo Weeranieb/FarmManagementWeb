@@ -51,6 +51,7 @@ export interface AddMoveActivity {
 }
 
 export interface AddSellActivity {
+  farmId: number
   pondId: number
   merchantId: number
   activityDate: string

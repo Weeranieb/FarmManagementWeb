@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React, { useEffect, useState, FC } from 'react'
 import {
   IconButton,
   Grid,
@@ -22,18 +22,16 @@ import { styled } from '@mui/system'
 import dayjs, { Dayjs } from 'dayjs'
 import DateSelect from '../../components/DateSelect'
 import DialogWrapper from '../../components/DialogWrapper'
+import { AddSellActivity } from '../../models/schema/activity'
+import { Farm } from '../../models/schema/farm'
+import { getFarmListApi } from '../../services/farm.service'
+import { FarmWithActive } from '../../models/schema/activePond'
+import { getFarmWithActiveApi } from '../../services/activePond.service'
 
 interface DialogSellProps {
   open: boolean
   onClose: () => void
   onSubmit: (data: AddSellActivity) => void
-}
-
-interface TableData {
-  fish: string
-  size: string
-  amount: string
-  pricePerKg: string
 }
 
 const HeaderTableCell = styled(TableCell)(({ theme }) => ({
@@ -60,18 +58,50 @@ const CustomTableCell = styled(TableCell)(({ theme }) => ({
   borderBottom: 'none',
 }))
 
-const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
-  const [formData, setFormData] = React.useState<AddSellActivity>({
-    pond: '',
-    activity: '',
-    farm: '',
-    totalWeight: '',
-    unit: '',
-    pricePerUnit: '',
-    date: dayjs().format('YYYY-MM-DD'),
-    closePond: false,
-    tableData: [{ fish: '', size: '', amount: '', pricePerKg: '' }],
+const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
+  const [farms, setFarms] = useState<Farm[]>([])
+  const [activePonds, setActivePonds] = useState<FarmWithActive[]>([])
+
+  const [formData, setFormData] = useState<AddSellActivity>({
+    farmId: 0,
+    pondId: 0,
+    merchantId: 0,
+    activityDate: dayjs().format('YYYY-MM-DD'),
+    additionalCost: 0,
+    isClose: false,
+    sellDetails: [
+      {
+        size: '',
+        fishUnit: 'Kilogram',
+        amount: 0,
+        pricePerUnit: 0,
+        fishType: '',
+      },
+    ],
   })
+
+  useEffect(() => {
+    const getListFarms = async () => {
+      const farmList = await getFarmListApi()
+      console.log('farm list', farmList.data)
+      setFarms(farmList.data)
+    }
+
+    getListFarms()
+  }, [])
+
+  useEffect(() => {
+    if (formData.farmId !== 0) {
+      const getActivePond = async (farmId: number) => {
+        console.log('farm id', farmId)
+        const activePondList = await getFarmWithActiveApi(farmId)
+        console.log('active pond list', activePondList.data)
+        setActivePonds(activePondList.data)
+      }
+
+      getActivePond(formData.farmId)
+    }
+  }, [formData.farmId])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, checked, type } = e.target
@@ -102,26 +132,34 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
 
   const handleTableDataChange = (index: number, key: string, value: string) => {
     setFormData((prevData) => {
-      const updatedTableData = [...prevData.tableData]
-      updatedTableData[index] = { ...updatedTableData[index], [key]: value }
-      return { ...prevData, tableData: updatedTableData }
+      const updatedSellDetail = [...prevData.sellDetails]
+      updatedSellDetail[index] = { ...updatedSellDetail[index], [key]: value }
+      return { ...prevData, tableData: updatedSellDetail }
     })
   }
 
   const handleAddRow = () => {
     setFormData((prevData) => ({
       ...prevData,
-      tableData: [
-        ...prevData.tableData,
-        { fish: '', size: '', amount: '', pricePerKg: '' },
+      sellDetails: [
+        ...prevData.sellDetails,
+        {
+          size: '',
+          fishUnit: 'Kilogram',
+          amount: 0,
+          pricePerUnit: 0,
+          fishType: '',
+        },
       ],
     }))
   }
 
   const handleRemoveRow = (index: number) => {
     setFormData((prevData) => {
-      const updatedTableData = prevData.tableData.filter((_, i) => i !== index)
-      return { ...prevData, tableData: updatedTableData }
+      const updatedSellDetail = prevData.sellDetails.filter(
+        (_, i) => i !== index
+      )
+      return { ...prevData, tableData: updatedSellDetail }
     })
   }
 
@@ -142,13 +180,16 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>ฟาร์ม</InputLabel>
             <Select
-              name='farm'
-              value={formData.farm}
+              name='farmId'
+              value={formData.farmId.toString()}
               onChange={handleSelectChange}
               label='ฟาร์ม'
             >
-              <MenuItem value='Farm1'>Farm1</MenuItem>
-              <MenuItem value='Farm2'>Farm2</MenuItem>
+              {farms.map((farm) => (
+                <MenuItem key={farm.id} value={farm.id.toString()}>
+                  {farm.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>
@@ -156,20 +197,23 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>บ่อ</InputLabel>
             <Select
-              name='pond'
-              value={formData.pond}
+              name='pondId'
+              value={formData.pondId.toString()}
               onChange={handleSelectChange}
               label='บ่อ'
             >
-              <MenuItem value='Pond1'>Pond1</MenuItem>
-              <MenuItem value='Pond2'>Pond2</MenuItem>
+              {activePonds.map((pond) => (
+                <MenuItem key={pond.id} value={pond.id.toString()}>
+                  {pond.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>
         <Grid item xs={6} style={{ marginTop: '8px' }}>
           <DateSelect
             label='วันที่ทำ'
-            value={dayjs(formData.date)}
+            value={dayjs(formData.activityDate)}
             onChange={handleDateChange}
           />
         </Grid>
@@ -177,9 +221,9 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={formData.closePond}
+                checked={formData.isClose}
                 onChange={handleInputChange}
-                name='closePond'
+                name='isClose'
                 color='primary'
               />
             }
@@ -226,15 +270,15 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
             </TableHead>
 
             <TableBody>
-              {formData.tableData.map((row, index) => (
+              {formData.sellDetails.map((row, index) => (
                 <TableRow key={index}>
                   <CustomTableCell>{index + 1}</CustomTableCell>
                   <CustomTableCell>
                     <CustomTextField
-                      name='fish'
-                      value={row.fish}
+                      name='fishType'
+                      value={row.fishType}
                       onChange={(e) =>
-                        handleTableDataChange(index, 'fish', e.target.value)
+                        handleTableDataChange(index, 'fishType', e.target.value)
                       }
                     />
                   </CustomTableCell>
@@ -258,19 +302,19 @@ const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
                   </CustomTableCell>
                   <CustomTableCell>
                     <CustomTextField
-                      name='pricePerKg'
-                      value={row.pricePerKg}
+                      name='pricePerUnit'
+                      value={row.pricePerUnit}
                       onChange={(e) =>
                         handleTableDataChange(
                           index,
-                          'pricePerKg',
+                          'pricePerUnit',
                           e.target.value
                         )
                       }
                     />
                   </CustomTableCell>
                   <CustomTableCell>
-                    {index === formData.tableData.length - 1 ? (
+                    {index === formData.sellDetails.length - 1 ? (
                       <AddRowFab size='small' onClick={handleAddRow}>
                         <AddIcon />
                       </AddRowFab>
