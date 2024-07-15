@@ -1,4 +1,5 @@
 import { Base } from './base'
+import { AddSellDetail } from './sellDetail'
 
 export interface Activity extends Base {
   id: number
@@ -34,7 +35,9 @@ export interface AddFillActivity {
 }
 
 export interface AddMoveActivity {
+  farmId: number
   pondId: number
+  toFarmId: number
   toPondId: number
   amount: number
   fishType: string
@@ -44,5 +47,14 @@ export interface AddMoveActivity {
   activityDate: string
   additionalCost?: number
   isNewPond: boolean
+  isClose: boolean
+}
+
+export interface AddSellActivity {
+  pondId: number
+  merchantId: number
+  activityDate: string
+  additionalCost?: number
+  sellDetails: AddSellDetail[]
   isClose: boolean
 }

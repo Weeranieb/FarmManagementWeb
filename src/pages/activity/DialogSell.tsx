@@ -26,19 +26,7 @@ import DialogWrapper from '../../components/DialogWrapper'
 interface DialogSellProps {
   open: boolean
   onClose: () => void
-  onSubmit: (data: NewActivityData) => void
-}
-
-interface NewActivityData {
-  pond: string
-  activity: string
-  farm: string
-  totalWeight: string
-  unit: string
-  pricePerUnit: string
-  date: string
-  closePond: boolean
-  tableData: TableData[]
+  onSubmit: (data: AddSellActivity) => void
 }
 
 interface TableData {
@@ -73,7 +61,7 @@ const CustomTableCell = styled(TableCell)(({ theme }) => ({
 }))
 
 const DialogSell: React.FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
-  const [formData, setFormData] = React.useState<NewActivityData>({
+  const [formData, setFormData] = React.useState<AddSellActivity>({
     pond: '',
     activity: '',
     farm: '',

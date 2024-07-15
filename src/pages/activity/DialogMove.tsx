@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React, { useEffect, useState, FC } from 'react'
 import {
   TextField,
   Grid,
@@ -12,43 +12,79 @@ import {
 import dayjs, { Dayjs } from 'dayjs'
 import DateSelect from '../../components/DateSelect'
 import DialogWrapper from '../../components/DialogWrapper'
+import { AddMoveActivity } from '../../models/schema/activity'
+import { getFarmListApi } from '../../services/farm.service'
+import { Farm } from '../../models/schema/farm'
+import { FarmWithActive } from '../../models/schema/activePond'
+import { getFarmWithActiveApi } from '../../services/activePond.service'
 
 interface DialogMoveProps {
   open: boolean
   onClose: () => void
-  onSubmit: (data: NewActivityData) => void
+  onSubmit: (data: AddMoveActivity) => void
 }
 
-interface NewActivityData {
-  pond: string
-  activity: string
-  farm: string
-  toFarm: string
-  toPond: string
-  totalWeight: string
-  unit: string
-  pricePerUnit: string
-  date: string
-}
+const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
+  const [farms, setFarms] = useState<Farm[]>([])
+  const [fromActivePonds, setFromActivePonds] = useState<FarmWithActive[]>([])
+  const [toActivePonds, setToActivePonds] = useState<FarmWithActive[]>([])
 
-const DialogMove: React.FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
-  const [formData, setFormData] = React.useState<NewActivityData>({
-    pond: '',
-    activity: '',
-    farm: '',
-    toFarm: '',
-    toPond: '',
-    totalWeight: '',
-    unit: '',
-    pricePerUnit: '',
-    date: dayjs().format('YYYY-MM-DD'), // Initialize with today's date
+  const [formData, setFormData] = useState<AddMoveActivity>({
+    farmId: 0,
+    pondId: 0,
+    toFarmId: 0,
+    toPondId: 0,
+    amount: 0,
+    fishType: '',
+    fishWeight: 0,
+    pricePerUnit: 0,
+    fishUnit: '',
+    activityDate: dayjs().format('YYYY-MM-DD'),
+    isNewPond: false,
+    isClose: false,
   })
+
+  useEffect(() => {
+    const getListFarms = async () => {
+      const farmList = await getFarmListApi()
+      console.log('farm list', farmList.data)
+      setFarms(farmList.data)
+    }
+
+    getListFarms()
+  }, [])
+
+  useEffect(() => {
+    if (formData.farmId !== 0) {
+      const getActivePond = async (farmId: number) => {
+        console.log('farm id', farmId)
+        const activePondList = await getFarmWithActiveApi(farmId)
+        console.log('active pond list', activePondList.data)
+        setFromActivePonds(activePondList.data)
+      }
+
+      getActivePond(formData.farmId)
+    }
+  }, [formData.farmId])
+
+  useEffect(() => {
+    if (formData.toFarmId !== 0) {
+      const getActivePond = async (toFarmId: number) => {
+        console.log('to farm id', toFarmId)
+        const activePondList = await getFarmWithActiveApi(toFarmId)
+        console.log('active pond list', activePondList.data)
+        setToActivePonds(activePondList.data)
+      }
+
+      getActivePond(formData.toFarmId)
+    }
+  }, [formData.toFarmId])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: isNaN(parseFloat(value)) ? value : parseFloat(value),
     }))
   }
 
@@ -56,7 +92,7 @@ const DialogMove: React.FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
     const formattedDate = date ? date.format('YYYY-MM-DD') : ''
     setFormData((prevData) => ({
       ...prevData,
-      date: formattedDate,
+      activityDate: formattedDate,
     }))
   }
 
@@ -65,7 +101,13 @@ const DialogMove: React.FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
     if (name) {
       setFormData((prevData) => ({
         ...prevData,
-        [name]: value,
+        [name]:
+          name === 'farmId' ||
+          name === 'pondId' ||
+          name === 'toFarmId' ||
+          name === 'toPondId'
+            ? parseInt(value, 10)
+            : value,
       }))
     }
   }
@@ -76,14 +118,6 @@ const DialogMove: React.FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
   }
 
   return (
-    // <StyledDialog open={open} onClose={onClose}>
-    //   <StyledDialogTitle>
-    //     กรอกข้อมูล: ย้าย
-    //     <IconButton edge='end' color='inherit' onClick={onClose}>
-    //       <CloseIcon />
-    //     </IconButton>
-    //   </StyledDialogTitle>
-    //   <StyledDialogContent>
     <DialogWrapper
       open={open}
       onClose={onClose}
@@ -98,13 +132,16 @@ const DialogMove: React.FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>ฟาร์ม</InputLabel>
             <Select
-              name='farm'
-              value={formData.farm}
+              name='farmId'
+              value={formData.farmId.toString()}
               onChange={handleSelectChange}
               label='ฟาร์ม'
             >
-              <MenuItem value='Farm1'>Farm1</MenuItem>
-              <MenuItem value='Farm2'>Farm2</MenuItem>
+              {farms.map((farm) => (
+                <MenuItem key={farm.id} value={farm.id.toString()}>
+                  {farm.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>
@@ -112,13 +149,16 @@ const DialogMove: React.FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>บ่อ</InputLabel>
             <Select
-              name='pond'
-              value={formData.pond}
+              name='pondId'
+              value={formData.pondId.toString()}
               onChange={handleSelectChange}
               label='บ่อ'
             >
-              <MenuItem value='Pond1'>Pond1</MenuItem>
-              <MenuItem value='Pond2'>Pond2</MenuItem>
+              {fromActivePonds.map((pond) => (
+                <MenuItem key={pond.id} value={pond.id.toString()}>
+                  {pond.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>
@@ -129,13 +169,16 @@ const DialogMove: React.FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>ฟาร์ม</InputLabel>
             <Select
-              name='toFarm'
-              value={formData.toFarm}
+              name='toFarmId'
+              value={formData.toFarmId.toString()}
               onChange={handleSelectChange}
               label='ฟาร์ม'
             >
-              <MenuItem value='Farm1'>Farm1</MenuItem>
-              <MenuItem value='Farm2'>Farm2</MenuItem>
+              {farms.map((farm) => (
+                <MenuItem key={farm.id} value={farm.id.toString()}>
+                  {farm.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>
@@ -143,13 +186,16 @@ const DialogMove: React.FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>บ่อ</InputLabel>
             <Select
-              name='toPond'
-              value={formData.toPond}
+              name='toPondId'
+              value={formData.toPondId.toString()}
               onChange={handleSelectChange}
               label='บ่อ'
             >
-              <MenuItem value='Pond1'>Pond1</MenuItem>
-              <MenuItem value='Pond2'>Pond2</MenuItem>
+              {toActivePonds.map((pond) => (
+                <MenuItem key={pond.id} value={pond.id.toString()}>
+                  {pond.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>
@@ -157,8 +203,8 @@ const DialogMove: React.FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>ปลา</InputLabel>
             <Select
-              name='activity'
-              value={formData.activity}
+              name='fishType'
+              value={formData.fishType}
               onChange={handleSelectChange}
               label='ปลา'
             >
@@ -170,12 +216,12 @@ const DialogMove: React.FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
         <Grid item xs={4}>
           <TextField
             margin='dense'
-            name='totalWeight'
+            name='fishWeight'
             label='น้ำหนัก'
             type='text'
             fullWidth
             variant='outlined'
-            value={formData.totalWeight}
+            value={formData.fishWeight.toString()}
             onChange={handleInputChange}
           />
         </Grid>
@@ -183,8 +229,8 @@ const DialogMove: React.FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>หน่วย</InputLabel>
             <Select
-              name='unit'
-              value={formData.unit}
+              name='fishUnit'
+              value={formData.fishUnit}
               onChange={handleSelectChange}
               label='หน่วย'
             >
@@ -201,14 +247,14 @@ const DialogMove: React.FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
             type='text'
             fullWidth
             variant='outlined'
-            value={formData.pricePerUnit}
+            value={formData.pricePerUnit.toString()}
             onChange={handleInputChange}
           />
         </Grid>
         <Grid item xs={6} style={{ marginTop: '8px' }}>
           <DateSelect
             label='วันที่ทำ'
-            value={dayjs(formData.date)}
+            value={dayjs(formData.activityDate)}
             onChange={handleDateChange}
           />
         </Grid>

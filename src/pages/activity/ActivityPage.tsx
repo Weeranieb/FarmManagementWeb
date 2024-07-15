@@ -19,7 +19,12 @@ import { columns } from './ActivityColumns'
 import { useNavigate } from 'react-router-dom'
 import { PageOptions } from '../../models/api/pageOptions'
 import { getActivityListApi } from '../../services/activity.service'
-import { ActivityList } from '../../models/schema/activity'
+import {
+  ActivityList,
+  AddFillActivity,
+  AddMoveActivity,
+  AddSellActivity,
+} from '../../models/schema/activity'
 import ModeFilter from './ActivityCatalogue'
 import FarmFilter from './FarmCatalogue'
 
@@ -99,7 +104,9 @@ const ActivityPage: React.FC = () => {
     setDialogOpen(false)
   }
 
-  const handleFormSubmit = (newActivity: any) => {
+  const handleFormSubmit = (
+    newActivity: AddFillActivity | AddMoveActivity | AddSellActivity
+  ) => {
     console.log('New Activity:', newActivity)
   }
 
