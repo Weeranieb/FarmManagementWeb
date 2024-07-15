@@ -18,6 +18,8 @@ import { getFarmListApi } from '../../services/farm.service'
 import { FarmWithActive } from '../../models/schema/activePond'
 import { getFarmWithActiveApi } from '../../services/activePond.service'
 import { AddFillActivity } from '../../models/schema/activity'
+import { FishTypeMap } from '../../constants/fishType'
+import { UnitMap } from '../../constants/unit'
 
 interface DialogFillProps {
   open: boolean
@@ -167,8 +169,11 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
               onChange={handleSelectChange}
               label='ปลา'
             >
-              <MenuItem value='Kaphong'>ปลากะพง</MenuItem>
-              <MenuItem value='Nil'>ปลานิล</MenuItem>
+              {Object.entries(FishTypeMap).map(([key, value]) => (
+                <MenuItem key={key} value={key}>
+                  {value}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>
@@ -193,8 +198,11 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
               onChange={handleSelectChange}
               label='หน่วย'
             >
-              <MenuItem value='Kilogram'>กิโลกรัม</MenuItem>
-              <MenuItem value='Keed'>ขีด</MenuItem>
+              {Object.entries(UnitMap).map(([key, value]) => (
+                <MenuItem key={key} value={key}>
+                  {value}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>

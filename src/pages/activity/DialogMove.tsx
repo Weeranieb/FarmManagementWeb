@@ -19,6 +19,8 @@ import { getFarmListApi } from '../../services/farm.service'
 import { Farm } from '../../models/schema/farm'
 import { FarmWithActive } from '../../models/schema/activePond'
 import { getFarmWithActiveApi } from '../../services/activePond.service'
+import { FishTypeMap } from '../../constants/fishType'
+import { UnitMap } from '../../constants/unit'
 
 interface DialogMoveProps {
   open: boolean
@@ -237,8 +239,11 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
               onChange={handleSelectChange}
               label='ปลา'
             >
-              <MenuItem value='Kaphong'>ปลากะพง</MenuItem>
-              <MenuItem value='Nil'>ปลานิล</MenuItem>
+              {Object.entries(FishTypeMap).map(([key, value]) => (
+                <MenuItem key={key} value={key}>
+                  {value}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>
@@ -263,8 +268,11 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
               onChange={handleSelectChange}
               label='หน่วย'
             >
-              <MenuItem value='Kilogram'>กิโลกรัม</MenuItem>
-              <MenuItem value='Keed'>ขีด</MenuItem>
+              {Object.entries(UnitMap).map(([key, value]) => (
+                <MenuItem key={key} value={key}>
+                  {value}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>
