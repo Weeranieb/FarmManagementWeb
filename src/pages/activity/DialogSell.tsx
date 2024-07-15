@@ -3,7 +3,6 @@ import {
   IconButton,
   Grid,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
   SelectChangeEvent,
@@ -16,6 +15,7 @@ import {
   TableRow,
   TextField,
   Fab,
+  InputLabel,
 } from '@mui/material'
 import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material'
 import { styled } from '@mui/system'
@@ -329,7 +329,6 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
                             e.target.value
                           )
                         }
-                        label='ชนิดปลา'
                       >
                         {Object.entries(FishTypeMap).map(([key, value]) => (
                           <MenuItem key={key} value={key}>
@@ -348,7 +347,6 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
                         onChange={(e) =>
                           handleTableDataChange(index, 'size', e.target.value)
                         }
-                        label='ไซส์'
                       >
                         {Object.entries(SizeMap).map(([key, value]) => (
                           <MenuItem key={key} value={key}>
