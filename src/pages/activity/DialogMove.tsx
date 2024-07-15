@@ -39,6 +39,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
     fishWeight: 0,
     pricePerUnit: 0,
     fishUnit: '',
+    additionalCost: 0,
     activityDate: dayjs().format('YYYY-MM-DD'),
     isNewPond: false,
     isClose: false,
@@ -134,9 +135,9 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
                   {farm.name}
                 </MenuItem>
               ))}
-              <MenuItem key={0} value={0}>
+              {/* <MenuItem key={0} value={0}>
                 -
-              </MenuItem>
+              </MenuItem> */}
             </Select>
           </FormControl>
         </Grid>
@@ -149,17 +150,17 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
               onChange={handleSelectChange}
               label='บ่อ'
             >
-              <MenuItem key={0} value={0}>
+              {/* <MenuItem key={0} value={0}>
                 -
-              </MenuItem>
+              </MenuItem> */}
               {fromActivePonds.map((pond) => (
                 <MenuItem key={pond.id} value={pond.id.toString()}>
                   {pond.name}
                 </MenuItem>
               ))}
-              <MenuItem key={0} value={0}>
+              {/* <MenuItem key={0} value={0}>
                 -
-              </MenuItem>
+              </MenuItem> */}
             </Select>
           </FormControl>
         </Grid>
@@ -180,9 +181,9 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
                   {farm.name}
                 </MenuItem>
               ))}
-              <MenuItem key={0} value={0}>
+              {/* <MenuItem key={0} value={0}>
                 -
-              </MenuItem>
+              </MenuItem> */}
             </Select>
           </FormControl>
         </Grid>
@@ -200,13 +201,13 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
                   {pond.name}
                 </MenuItem>
               ))}
-              <MenuItem key={0} value={0}>
+              {/* <MenuItem key={0} value={0}>
                 -
-              </MenuItem>
+              </MenuItem> */}
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>ปลา</InputLabel>
             <Select
@@ -220,11 +221,11 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <TextField
             margin='dense'
             name='fishWeight'
-            label='น้ำหนัก'
+            label='น้ำหนักเฉลี่ย'
             type='text'
             fullWidth
             variant='outlined'
@@ -232,7 +233,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
             onChange={handleInputChange}
           />
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>หน่วย</InputLabel>
             <Select
@@ -246,11 +247,23 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
             </Select>
           </FormControl>
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={3}>
+          <TextField
+            margin='dense'
+            name='amount'
+            label='จำนวน'
+            type='text'
+            fullWidth
+            variant='outlined'
+            value={formData.amount.toString()}
+            onChange={handleInputChange}
+          />
+        </Grid>
+        <Grid item xs={4}>
           <TextField
             margin='dense'
             name='pricePerUnit'
-            label='ราคาต่อหน่วย'
+            label='ราคาต่อ (บาท) หน่วย'
             type='text'
             fullWidth
             variant='outlined'
@@ -258,7 +271,19 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
             onChange={handleInputChange}
           />
         </Grid>
-        <Grid item xs={6} style={{ marginTop: '8px' }}>
+        <Grid item xs={4}>
+          <TextField
+            margin='dense'
+            name='additionalCost'
+            label='ค่าใช้จ่ายเพิ่มเติม (บาท)'
+            type='text'
+            fullWidth
+            variant='outlined'
+            value={formData.additionalCost?.toString() ?? ''}
+            onChange={handleInputChange}
+          />
+        </Grid>
+        <Grid item xs={4} style={{ marginTop: '8px' }}>
           <DateSelect
             label='วันที่ทำ'
             value={dayjs(formData.activityDate)}

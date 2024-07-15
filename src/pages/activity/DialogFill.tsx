@@ -162,18 +162,6 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
           />
         </Grid>
         <Grid item xs={3}>
-          <TextField
-            margin='dense'
-            name='amount'
-            label='จำนวน'
-            type='text'
-            fullWidth
-            variant='outlined'
-            value={formData.amount.toString()}
-            onChange={handleInputChange}
-          />
-        </Grid>
-        <Grid item xs={3}>
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>หน่วย</InputLabel>
             <Select
@@ -186,6 +174,18 @@ const DialogFill: React.FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
               <MenuItem value='Keed'>ขีด</MenuItem>
             </Select>
           </FormControl>
+        </Grid>
+        <Grid item xs={3}>
+          <TextField
+            margin='dense'
+            name='amount'
+            label='จำนวน'
+            type='text'
+            fullWidth
+            variant='outlined'
+            value={formData.amount.toString()}
+            onChange={handleInputChange}
+          />
         </Grid>
         <Grid item xs={4}>
           <TextField
