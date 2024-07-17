@@ -6,8 +6,6 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
-  Checkbox,
-  FormControlLabel,
   Table,
   TableBody,
   TableCell,
@@ -15,12 +13,10 @@ import {
   TableRow,
   TextField,
   Fab,
-  InputLabel,
 } from '@mui/material'
 import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material'
 import { styled } from '@mui/system'
 import dayjs, { Dayjs } from 'dayjs'
-import DateSelect from '../../components/DateSelect'
 import DialogWrapper from '../../components/DialogWrapper'
 import { AddSellActivity } from '../../models/schema/activity'
 import { Farm } from '../../models/schema/farm'
@@ -29,6 +25,10 @@ import { FarmWithActive } from '../../models/schema/activePond'
 import { getFarmWithActiveApi } from '../../services/activePond.service'
 import { FishTypeMap } from '../../constants/fishType'
 import { SizeMap } from '../../constants/size'
+import GridSelect from '../../components/grid/GridSelect'
+import GridDateSelect from '../../components/grid/GridDateSelect'
+import GridCheckbox from '../../components/grid/GridCheckbox'
+import GridTextField from '../../components/grid/GridTextField'
 
 interface DialogSellProps {
   open: boolean
@@ -182,72 +182,43 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
       handleFormSubmit={handleFormSubmit}
     >
       <Grid container spacing={3}>
-        <Grid item xs={4}>
-          <FormControl fullWidth variant='outlined' margin='dense'>
-            <InputLabel>ฟาร์ม</InputLabel>
-            <Select
-              name='farmId'
-              value={formData.farmId.toString()}
-              onChange={handleSelectChange}
-              label='ฟาร์ม'
-            >
-              {farms.map((farm) => (
-                <MenuItem key={farm.id} value={farm.id.toString()}>
-                  {farm.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={3}>
-          <FormControl fullWidth variant='outlined' margin='dense'>
-            <InputLabel>บ่อ</InputLabel>
-            <Select
-              name='pondId'
-              value={formData.pondId.toString()}
-              onChange={handleSelectChange}
-              label='บ่อ'
-            >
-              {activePonds.map((pond) => (
-                <MenuItem key={pond.id} value={pond.id.toString()}>
-                  {pond.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={3} style={{ marginTop: '8px' }}>
-          <DateSelect
-            label='วันที่ทำ'
-            value={dayjs(formData.activityDate)}
-            onChange={handleDateChange}
-          />
-        </Grid>
-        <Grid item xs={2} container justifyContent='left' alignItems='center'>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={formData.isClose}
-                onChange={handleInputChange}
-                name='isClose'
-                color='primary'
-              />
-            }
-            label='ปิดบ่อ'
-          />
-        </Grid>
-        <Grid item xs={4}>
-          <TextField
-            margin='dense'
-            name='additionalCost'
-            label='ค่าใช้จ่ายเพิ่มเติม (บาท)'
-            type='text'
-            fullWidth
-            variant='outlined'
-            value={formData.additionalCost?.toString() ?? ''}
-            onChange={handleInputChange}
-          />
-        </Grid>
+        <GridSelect
+          xs={4}
+          value={formData.farmId.toString()}
+          name='farmId'
+          label='ฟาร์ม'
+          objectMap={farms}
+          handleSelectChange={handleSelectChange}
+        />
+        <GridSelect
+          xs={3}
+          value={formData.pondId.toString()}
+          name='pondId'
+          label='บ่อ'
+          objectMap={activePonds}
+          handleSelectChange={handleSelectChange}
+        />
+        <GridDateSelect
+          xs={3}
+          date={formData.activityDate}
+          name='activityDate'
+          label='วันที่ทำ'
+          handleDateChange={handleDateChange}
+        />
+        <GridCheckbox
+          xs={3}
+          isCheck={formData.isClose}
+          name='isClose'
+          label='ปิดบ่อ'
+          handleCheckbox={handleInputChange}
+        />
+        <GridTextField
+          xs={4}
+          value={formData.additionalCost?.toString() ?? ''}
+          name='additionalCost'
+          label='ค่าใช้จ่ายเพิ่มเติม (บาท)'
+          handleInputChange={handleInputChange}
+        />
       </Grid>
       <Grid container spacing={3} style={{ marginTop: '4px' }}>
         <Grid item xs={12}>
