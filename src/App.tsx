@@ -19,6 +19,7 @@ import { setToken, setUserData } from './redux/reducers/user'
 import { useDispatch } from 'react-redux'
 import { getUserApi } from './services/user.service'
 import { checkIsTokenValid } from './utils/token'
+import i18n from './i18n/i18n'
 
 const App: React.FC = () => {
   const dispatch = useDispatch()
@@ -34,6 +35,8 @@ const App: React.FC = () => {
       }
     }
   }
+
+  i18n.changeLanguage('th')
 
   useEffect(() => {
     getUser()

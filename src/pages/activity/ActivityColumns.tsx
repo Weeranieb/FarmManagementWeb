@@ -3,6 +3,7 @@ import { Box } from '@mui/material'
 import { Info as InfoIcon, Delete as DeleteIcon } from '@mui/icons-material'
 import Swal from 'sweetalert2'
 import { timeToDate, trimPondName } from '../../utils/string'
+import { useTranslation } from 'react-i18next'
 
 const handleInfoClick = () => {
   console.log('Info icon clicked') // Implement your logic here
@@ -26,101 +27,117 @@ const handleDeleteClick = (id: number) => {
   })
 }
 
-export const columns: GridColDef[] = [
-  {
-    field: 'id',
-    headerName: '',
-    flex: 0.05,
-    hideSortIcons: true,
-  },
-  {
-    field: 'pondName',
-    headerName: 'บ่อ',
-    flex: 0.15,
-    valueFormatter: (params) => trimPondName(params.value),
-  },
-  { field: 'mode', headerName: 'กิจกรรม', flex: 0.15 },
-  {
-    field: 'farmName',
-    headerName: 'ฟาร์ม',
-    flex: 0.2,
-    headerAlign: 'center',
-    align: 'center',
-  },
-  {
-    field: 'totalWeight',
-    headerName: 'น้ำหนักรวม',
-    flex: 0.2,
-    align: 'center',
-  },
-  { field: 'unit', headerName: 'หน่วย', flex: 0.2 },
-  {
-    field: 'activityDate',
-    headerName: 'วันที่ทำ',
-    flex: 0.2,
-    valueFormatter: (params) => {
-      if (params.value == null) {
-        return ''
-      }
+const useColumns = () => {
+  const { t } = useTranslation()
 
-      return timeToDate(params.value)
+  const columns: GridColDef[] = [
+    {
+      field: 'id',
+      headerName: '',
+      flex: 0.05,
+      hideSortIcons: true,
     },
-  },
-  {
-    field: 'createdDate',
-    headerName: 'เพิ่มข้อมูลวันที่',
-    flex: 0.2,
-    align: 'center',
-    valueFormatter: (params) => {
-      if (params.value == null) {
-        return ''
-      }
+    {
+      field: 'pondName',
+      headerName: 'บ่อ',
+      flex: 0.15,
+      valueFormatter: (params) => trimPondName(params.value),
+    },
+    {
+      field: 'mode',
+      headerName: 'กิจกรรม',
+      flex: 0.15,
+      valueFormatter: (params) => {
+        if (params.value == null) {
+          return ''
+        }
+        return t(params.value.toLowerCase())
+      },
+    },
+    {
+      field: 'farmName',
+      headerName: 'ฟาร์ม',
+      flex: 0.2,
+      headerAlign: 'center',
+      align: 'center',
+    },
+    {
+      field: 'totalWeight',
+      headerName: 'น้ำหนักรวม',
+      flex: 0.2,
+      align: 'center',
+    },
+    { field: 'unit', headerName: 'หน่วย', flex: 0.2 },
+    {
+      field: 'activityDate',
+      headerName: 'วันที่ทำ',
+      flex: 0.2,
+      valueFormatter: (params) => {
+        if (params.value == null) {
+          return ''
+        }
+        return timeToDate(params.value)
+      },
+    },
+    {
+      field: 'createdDate',
+      headerName: 'เพิ่มข้อมูลวันที่',
+      flex: 0.2,
+      align: 'center',
+      valueFormatter: (params) => {
+        if (params.value == null) {
+          return ''
+        }
+        return timeToDate(params.value)
+      },
+    },
+    {
+      field: 'info',
+      headerName: '',
+      align: 'right',
+      hideSortIcons: true,
+      disableColumnMenu: true,
+      flex: 0.05,
+      renderCell: (params) => {
+        if (params.field === 'info') {
+          return (
+            <Box display='flex' alignItems='center'>
+              <InfoIcon
+                color='disabled'
+                style={{ cursor: 'pointer' }}
+                onClick={handleInfoClick}
+              />
+            </Box>
+          )
+        }
+        return params.value
+      },
+    },
+    {
+      field: 'more',
+      headerName: '',
+      align: 'left',
+      hideSortIcons: true,
+      disableColumnMenu: true,
+      flex: 0.1,
+      renderCell: (params) => {
+        if (params.field === 'more') {
+          return (
+            <Box display='flex' alignItems='center'>
+              <DeleteIcon
+                color='disabled'
+                style={{ cursor: 'pointer' }}
+                onClick={() => handleDeleteClick(params.row.id)}
+              />
+            </Box>
+          )
+        }
+        return params.value
+      },
+    },
+  ]
 
-      return timeToDate(params.value)
-    },
-  },
-  {
-    field: 'info',
-    headerName: '',
-    align: 'right',
-    hideSortIcons: true,
-    disableColumnMenu: true,
-    flex: 0.05,
-    renderCell: (params) => {
-      if (params.field === 'info') {
-        return (
-          <Box display='flex' alignItems='center'>
-            <InfoIcon
-              color='disabled'
-              style={{ cursor: 'pointer' }}
-              onClick={handleInfoClick}
-            />
-          </Box>
-        )
-      }
-      return params.value
-    },
-  },
-  {
-    field: 'more',
-    headerName: '',
-    align: 'left',
-    hideSortIcons: true,
-    disableColumnMenu: true,
-    flex: 0.1,
-    renderCell: (params) => {
-      if (params.field === 'more') {
-        return (
-          <Box display='flex' alignItems='center'>
-            <DeleteIcon
-              color='disabled'
-              style={{ cursor: 'pointer' }}
-              onClick={() => handleDeleteClick(params.row.id)}
-            />
-          </Box>
-        )
-      }
-      return params.value
-    },
-  },
-]
+  return columns
+}
+
+export { useColumns }

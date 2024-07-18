@@ -15,7 +15,8 @@ import { GridPaginationModel } from '@mui/x-data-grid/models/gridPaginationProps
 import DialogFill from './DialogFill'
 import DialogMove from './DialogMove'
 import DialogSell from './DialogSell'
-import { columns } from './ActivityColumns'
+import { useColumns } from './ActivityColumns'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { PageOptions } from '../../models/api/pageOptions'
 import { getActivityListApi } from '../../services/activity.service'
@@ -37,6 +38,7 @@ const ActivityPage: React.FC = () => {
   const [dialogOpen, setDialogOpen] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
   const [selectedActivity, setSelectedActivity] = React.useState('')
+  const { t } = useTranslation()
   const [pageOption, setPageOption] = useState<PageOptions>({
     page: 0,
     pageSize: 10,
@@ -191,7 +193,7 @@ const ActivityPage: React.FC = () => {
       <div style={{ height: 600, width: '100%' }}>
         <DataGrid
           rows={rowActivity}
-          columns={columns}
+          columns={useColumns()}
           onPaginationModelChange={handlePageModelChange}
           onSortModelChange={handleSortModelChange}
           paginationModel={{
