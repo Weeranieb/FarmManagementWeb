@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, FC, MouseEvent } from 'react'
 import { DataGrid, GridRowParams } from '@mui/x-data-grid'
 import {
   Box,
@@ -28,17 +28,16 @@ import {
 } from '../../models/schema/activity'
 import ModeFilter from './ActivityCatalogue'
 import FarmFilter from './FarmCatalogue'
+import { ActivityMode } from '../../constants/activity'
 
-const ActivityPage: React.FC = () => {
+const ActivityPage: FC = () => {
   const navigate = useNavigate()
   const [rowActivity, setRows] = useState<ActivityList[]>([])
-  const [modeFilter, setModeFilter] = React.useState('')
-  const [farmFilter, setFarmFilter] = React.useState<number>(0)
-  // const [farmFilter, setFarmFilter] = useState<string | number>('')
-  const [dialogOpen, setDialogOpen] = React.useState(false)
-  const [isLoading, setIsLoading] = React.useState(false)
-  const [selectedActivity, setSelectedActivity] = React.useState('')
-  const { t } = useTranslation()
+  const [modeFilter, setModeFilter] = useState('')
+  const [farmFilter, setFarmFilter] = useState<number>(0)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [selectedActivity, setSelectedActivity] = useState('')
   const [pageOption, setPageOption] = useState<PageOptions>({
     page: 0,
     pageSize: 10,
@@ -46,10 +45,12 @@ const ActivityPage: React.FC = () => {
     keyword: '',
   })
 
+  const { t } = useTranslation()
+
   const handleRowDblClick = (row: GridRowParams): void => {
-    navigate(`/appowner/info/${row.id}`, {
-      replace: true,
-    })
+    // navigate(`/appowner/info/${row.id}`, {
+    //   replace: true,
+    // })
   }
 
   const handlePageModelChange = async (newPageModel: GridPaginationModel) => {
@@ -73,7 +74,7 @@ const ActivityPage: React.FC = () => {
   }
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleMenuClick = (event: MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
   }
   const handleMenuItemClick = (activity: string) => {
@@ -176,13 +177,15 @@ const ActivityPage: React.FC = () => {
             open={Boolean(anchorEl)}
             onClose={handleCloseMenu}
           >
-            <MenuItem onClick={() => handleMenuItemClick('เติม')}>
-              เติม
+            <MenuItem onClick={() => handleMenuItemClick(ActivityMode.Fill)}>
+              {t('fill')}
             </MenuItem>
-            <MenuItem onClick={() => handleMenuItemClick('ย้าย')}>
-              ย้าย
+            <MenuItem onClick={() => handleMenuItemClick(ActivityMode.Move)}>
+              {t('move')}
             </MenuItem>
-            <MenuItem onClick={() => handleMenuItemClick('ขาย')}>ขาย</MenuItem>
+            <MenuItem onClick={() => handleMenuItemClick(ActivityMode.Sell)}>
+              {t('sell')}
+            </MenuItem>
           </Menu>
         </Box>
       </Box>
@@ -223,19 +226,19 @@ const ActivityPage: React.FC = () => {
           }}
         />
       </div>
-      {selectedActivity === 'เติม' ? (
+      {selectedActivity === 'FILL' ? (
         <DialogFill
           open={dialogOpen}
           onClose={handleDialogClose}
           onSubmit={handleFormSubmit}
         />
-      ) : selectedActivity === 'ย้าย' ? (
+      ) : selectedActivity === 'MOVE' ? (
         <DialogMove
           open={dialogOpen}
           onClose={handleDialogClose}
           onSubmit={handleFormSubmit}
         />
-      ) : selectedActivity === 'ขาย' ? (
+      ) : selectedActivity === 'SELL' ? (
         <DialogSell
           open={dialogOpen}
           onClose={handleDialogClose}

@@ -67,7 +67,17 @@ const useColumns = () => {
       flex: 0.2,
       align: 'center',
     },
-    { field: 'unit', headerName: 'หน่วย', flex: 0.2 },
+    {
+      field: 'unit',
+      headerName: 'หน่วย',
+      flex: 0.2,
+      valueFormatter: (params) => {
+        if (params.value == null) {
+          return ''
+        }
+        return t(params.value.toLowerCase())
+      },
+    },
     {
       field: 'activityDate',
       headerName: 'วันที่ทำ',

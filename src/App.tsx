@@ -36,6 +36,7 @@ const App: React.FC = () => {
     }
   }
 
+  // FIXME to use localStorage.getItem('lang') instead
   i18n.changeLanguage('th')
 
   useEffect(() => {

@@ -1,5 +1,8 @@
 {
   "sell": "Sell",
   "move": "Move",
-  "fill": "Fill"
+  "fill": "Fill",
+  "kilogram": "Kilogram",
+  "keed": "Keed",
+  "all": "All"
 }

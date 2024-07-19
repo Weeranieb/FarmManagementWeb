@@ -3,9 +3,11 @@ import { TextField, MenuItem } from '@mui/material'
 import { Farm } from '../../models/schema/farm'
 import { getFarmListApi } from '../../services/farm.service'
 import { FilterNumberProps } from '../../models/props/filterprop'
+import { useTranslation } from 'react-i18next'
 
 const FarmFilter: React.FC<FilterNumberProps> = ({ value, onChange }) => {
   const [farms, setFarms] = useState<Farm[]>([])
+  const { t } = useTranslation()
   useEffect(() => {
     const getFarms = async () => {
       try {
@@ -32,7 +34,7 @@ const FarmFilter: React.FC<FilterNumberProps> = ({ value, onChange }) => {
       onChange={handleChange}
       select
     >
-      <MenuItem value={0}>ทั้งหมด</MenuItem>
+      <MenuItem value={0}>{t('all')}</MenuItem>
       {farms.map((farm) => (
         <MenuItem key={farm.id} value={farm.id}>
           {farm.name}

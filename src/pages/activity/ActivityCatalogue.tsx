@@ -1,6 +1,7 @@
 import React from 'react'
 import { TextField, MenuItem } from '@mui/material'
 import { FilterStringProps } from '../../models/props/filterprop'
+import { useTranslation } from 'react-i18next'
 
 const pairFilterMap = {
   FILL: 'เติม',
@@ -12,6 +13,7 @@ const ModeFilter: React.FC<FilterStringProps> = ({ value, onChange }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value)
   }
+  const { t } = useTranslation()
   return (
     <TextField
       label='ประเภท'
@@ -22,7 +24,7 @@ const ModeFilter: React.FC<FilterStringProps> = ({ value, onChange }) => {
       onChange={handleChange}
       select
     >
-      <MenuItem value=''>ทั้งหมด</MenuItem>
+      <MenuItem value=''>{t('all')}</MenuItem>
       {Object.entries(pairFilterMap).map(([key, val]) => (
         <MenuItem key={key} value={key}>
           {val}
