@@ -142,6 +142,7 @@ const DialogFill: FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
           value={formData.fishWeight.toString()}
           name='fishWeight'
           label='น้ำหนักเฉลี่ย'
+          type='number'
           handleInputChange={handleInputChange}
         />
         <GridSelect
@@ -157,6 +158,7 @@ const DialogFill: FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
           value={formData.amount.toString()}
           name='amount'
           label='จำนวน'
+          type='number'
           handleInputChange={handleInputChange}
         />
         <GridTextField
@@ -164,6 +166,7 @@ const DialogFill: FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
           value={formData.pricePerUnit.toString()}
           name='pricePerUnit'
           label='ราคาต่อหน่วย (บาท/หน่วย)'
+          type='number'
           handleInputChange={handleInputChange}
         />
         <GridTextField
@@ -171,6 +174,7 @@ const DialogFill: FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
           value={formData.additionalCost?.toString() ?? ''}
           name='additionalCost'
           label='ค่าใช้จ่ายเพิ่มเติม (บาท)'
+          type='number'
           handleInputChange={handleInputChange}
         />
         <GridDateSelect

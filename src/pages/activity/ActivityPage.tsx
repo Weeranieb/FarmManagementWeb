@@ -120,11 +120,12 @@ const ActivityPage: FC = () => {
               SuccessAlert()
               window.location.reload()
             } else {
+              console.log('enter here', res.error)
               ErrorAlert(res.error)
             }
           })
           .catch((err) => {
-            ErrorAlert(err)
+            ErrorAlert(err.error)
           })
         break
       case ActivityMode.Move:

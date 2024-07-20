@@ -7,6 +7,7 @@ interface Props {
   name: string
   label: string
   handleInputChange: (event: ChangeEvent<HTMLInputElement>) => void
+  type?: string
 }
 
 const GridTextField: FC<Props> = ({
@@ -15,6 +16,7 @@ const GridTextField: FC<Props> = ({
   name,
   label,
   handleInputChange,
+  type = 'text',
 }) => {
   return (
     <Grid item xs={xs}>
@@ -22,7 +24,7 @@ const GridTextField: FC<Props> = ({
         margin='dense'
         name={name}
         label={label}
-        type='text'
+        type={type}
         fullWidth
         variant='outlined'
         value={value}
