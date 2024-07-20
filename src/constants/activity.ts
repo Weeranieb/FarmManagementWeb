@@ -1,5 +1,5 @@
 export const ActivityMode = {
   Fill: 'FILL',
-  Move: 'Move',
-  Sell: 'Sell',
+  Move: 'MOVE',
+  Sell: 'SELL',
 }

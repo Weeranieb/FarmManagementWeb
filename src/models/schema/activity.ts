@@ -1,5 +1,6 @@
+import { ActivePond } from './activePond'
 import { Base } from './base'
-import { AddSellDetail } from './sellDetail'
+import { AddSellDetail, SellDetail } from './sellDetail'
 
 export interface Activity extends Base {
   id: number
@@ -34,6 +35,11 @@ export interface AddFillActivity {
   isNewPond: boolean
 }
 
+export interface CreateFillActityResponse {
+  activity: Activity
+  activePond: ActivePond
+}
+
 export interface AddMoveActivity {
   farmId: number
   pondId: number
@@ -50,6 +56,12 @@ export interface AddMoveActivity {
   isClose: boolean
 }
 
+export interface CreateMoveActityResponse {
+  activity: Activity
+  fromActivePond: ActivePond
+  toActivePond: ActivePond
+}
+
 export interface AddSellActivity {
   farmId: number
   pondId: number
@@ -58,4 +70,10 @@ export interface AddSellActivity {
   additionalCost?: number
   sellDetails: AddSellDetail[]
   isClose: boolean
+}
+
+export interface CreateSellActityResponse {
+  activity: Activity
+  activePond: ActivePond
+  sellDetails: SellDetail[]
 }

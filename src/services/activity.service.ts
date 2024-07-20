@@ -1,5 +1,13 @@
 import { BaseResponse, ListPage } from '../models/api/baseResponse'
-import { ActivityList } from '../models/schema/activity'
+import {
+  ActivityList,
+  AddFillActivity,
+  AddMoveActivity,
+  AddSellActivity,
+  CreateFillActityResponse,
+  CreateMoveActityResponse,
+  CreateSellActityResponse,
+} from '../models/schema/activity'
 import api from './apiClient'
 import handleResponseError from './handleError'
 
@@ -32,4 +40,48 @@ const getActivityListApi = async (
     .catch((err) => handleResponseError(err))
 }
 
-export { getActivityListApi }
+const createFillActivityApi = async (
+  data: AddFillActivity
+): Promise<BaseResponse<CreateFillActityResponse>> => {
+  const url = 'activity/fill'
+  return api
+    .post<BaseResponse<any>>(url, data)
+    .then((res) => {
+      if (res.data.result) return res.data
+      else return handleResponseError(res.data)
+    })
+    .catch((err) => handleResponseError(err))
+}
+
+const createMoveActivityApi = async (
+  data: AddMoveActivity
+): Promise<BaseResponse<CreateMoveActityResponse>> => {
+  const url = 'activity/move'
+  return api
+    .post<BaseResponse<any>>(url, data)
+    .then((res) => {
+      if (res.data.result) return res.data
+      else return handleResponseError(res.data)
+    })
+    .catch((err) => handleResponseError(err))
+}
+
+const createSellActivityApi = async (
+  data: AddSellActivity
+): Promise<BaseResponse<CreateSellActityResponse>> => {
+  const url = 'activity/sell'
+  return api
+    .post<BaseResponse<any>>(url, data)
+    .then((res) => {
+      if (res.data.result) return res.data
+      else return handleResponseError(res.data)
+    })
+    .catch((err) => handleResponseError(err))
+}
+
+export {
+  getActivityListApi,
+  createFillActivityApi,
+  createMoveActivityApi,
+  createSellActivityApi,
+}

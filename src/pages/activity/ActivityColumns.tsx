@@ -66,11 +66,13 @@ const useColumns = () => {
       headerName: 'น้ำหนักรวม',
       flex: 0.2,
       align: 'center',
+      sortable: false,
     },
     {
       field: 'unit',
       headerName: 'หน่วย',
       flex: 0.2,
+      sortable: false,
       valueFormatter: (params) => {
         if (params.value == null) {
           return ''

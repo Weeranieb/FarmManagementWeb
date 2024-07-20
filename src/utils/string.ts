@@ -6,3 +6,7 @@ export const timeToDate = (time: string) => {
 export const trimPondName = (name: string) => {
   return name.replace('บ่อ', '').trim()
 }
+
+export const firstCapital = (text: string) => {
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}

@@ -17,23 +17,22 @@ import DialogMove from './DialogMove'
 import DialogSell from './DialogSell'
 import { useColumns } from './ActivityColumns'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
 import { PageOptions } from '../../models/api/pageOptions'
-import { getActivityListApi } from '../../services/activity.service'
 import {
-  ActivityList,
-  AddFillActivity,
-  AddMoveActivity,
-  AddSellActivity,
-} from '../../models/schema/activity'
+  createFillActivityApi,
+  createMoveActivityApi,
+  createSellActivityApi,
+  getActivityListApi,
+} from '../../services/activity.service'
+import { ActivityList } from '../../models/schema/activity'
 import ModeFilter from './ActivityCatalogue'
 import FarmFilter from './FarmCatalogue'
 import { ActivityMode } from '../../constants/activity'
 import SuccessAlert from '../../components/SuccessAlert'
 import ErrorAlert from '../../components/ErrorAlert'
+import { firstCapital } from '../../utils/string'
 
 const ActivityPage: FC = () => {
-  const navigate = useNavigate()
   const [rowActivity, setRows] = useState<ActivityList[]>([])
   const [modeFilter, setModeFilter] = useState('')
   const [farmFilter, setFarmFilter] = useState<number>(0)
@@ -93,7 +92,7 @@ const ActivityPage: FC = () => {
       if (sortModel.length && sortModel[0].field) {
         setPageOption({
           ...pageOption,
-          orderBy: `${sortModel[0].field} ${sortModel[0].sort}`,
+          orderBy: `"${firstCapital(sortModel[0].field)}" ${sortModel[0].sort}`,
         })
       }
     },
@@ -101,6 +100,7 @@ const ActivityPage: FC = () => {
   )
 
   const handleDialogOpen = (activity: string) => {
+    console.log('Selected handleDialogOpen:', activity)
     setSelectedActivity(activity)
     setDialogOpen(true)
   }
@@ -109,67 +109,57 @@ const ActivityPage: FC = () => {
     setDialogOpen(false)
   }
 
-  const handleFormSubmit = (
-    newActivity: AddFillActivity | AddMoveActivity | AddSellActivity
-  ) => {
+  const handleFormSubmit = async (newActivity: any) => {
     console.log('New Activity:', newActivity)
-    // SuccessAlert()
-    // ErrorAlert({ message: 'Error', code: 'Error' })
-
-    //   onSubmit: async (values, actions) => {
-    //     if (isAddMode) {
-    //       await createAppOwnerApi(values)
-    //         .then((res) => {
-    //           if (res.result) {
-    //             Swal.fire({
-    //               icon: "success",
-    //               title: "Successfully",
-    //               showConfirmButton: false,
-    //               timer: 1500,
-    //             }).then(() => {
-    //               navigate(`/domain/info/${res.data.id}`, {
-    //                 replace: true,
-    //               })
-    //             })
-    //           } else {
-    //             Swal.fire(res.error.code, res.error.message, "error")
-    //           }
-    //         })
-    //         .catch((err: any) => {
-    //           return Swal.fire({
-    //             icon: "error",
-    //             title: err.code || err.error?.code,
-    //             text: err.message || err.error?.message,
-    //           })
-    //         })
-    //     } else {
-    //       await updateAppOwnerApi(parseInt(id), values)
-    //         .then((res) => {
-    //           if (res.result) {
-    //             Swal.fire({
-    //               icon: "success",
-    //               title: "Successfully",
-    //               showConfirmButton: false,
-    //               timer: 1500,
-    //             }).then(() =>
-    //               navigate(`/domain/info/${res.data.id}`, {
-    //                 replace: true,
-    //               })
-    //             )
-    //           } else {
-    //             Swal.fire(res.error.code, res.error.message, "error")
-    //           }
-    //         })
-    //         .catch((err: any) => {
-    //           return Swal.fire({
-    //             icon: "error",
-    //             title: err.code || err.error?.code,
-    //             text: err.message || err.error?.message,
-    //           })
-    //         })
-    //     }
-    //   },
-    // })
+    switch (selectedActivity) {
+      case ActivityMode.Fill:
+        console.log('Fill Activity')
+        await createFillActivityApi(newActivity)
+          .then((res) => {
+            if (res.result) {
+              SuccessAlert()
+              window.location.reload()
+            } else {
+              ErrorAlert(res.error)
+            }
+          })
+          .catch((err) => {
+            ErrorAlert(err)
+          })
+        break
+      case ActivityMode.Move:
+        console.log('Move Activity')
+        await createMoveActivityApi(newActivity)
+          .then((res) => {
+            if (res.result) {
+              SuccessAlert()
+              window.location.reload()
+            } else {
+              ErrorAlert(res.error)
+            }
+          })
+          .catch((err) => {
+            ErrorAlert(err)
+          })
+        break
+      case ActivityMode.Sell:
+        console.log('Sell Activity')
+        await createSellActivityApi(newActivity)
+          .then((res) => {
+            if (res.result) {
+              SuccessAlert()
+              window.location.reload()
+            } else {
+              ErrorAlert(res.error)
+            }
+          })
+          .catch((err) => {
+            ErrorAlert(err)
+          })
+        break
+      default:
+        break
+    }
   }
 
   const getActivityList = useCallback(async () => {
@@ -285,19 +275,19 @@ const ActivityPage: FC = () => {
           }}
         />
       </div>
-      {selectedActivity === 'FILL' ? (
+      {selectedActivity === ActivityMode.Fill ? (
         <DialogFill
           open={dialogOpen}
           onClose={handleDialogClose}
           onSubmit={handleFormSubmit}
         />
-      ) : selectedActivity === 'MOVE' ? (
+      ) : selectedActivity === ActivityMode.Move ? (
         <DialogMove
           open={dialogOpen}
           onClose={handleDialogClose}
           onSubmit={handleFormSubmit}
         />
-      ) : selectedActivity === 'SELL' ? (
+      ) : selectedActivity === ActivityMode.Sell ? (
         <DialogSell
           open={dialogOpen}
           onClose={handleDialogClose}
