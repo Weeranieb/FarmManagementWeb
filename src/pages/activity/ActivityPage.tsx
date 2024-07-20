@@ -29,6 +29,8 @@ import {
 import ModeFilter from './ActivityCatalogue'
 import FarmFilter from './FarmCatalogue'
 import { ActivityMode } from '../../constants/activity'
+import SuccessAlert from '../../components/SuccessAlert'
+import ErrorAlert from '../../components/ErrorAlert'
 
 const ActivityPage: FC = () => {
   const navigate = useNavigate()
@@ -111,6 +113,63 @@ const ActivityPage: FC = () => {
     newActivity: AddFillActivity | AddMoveActivity | AddSellActivity
   ) => {
     console.log('New Activity:', newActivity)
+    // SuccessAlert()
+    // ErrorAlert({ message: 'Error', code: 'Error' })
+
+    //   onSubmit: async (values, actions) => {
+    //     if (isAddMode) {
+    //       await createAppOwnerApi(values)
+    //         .then((res) => {
+    //           if (res.result) {
+    //             Swal.fire({
+    //               icon: "success",
+    //               title: "Successfully",
+    //               showConfirmButton: false,
+    //               timer: 1500,
+    //             }).then(() => {
+    //               navigate(`/domain/info/${res.data.id}`, {
+    //                 replace: true,
+    //               })
+    //             })
+    //           } else {
+    //             Swal.fire(res.error.code, res.error.message, "error")
+    //           }
+    //         })
+    //         .catch((err: any) => {
+    //           return Swal.fire({
+    //             icon: "error",
+    //             title: err.code || err.error?.code,
+    //             text: err.message || err.error?.message,
+    //           })
+    //         })
+    //     } else {
+    //       await updateAppOwnerApi(parseInt(id), values)
+    //         .then((res) => {
+    //           if (res.result) {
+    //             Swal.fire({
+    //               icon: "success",
+    //               title: "Successfully",
+    //               showConfirmButton: false,
+    //               timer: 1500,
+    //             }).then(() =>
+    //               navigate(`/domain/info/${res.data.id}`, {
+    //                 replace: true,
+    //               })
+    //             )
+    //           } else {
+    //             Swal.fire(res.error.code, res.error.message, "error")
+    //           }
+    //         })
+    //         .catch((err: any) => {
+    //           return Swal.fire({
+    //             icon: "error",
+    //             title: err.code || err.error?.code,
+    //             text: err.message || err.error?.message,
+    //           })
+    //         })
+    //     }
+    //   },
+    // })
   }
 
   const getActivityList = useCallback(async () => {

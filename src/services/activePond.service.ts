@@ -1,6 +1,7 @@
 import { BaseResponse } from '../models/api/baseResponse'
 import { FarmWithActive } from '../models/schema/activePond'
 import api from './apiClient'
+import handleResponseError from './handleError'
 
 const getFarmWithActiveApi = async (
   farmId: number
@@ -13,8 +14,10 @@ const getFarmWithActiveApi = async (
       },
     })
     .then((res) => {
-      return res.data
+      if (res.data.result) return res.data
+      else return handleResponseError(res.data)
     })
+    .catch((err) => handleResponseError(err))
 }
 
 export { getFarmWithActiveApi }

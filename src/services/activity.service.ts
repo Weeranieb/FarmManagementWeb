@@ -1,6 +1,7 @@
 import { BaseResponse, ListPage } from '../models/api/baseResponse'
 import { ActivityList } from '../models/schema/activity'
 import api from './apiClient'
+import handleResponseError from './handleError'
 
 const getActivityListApi = async (
   pageOption: {
@@ -26,8 +27,9 @@ const getActivityListApi = async (
     })
     .then((res) => {
       if (res.data.result) return res.data
-      else return {} as BaseResponse<ListPage<ActivityList>>
+      else return handleResponseError(res.data)
     })
+    .catch((err) => handleResponseError(err))
 }
 
 export { getActivityListApi }
