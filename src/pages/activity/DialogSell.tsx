@@ -25,6 +25,7 @@ import { FarmWithActive } from '../../models/schema/activePond'
 import { getFarmWithActiveApi } from '../../services/activePond.service'
 import { FishTypeMap } from '../../constants/fishType'
 import { SizeMap } from '../../constants/size'
+import { MerchantMap } from '../../constants/merchant'
 import GridSelect from '../../components/grid/GridSelect'
 import GridDateSelect from '../../components/grid/GridDateSelect'
 import GridCheckbox from '../../components/grid/GridCheckbox'
@@ -170,7 +171,11 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
   }
 
   const handleFormSubmit = () => {
-    onSubmit(formData)
+    const formDataWithISODate = {
+      ...formData,
+      activityDate: dayjs(formData.activityDate).toISOString(),
+    }
+    onSubmit(formDataWithISODate)
     onClose()
   }
 
@@ -206,7 +211,7 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
           handleDateChange={handleDateChange}
         />
         <GridCheckbox
-          xs={3}
+          xs={2}
           isCheck={formData.isClose}
           name='isClose'
           label='ปิดบ่อ'
@@ -218,6 +223,14 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
           name='additionalCost'
           label='ค่าใช้จ่ายเพิ่มเติม (บาท)'
           handleInputChange={handleInputChange}
+        />
+        <GridSelect
+          xs={3}
+          value={formData.merchantId.toString()}
+          name='merchantId'
+          label='แม่ค้าที่จับ'
+          objectMap={MerchantMap}
+          handleSelectChange={handleSelectChange}
         />
       </Grid>
       <Grid container spacing={3} style={{ marginTop: '4px' }}>
@@ -307,6 +320,7 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
                       size='small'
                       name='amount'
                       value={row.amount.toString()}
+                      type='number'
                       onChange={(e) =>
                         handleTableDataChange(index, 'amount', e.target.value)
                       }
@@ -317,6 +331,7 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
                       size='small'
                       name='pricePerUnit'
                       value={row.pricePerUnit.toString()}
+                      type='number'
                       onChange={(e) =>
                         handleTableDataChange(
                           index,

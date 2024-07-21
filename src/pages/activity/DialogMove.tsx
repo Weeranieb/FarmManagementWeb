@@ -105,12 +105,22 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
     const { name, value } = e.target
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]:
+        name === 'farmId' ||
+        name === 'pondId' ||
+        name === 'toFarmId' ||
+        name === 'toPondId'
+          ? parseInt(value, 10)
+          : value,
     }))
   }
 
   const handleFormSubmit = () => {
-    onSubmit(formData)
+    const formDataWithISODate = {
+      ...formData,
+      activityDate: dayjs(formData.activityDate).toISOString(),
+    }
+    onSubmit(formDataWithISODate)
     onClose()
   }
 
@@ -187,6 +197,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           value={formData.fishWeight.toString()}
           name='fishWeight'
           label='น้ำหนักเฉลี่ย'
+          type='number'
           handleInputChange={handleInputChange}
         />
         <GridSelect
@@ -202,6 +213,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           value={formData.amount.toString()}
           name='amount'
           label='จำนวน'
+          type='number'
           handleInputChange={handleInputChange}
         />
         <GridTextField
@@ -209,6 +221,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           value={formData.pricePerUnit.toString()}
           name='pricePerUnit'
           label='ราคาต่อ (บาท) หน่วย'
+          type='number'
           handleInputChange={handleInputChange}
         />
         <GridTextField
@@ -216,6 +229,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           value={formData.additionalCost?.toString() ?? ''}
           name='additionalCost'
           label='ค่าใช้จ่ายเพิ่มเติม (บาท)'
+          type='number'
           handleInputChange={handleInputChange}
         />
         <GridDateSelect

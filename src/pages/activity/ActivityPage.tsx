@@ -120,23 +120,21 @@ const ActivityPage: FC = () => {
               SuccessAlert()
               window.location.reload()
             } else {
-              console.log('enter here', res.error)
-              ErrorAlert(res.error)
+              ErrorAlert(res)
             }
           })
           .catch((err) => {
-            ErrorAlert(err.error)
+            ErrorAlert(err)
           })
         break
       case ActivityMode.Move:
-        console.log('Move Activity')
         await createMoveActivityApi(newActivity)
           .then((res) => {
             if (res.result) {
               SuccessAlert()
               window.location.reload()
             } else {
-              ErrorAlert(res.error)
+              ErrorAlert(res)
             }
           })
           .catch((err) => {
@@ -144,14 +142,13 @@ const ActivityPage: FC = () => {
           })
         break
       case ActivityMode.Sell:
-        console.log('Sell Activity')
         await createSellActivityApi(newActivity)
           .then((res) => {
             if (res.result) {
               SuccessAlert()
               window.location.reload()
             } else {
-              ErrorAlert(res.error)
+              ErrorAlert(res)
             }
           })
           .catch((err) => {

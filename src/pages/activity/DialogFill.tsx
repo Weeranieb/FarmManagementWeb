@@ -94,7 +94,11 @@ const DialogFill: FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
   }
 
   const handleFormSubmit = () => {
-    onSubmit(formData)
+    const formDataWithISODate = {
+      ...formData,
+      activityDate: dayjs(formData.activityDate).toISOString(),
+    }
+    onSubmit(formDataWithISODate)
     onClose()
   }
 
