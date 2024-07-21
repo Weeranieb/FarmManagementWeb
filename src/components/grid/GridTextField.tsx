@@ -8,6 +8,7 @@ interface Props {
   label: string
   handleInputChange: (event: ChangeEvent<HTMLInputElement>) => void
   type?: string
+  error?: string
 }
 
 const GridTextField: FC<Props> = ({
@@ -17,6 +18,7 @@ const GridTextField: FC<Props> = ({
   label,
   handleInputChange,
   type = 'text',
+  error,
 }) => {
   return (
     <Grid item xs={xs}>
@@ -29,6 +31,8 @@ const GridTextField: FC<Props> = ({
         variant='outlined'
         value={value}
         onChange={handleInputChange}
+        error={!!error}
+        helperText={error}
       />
     </Grid>
   )

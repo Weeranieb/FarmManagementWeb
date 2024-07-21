@@ -6,6 +6,7 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
+  FormHelperText,
 } from '@mui/material'
 
 interface Props {
@@ -17,6 +18,7 @@ interface Props {
     | Record<string | number, string | number>
     | { id: string | number; name: string | number }[] // Handle both object and array
   handleSelectChange: (event: SelectChangeEvent<string>) => void
+  error?: string
 }
 
 const GridSelect: FC<Props> = ({
@@ -26,6 +28,7 @@ const GridSelect: FC<Props> = ({
   label,
   objectMap,
   handleSelectChange,
+  error,
 }) => {
   return (
     <Grid item xs={xs}>
@@ -36,6 +39,7 @@ const GridSelect: FC<Props> = ({
           value={value}
           onChange={handleSelectChange}
           label={label}
+          error={!!error}
         >
           {Array.isArray(objectMap)
             ? objectMap.map((item) => (
@@ -49,6 +53,9 @@ const GridSelect: FC<Props> = ({
                 </MenuItem>
               ))}
         </Select>
+        {error && (
+          <FormHelperText style={{ color: '#d32f2f' }}>{error}</FormHelperText>
+        )}
       </FormControl>
     </Grid>
   )

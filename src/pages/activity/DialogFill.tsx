@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useState, ChangeEvent } from 'react'
 import { Grid, SelectChangeEvent } from '@mui/material'
 import dayjs, { Dayjs } from 'dayjs'
 import DialogWrapper from '../../components/DialogWrapper'
@@ -23,6 +23,7 @@ interface DialogFillProps {
 const DialogFill: FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
   const [farms, setFarms] = useState<Farm[]>([])
   const [activePonds, setActivePonds] = useState<FarmWithActive[]>([])
+  const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
   useEffect(() => {
     const getListFarms = async () => {
@@ -60,7 +61,7 @@ const DialogFill: FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
     }
   }, [formData.farmId])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prevData) => ({
       ...prevData,
@@ -68,7 +69,7 @@ const DialogFill: FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
     }))
   }
 
-  const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCheckbox = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target
     setFormData((prevData) => ({
       ...prevData,
@@ -93,13 +94,34 @@ const DialogFill: FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
     }))
   }
 
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {}
+
+    if (formData.farmId === 0) newErrors.farmId = 'Farm is required'
+    if (formData.pondId === 0) newErrors.pondId = 'Pond is required'
+    if (formData.amount <= 0) newErrors.amount = 'Amount must be greater than 0'
+    if (formData.fishType === '') newErrors.fishType = 'Fish type is required'
+    if (formData.fishUnit === '') newErrors.fishUnit = 'Fish unit is required'
+    if (formData.fishWeight <= 0)
+      newErrors.fishWeight = 'Fish weight must be greater than 0'
+    if (formData.pricePerUnit <= 0)
+      newErrors.pricePerUnit = 'Price per unit must be greater than 0'
+    if (!formData.activityDate)
+      newErrors.activityDate = 'Activity date is required'
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
   const handleFormSubmit = () => {
-    const formDataWithISODate = {
-      ...formData,
-      activityDate: dayjs(formData.activityDate).toISOString(),
+    if (validateForm()) {
+      const formDataWithISODate = {
+        ...formData,
+        activityDate: dayjs(formData.activityDate).toISOString(),
+      }
+      onSubmit(formDataWithISODate)
+      onClose()
     }
-    onSubmit(formDataWithISODate)
-    onClose()
   }
 
   return (
@@ -117,6 +139,7 @@ const DialogFill: FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
           label='ฟาร์ม'
           objectMap={farms}
           handleSelectChange={handleSelectChange}
+          error={errors.farmId}
         />
         <GridSelect
           xs={4}
@@ -125,6 +148,7 @@ const DialogFill: FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
           label='บ่อ'
           objectMap={activePonds}
           handleSelectChange={handleSelectChange}
+          error={errors.pondId}
         />
         <GridCheckbox
           xs={3}
@@ -140,6 +164,7 @@ const DialogFill: FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
           label='ปลา'
           objectMap={FishTypeMap}
           handleSelectChange={handleSelectChange}
+          error={errors.fishType}
         />
         <GridTextField
           xs={3}
@@ -148,6 +173,7 @@ const DialogFill: FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
           label='น้ำหนักเฉลี่ย'
           type='number'
           handleInputChange={handleInputChange}
+          error={errors.fishWeight}
         />
         <GridSelect
           xs={3}
@@ -156,6 +182,7 @@ const DialogFill: FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
           label='หน่วย'
           objectMap={UnitMap}
           handleSelectChange={handleSelectChange}
+          error={errors.fishUnit}
         />
         <GridTextField
           xs={3}
@@ -164,6 +191,7 @@ const DialogFill: FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
           label='จำนวน'
           type='number'
           handleInputChange={handleInputChange}
+          error={errors.amount}
         />
         <GridTextField
           xs={4}
@@ -172,6 +200,7 @@ const DialogFill: FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
           label='ราคาต่อหน่วย (บาท/หน่วย)'
           type='number'
           handleInputChange={handleInputChange}
+          error={errors.pricePerUnit}
         />
         <GridTextField
           xs={4}
@@ -187,6 +216,7 @@ const DialogFill: FC<DialogFillProps> = ({ open, onClose, onSubmit }) => {
           name='activityDate'
           label='วันที่ทำ'
           handleDateChange={handleDateChange}
+          error={errors.activityDate}
         />
       </Grid>
     </DialogWrapper>

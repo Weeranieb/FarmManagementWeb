@@ -24,6 +24,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
   const [farms, setFarms] = useState<Farm[]>([])
   const [fromActivePonds, setFromActivePonds] = useState<FarmWithActive[]>([])
   const [toActivePonds, setToActivePonds] = useState<FarmWithActive[]>([])
+  const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
   const [formData, setFormData] = useState<AddMoveActivity>({
     farmId: 0,
@@ -115,13 +116,39 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
     }))
   }
 
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {}
+
+    if (formData.farmId === 0) newErrors.farmId = 'Farm is required'
+    if (formData.pondId === 0) newErrors.pondId = 'Pond is required'
+    if (formData.toFarmId === 0)
+      newErrors.toFarmId = 'Destination farm is required'
+    if (formData.toPondId === 0)
+      newErrors.toPondId = 'Destination pond is required'
+    if (formData.amount <= 0)
+      newErrors.amount = 'Amount must be greater than zero'
+    if (formData.pricePerUnit <= 0)
+      newErrors.pricePerUnit = 'Price per unit must be greater than zero'
+    if (!formData.activityDate)
+      newErrors.activityDate = 'Activity date is required'
+    if (formData.fishType === '') newErrors.fishType = 'Fish type is required'
+    if (formData.fishUnit === '') newErrors.fishUnit = 'Fish unit is required'
+    if (formData.fishWeight <= 0)
+      newErrors.fishWeight = 'Fish weight must be greater than 0'
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
   const handleFormSubmit = () => {
-    const formDataWithISODate = {
-      ...formData,
-      activityDate: dayjs(formData.activityDate).toISOString(),
+    if (validateForm()) {
+      const formDataWithISODate = {
+        ...formData,
+        activityDate: dayjs(formData.activityDate).toISOString(),
+      }
+      onSubmit(formDataWithISODate)
+      onClose()
     }
-    onSubmit(formDataWithISODate)
-    onClose()
   }
 
   return (
@@ -142,6 +169,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           label='ฟาร์ม'
           objectMap={farms}
           handleSelectChange={handleSelectChange}
+          error={errors.farmId}
         />
         <GridSelect
           xs={3}
@@ -150,6 +178,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           label='บ่อ'
           objectMap={fromActivePonds}
           handleSelectChange={handleSelectChange}
+          error={errors.pondId}
         />
         <GridCheckbox
           xs={3}
@@ -168,6 +197,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           label='ฟาร์ม'
           objectMap={farms}
           handleSelectChange={handleSelectChange}
+          error={errors.toFarmId}
         />
         <GridSelect
           xs={3}
@@ -176,6 +206,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           label='บ่อ'
           objectMap={toActivePonds}
           handleSelectChange={handleSelectChange}
+          error={errors.toPondId}
         />
         <GridCheckbox
           xs={3}
@@ -191,6 +222,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           label='ปลา'
           objectMap={FishTypeMap}
           handleSelectChange={handleSelectChange}
+          error={errors.fishType}
         />
         <GridTextField
           xs={3}
@@ -199,6 +231,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           label='น้ำหนักเฉลี่ย'
           type='number'
           handleInputChange={handleInputChange}
+          error={errors.fishWeight}
         />
         <GridSelect
           xs={3}
@@ -207,6 +240,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           label='หน่วย'
           objectMap={UnitMap}
           handleSelectChange={handleSelectChange}
+          error={errors.fishUnit}
         />
         <GridTextField
           xs={3}
@@ -215,6 +249,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           label='จำนวน'
           type='number'
           handleInputChange={handleInputChange}
+          error={errors.amount}
         />
         <GridTextField
           xs={4}
@@ -223,6 +258,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           label='ราคาต่อ (บาท) หน่วย'
           type='number'
           handleInputChange={handleInputChange}
+          error={errors.pricePerUnit}
         />
         <GridTextField
           xs={4}
@@ -238,6 +274,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
           name='activityDate'
           label='วันที่ทำ'
           handleDateChange={handleDateChange}
+          error={errors.activityDate}
         />
       </Grid>
     </DialogWrapper>
