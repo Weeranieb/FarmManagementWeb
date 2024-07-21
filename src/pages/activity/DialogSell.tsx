@@ -25,11 +25,12 @@ import { FarmWithActive } from '../../models/schema/activePond'
 import { getFarmWithActiveApi } from '../../services/activePond.service'
 import { FishTypeMap } from '../../constants/fishType'
 import { SizeMap } from '../../constants/size'
-import { MerchantMap } from '../../constants/merchant'
 import GridSelect from '../../components/grid/GridSelect'
 import GridDateSelect from '../../components/grid/GridDateSelect'
 import GridCheckbox from '../../components/grid/GridCheckbox'
 import GridTextField from '../../components/grid/GridTextField'
+import { getMerchantListApi } from '../../services/merchant.service'
+import { Merchant } from '../../models/schema/merchant'
 
 interface DialogSellProps {
   open: boolean
@@ -57,6 +58,7 @@ const CustomTableCell = styled(TableCell)(({ theme }) => ({
 const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
   const [farms, setFarms] = useState<Farm[]>([])
   const [activePonds, setActivePonds] = useState<FarmWithActive[]>([])
+  const [merchantList, setMerchantList] = useState<Merchant[]>([])
 
   const [formData, setFormData] = useState<AddSellActivity>({
     farmId: 0,
@@ -82,7 +84,13 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
       setFarms(farmList.data)
     }
 
+    const getListMerchant = async () => {
+      const merchantList = await getMerchantListApi()
+      setMerchantList(merchantList.data)
+    }
+
     getListFarms()
+    getListMerchant()
   }, [])
 
   useEffect(() => {
@@ -229,7 +237,7 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
           value={formData.merchantId.toString()}
           name='merchantId'
           label='แม่ค้าที่จับ'
-          objectMap={MerchantMap}
+          objectMap={merchantList}
           handleSelectChange={handleSelectChange}
         />
       </Grid>
