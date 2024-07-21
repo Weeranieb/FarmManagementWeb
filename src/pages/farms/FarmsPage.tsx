@@ -14,6 +14,7 @@ import { getFarmListApi } from '../../services/farm.service'
 import { FarmWithActive } from '../../models/schema/activePond'
 import { Farm } from '../../models/schema/farm'
 import { getFarmWithActiveApi } from '../../services/activePond.service'
+import ErrorAlert from '../../components/ErrorAlert'
 
 const FarmsPage = () => {
   const [farms, setFarms] = useState<Farm[]>([])
@@ -55,12 +56,23 @@ const FarmsPage = () => {
     hasHistory: boolean,
     activePondId?: number
   ) => {
-    if (!hasHistory) {
-      navigate(`/pond/${pondId}`)
+    console.log(
+      'pond id',
+      pondId,
+      'has history',
+      hasHistory,
+      'active pond id',
+      activePondId
+    )
+    if (hasHistory) {
+      navigate(`/pond/${activePondId}`)
       return
+    } else {
+      setSelectedPond(pondId)
+      ErrorAlert({
+        message: 'ไม่มีประวัติการใช้งานของบ่อนี้',
+      })
     }
-    // navigate(`/pond/${activePondId}`)
-    setSelectedPond(pondId)
   }
 
   return (
