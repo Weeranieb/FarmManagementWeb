@@ -3,6 +3,7 @@ import { Box } from '@mui/material'
 import { Info as InfoIcon, Delete as DeleteIcon } from '@mui/icons-material'
 import Swal from 'sweetalert2'
 import { timeToDate } from '../../utils/string'
+import { useTranslation } from 'react-i18next'
 
 const handleInfoClick = () => {
   console.log('Info icon clicked') // Implement your logic here
@@ -26,95 +27,108 @@ const handleDeleteClick = (id: number) => {
   })
 }
 
-export const columns: GridColDef[] = [
-  {
-    field: 'id',
-    headerName: '',
-    flex: 0.05,
-    hideSortIcons: true,
-    align: 'right',
-  },
-  {
-    field: 'name',
-    headerName: 'รายการ',
-    flex: 0.2,
-    headerAlign: 'center',
-    align: 'center',
-  },
-  {
-    field: 'code',
-    headerName: 'โค้ดเนม',
-    flex: 0.15,
-    headerAlign: 'center',
-    align: 'center',
-  },
-  {
-    field: 'price',
-    headerName: 'ราคาล่าสุด',
-    flex: 0.15,
-    headerAlign: 'center',
-    align: 'center',
-  },
-  {
-    field: 'unit',
-    headerName: 'หน่วย',
-    flex: 0.15,
-    align: 'center',
-    headerAlign: 'center',
-  },
-  {
-    field: 'updatedDate',
-    headerName: 'อัปเดทวันที่',
-    flex: 0.15,
-    valueFormatter: (params) => {
-      if (params.value == null) {
-        return ''
-      }
-      return timeToDate(params.value)
+const useColumns = () => {
+  const { t } = useTranslation()
+
+  const columns: GridColDef[] = [
+    {
+      field: 'id',
+      headerName: '',
+      flex: 0.05,
+      hideSortIcons: true,
+      align: 'right',
     },
-  },
-  {
-    field: 'info',
-    headerName: '',
-    align: 'right',
-    hideSortIcons: true,
-    disableColumnMenu: true,
-    flex: 0.05,
-    renderCell: (params) => {
-      if (params.field === 'info') {
-        return (
-          <Box display='flex' alignItems='center'>
-            <InfoIcon
-              color='disabled'
-              style={{ cursor: 'pointer' }}
-              onClick={handleInfoClick}
-            />
-          </Box>
-        )
-      }
-      return params.value
+    {
+      field: 'name',
+      headerName: 'รายการ',
+      flex: 0.2,
+      headerAlign: 'center',
+      align: 'center',
     },
-  },
-  {
-    field: 'more',
-    headerName: '',
-    align: 'left',
-    hideSortIcons: true,
-    disableColumnMenu: true,
-    flex: 0.1,
-    renderCell: (params) => {
-      if (params.field === 'more') {
-        return (
-          <Box display='flex' alignItems='center'>
-            <DeleteIcon
-              color='disabled'
-              style={{ cursor: 'pointer' }}
-              onClick={() => handleDeleteClick(params.row.id)}
-            />
-          </Box>
-        )
-      }
-      return params.value
+    {
+      field: 'code',
+      headerName: 'โค้ดเนม',
+      flex: 0.15,
+      headerAlign: 'center',
+      align: 'center',
     },
-  },
-]
+    {
+      field: 'latestPrice',
+      headerName: 'ราคาล่าสุด (บาท)',
+      flex: 0.15,
+      headerAlign: 'center',
+      align: 'center',
+    },
+    {
+      field: 'unit',
+      headerName: 'หน่วย',
+      flex: 0.15,
+      align: 'center',
+      headerAlign: 'center',
+      valueFormatter: (params) => {
+        if (params.value == null) {
+          return ''
+        }
+        return t(params.value.toLowerCase())
+      },
+    },
+    {
+      field: 'updatedDate',
+      headerName: 'อัปเดทวันที่',
+      flex: 0.15,
+      valueFormatter: (params) => {
+        if (params.value == null) {
+          return ''
+        }
+        return timeToDate(params.value)
+      },
+    },
+    {
+      field: 'info',
+      headerName: '',
+      align: 'right',
+      hideSortIcons: true,
+      disableColumnMenu: true,
+      flex: 0.05,
+      renderCell: (params) => {
+        if (params.field === 'info') {
+          return (
+            <Box display='flex' alignItems='center'>
+              <InfoIcon
+                color='disabled'
+                style={{ cursor: 'pointer' }}
+                onClick={handleInfoClick}
+              />
+            </Box>
+          )
+        }
+        return params.value
+      },
+    },
+    {
+      field: 'more',
+      headerName: '',
+      align: 'left',
+      hideSortIcons: true,
+      disableColumnMenu: true,
+      flex: 0.1,
+      renderCell: (params) => {
+        if (params.field === 'more') {
+          return (
+            <Box display='flex' alignItems='center'>
+              <DeleteIcon
+                color='disabled'
+                style={{ cursor: 'pointer' }}
+                onClick={() => handleDeleteClick(params.row.id)}
+              />
+            </Box>
+          )
+        }
+        return params.value
+      },
+    },
+  ]
+  return columns
+}
+
+export { useColumns }

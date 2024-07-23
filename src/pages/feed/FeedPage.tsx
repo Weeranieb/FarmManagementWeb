@@ -3,7 +3,7 @@ import { DataGrid, GridPaginationModel, GridSortModel } from '@mui/x-data-grid'
 import DialogAdd from './DialogAdd'
 import { Box } from '@mui/material'
 import PageBar from '../../components/PageBar'
-import { columns } from './FeedColumns'
+import { useColumns } from './FeedColumns'
 import { FeedCollection } from '../../models/schema/feed'
 import { PageOptions } from '../../models/api/pageOptions'
 import { firstCapital } from '../../utils/string'
@@ -90,7 +90,7 @@ const Feed: React.FC = () => {
       <Box sx={{ height: 600, width: '100%' }}>
         <DataGrid
           rows={feedRows}
-          columns={columns}
+          columns={useColumns()}
           onPaginationModelChange={handlePageModelChange}
           onSortModelChange={handleSortModelChange}
           paginationModel={{
