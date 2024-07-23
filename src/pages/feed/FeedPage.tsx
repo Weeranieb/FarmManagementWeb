@@ -7,8 +7,12 @@ import { columns } from './FeedColumns'
 import { FeedCollection } from '../../models/schema/feed'
 import { PageOptions } from '../../models/api/pageOptions'
 import { firstCapital } from '../../utils/string'
-import { getFeedListApi } from '../../services/feedCollection.service'
+import {
+  createFeedCollectionApi,
+  getFeedListApi,
+} from '../../services/feedCollection.service'
 import ErrorAlert from '../../components/ErrorAlert'
+import SuccessAlert from '../../components/SuccessAlert'
 
 const Feed: React.FC = () => {
   const [feedRows, setFeedRows] = useState<FeedCollection[]>([])
@@ -49,8 +53,20 @@ const Feed: React.FC = () => {
     setDialogOpen(false)
   }
 
-  const handleFormSubmit = (newFeed: any) => {
+  const handleFormSubmit = async (newFeed: any) => {
     console.log('New Feed:', newFeed)
+    await createFeedCollectionApi(newFeed)
+      .then((res) => {
+        if (res.result) {
+          SuccessAlert()
+          window.location.reload()
+        } else {
+          ErrorAlert(res)
+        }
+      })
+      .catch((err) => {
+        ErrorAlert(err)
+      })
   }
 
   const getFeedList = useCallback(async () => {

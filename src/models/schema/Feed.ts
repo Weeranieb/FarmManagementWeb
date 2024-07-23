@@ -15,10 +15,28 @@ export interface FeedPriceHistory {
   priceUpdatedDate: string
 }
 
+export interface AddFeedPriceHistory {
+  feedCollectionId?: number
+  price: number
+  priceUpdatedDate: string
+}
+
 export interface FeedCollection extends Base {
   id: number
   clientId: number
   code: string
   name: string
   unit: string
+}
+
+export interface CreateFeedCollectionRequest {
+  code: string
+  name: string
+  unit: string
+  feedPriceHistories: AddFeedPriceHistory[]
+}
+
+export interface CreateFeedCollectionResponse {
+  feedCollection: FeedCollection
+  feedPriceHistory: FeedPriceHistory[]
 }

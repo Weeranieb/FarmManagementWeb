@@ -1,5 +1,9 @@
 import { BaseResponse, ListPage } from '../models/api/baseResponse'
-import { FeedCollection } from '../models/schema/feed'
+import {
+  CreateFeedCollectionRequest,
+  CreateFeedCollectionResponse,
+  FeedCollection,
+} from '../models/schema/feed'
 import api from './apiClient'
 import handleResponseError from './handleError'
 
@@ -26,4 +30,17 @@ const getFeedListApi = async (pageOption: {
     .catch((err) => handleResponseError(err))
 }
 
-export { getFeedListApi }
+const createFeedCollectionApi = async (
+  data: CreateFeedCollectionRequest
+): Promise<BaseResponse<CreateFeedCollectionResponse>> => {
+  const url = 'feedcollection'
+  return api
+    .post<BaseResponse<CreateFeedCollectionResponse>>(url, data)
+    .then((res) => {
+      if (res.data.result) return res.data
+      else return handleResponseError(res.data)
+    })
+    .catch((err) => handleResponseError(err))
+}
+
+export { getFeedListApi, createFeedCollectionApi }

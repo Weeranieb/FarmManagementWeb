@@ -53,7 +53,6 @@ const AddRowFab = styled(Fab)(({ theme }) => ({
 
 const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
   const [formData, setFormData] = useState<CreateFeedCollection>({
-    // id: 0,
     name: '',
     code: '',
     unit: '',
@@ -66,13 +65,14 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
       },
     ],
   })
+  const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
   const handleTableDataChange = (index: number, key: string, value: string) => {
     setFormData((prevData) => {
       const updatedFeedPriceHistories = [...prevData.feedPriceHistories]
       updatedFeedPriceHistories[index] = {
         ...updatedFeedPriceHistories[index],
-        [key]: value,
+        [key]: key === 'price' ? parseFloat(value) || 0 : value,
       }
       return { ...prevData, feedPriceHistories: updatedFeedPriceHistories }
     })
@@ -131,9 +131,40 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
     })
   }
 
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {}
+
+    if (formData.name === '') newErrors.name = 'Name is required'
+    if (formData.code === '') newErrors.code = 'Code is required'
+    if (formData.unit === '') newErrors.unit = 'Unit is required'
+    if (formData.feedPriceHistories.length === 0)
+      newErrors.feedPriceHistories = 'Price history is required'
+    else {
+      formData.feedPriceHistories.forEach((row, index) => {
+        if (!row.priceUpdatedDate)
+          newErrors[`priceUpdatedDate${index}`] =
+            'Price updated date is required'
+        if (row.price <= 0)
+          newErrors[`price${index}`] = 'Price must be greater than 0'
+      })
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
   const handleFormSubmit = () => {
-    onSubmit(formData)
-    onClose()
+    if (validateForm()) {
+      const formDataWithISODate = {
+        ...formData,
+        feedPriceHistories: formData.feedPriceHistories.map((row) => ({
+          ...row,
+          priceUpdatedDate: dayjs(row.priceUpdatedDate).toISOString(),
+        })),
+      }
+      onSubmit(formDataWithISODate)
+      onClose()
+    }
   }
 
   return (
@@ -150,6 +181,7 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
           label='ชื่อเต็มอาหาร'
           value={formData.name}
           handleInputChange={handleInputChange}
+          error={errors.name}
         />
         <GridTextField
           xs={4}
@@ -157,6 +189,7 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
           label='ชื่อย่อ'
           value={formData.code}
           handleInputChange={handleInputChange}
+          error={errors.code}
         />
         <GridSelect
           xs={3}
@@ -165,6 +198,7 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
           value={formData.unit}
           objectMap={FeedUnitMap}
           handleSelectChange={handleSelectChange}
+          error={errors.unit}
         />
       </Grid>
 
@@ -213,11 +247,13 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
                   <CustomTableCell>
                     <TextField
                       name='price'
-                      value={row.price}
+                      value={row.price.toString()}
                       type='number'
                       onChange={(e) =>
                         handleTableDataChange(index, 'price', e.target.value)
                       }
+                      error={!!errors[`price${index}`]}
+                      helperText={errors[`price${index}`]}
                     />
                   </CustomTableCell>
                   <CustomTableCell>
