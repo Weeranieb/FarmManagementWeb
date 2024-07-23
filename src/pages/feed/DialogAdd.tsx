@@ -1,9 +1,8 @@
-import * as React from 'react'
+import { ChangeEvent, useState } from 'react'
 import {
   TextField,
   IconButton,
   Grid,
-  FormControl,
   Typography,
   Table,
   TableRow,
@@ -11,18 +10,22 @@ import {
   TableHead,
   TableBody,
   Fab,
+  SelectChangeEvent,
 } from '@mui/material'
 import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material'
 import { styled } from '@mui/system'
 import dayjs, { Dayjs } from 'dayjs'
-import { FeedCollection } from '../../models/schema/feed'
+import { CreateFeedCollection } from '../../models/schema/feed'
 import DateSelect from '../../components/DateSelect'
 import DialogWrapper from '../../components/DialogWrapper'
+import GridTextField from '../../components/grid/GridTextField'
+import GridSelect from '../../components/grid/GridSelect'
+import { FeedUnitMap } from '../../constants/feedUnit'
 
 interface DialogAddProps {
   open: boolean
   onClose: () => void
-  onSubmit: (data: FeedCollection) => void
+  onSubmit: (data: CreateFeedCollection) => void
 }
 
 const CustomTableCell = styled(TableCell)(({ theme }) => ({
@@ -49,7 +52,7 @@ const AddRowFab = styled(Fab)(({ theme }) => ({
 }))
 
 const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
-  const [formData, setFormData] = React.useState<FeedCollection>({
+  const [formData, setFormData] = useState<CreateFeedCollection>({
     // id: 0,
     name: '',
     code: '',
@@ -75,11 +78,11 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
     })
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: isNaN(parseFloat(value)) ? value : parseFloat(value),
     }))
   }
 
@@ -91,7 +94,7 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
         {
           id: 0,
           feedCollectionId: prevData?.id || 0,
-          priceUpdatedDate: '',
+          priceUpdatedDate: dayjs().format('YYYY-MM-DD'), // Use the current date
           price: 0,
         },
       ],
@@ -107,12 +110,25 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
     })
   }
 
-  const handleDateChange = (date: Dayjs | null) => {
-    const formattedDate = date ? date.format('YYYY-MM-DD') : ''
+  const handleSelectChange = (e: SelectChangeEvent<string>) => {
+    const { name, value } = e.target
     setFormData((prevData) => ({
       ...prevData,
-      date: formattedDate,
+      [name]:
+        name === 'farmId' || name === 'pondId' ? parseInt(value, 10) : value,
     }))
+  }
+
+  const handleDateChange = (index: number, date: Dayjs | null) => {
+    const formattedDate = date ? date.format('YYYY-MM-DD') : ''
+    setFormData((prevData) => {
+      const updatedFeedPriceHistories = [...prevData.feedPriceHistories]
+      updatedFeedPriceHistories[index] = {
+        ...updatedFeedPriceHistories[index],
+        priceUpdatedDate: formattedDate,
+      }
+      return { ...prevData, feedPriceHistories: updatedFeedPriceHistories }
+    })
   }
 
   const handleFormSubmit = () => {
@@ -128,40 +144,30 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
       handleFormSubmit={handleFormSubmit}
     >
       <Grid container spacing={3}>
-        <Grid item xs={5}>
-          <FormControl fullWidth variant='outlined' margin='dense'>
-            <TextField
-              name='name'
-              label='ชื่อ'
-              value={formData.name}
-              onChange={handleInputChange}
-              variant='outlined'
-            />
-          </FormControl>
-        </Grid>
-        <Grid item xs={4}>
-          <FormControl fullWidth variant='outlined' margin='dense'>
-            <TextField
-              name='code'
-              label='ชื่อย่อ'
-              value={formData.code}
-              onChange={handleInputChange}
-              variant='outlined'
-            />
-          </FormControl>
-        </Grid>
-        <Grid item xs={3}>
-          <FormControl fullWidth variant='outlined' margin='dense'>
-            <TextField
-              name='unit'
-              label='หน่วย'
-              value={formData.unit}
-              onChange={handleInputChange}
-              variant='outlined'
-            />
-          </FormControl>
-        </Grid>
+        <GridTextField
+          xs={5}
+          name='name'
+          label='ชื่อเต็มอาหาร'
+          value={formData.name}
+          handleInputChange={handleInputChange}
+        />
+        <GridTextField
+          xs={4}
+          name='code'
+          label='ชื่อย่อ'
+          value={formData.code}
+          handleInputChange={handleInputChange}
+        />
+        <GridSelect
+          xs={3}
+          name='unit'
+          label='หน่วย'
+          value={formData.unit}
+          objectMap={FeedUnitMap}
+          handleSelectChange={handleSelectChange}
+        />
       </Grid>
+
       <Grid container spacing={3} style={{ marginTop: '16px' }}>
         <Grid item xs={12}>
           <Typography variant='h5' style={{ fontWeight: 'bold' }}>
@@ -187,7 +193,7 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
                     width: '45%',
                   }}
                 >
-                  ราคา
+                  ราคาต่อหน่วย
                 </HeaderTableCell>
                 <TableCell style={{ width: '5%' }}></TableCell>
               </TableRow>
@@ -201,13 +207,14 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
                     <DateSelect
                       label='วันที่'
                       value={dayjs(row.priceUpdatedDate)}
-                      onChange={handleDateChange}
+                      onChange={(date) => handleDateChange(index, date)}
                     />
                   </CustomTableCell>
                   <CustomTableCell>
                     <TextField
                       name='price'
                       value={row.price}
+                      type='number'
                       onChange={(e) =>
                         handleTableDataChange(index, 'price', e.target.value)
                       }

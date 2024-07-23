@@ -1,43 +1,45 @@
-import React from 'react'
-import { DataGrid, GridSortModel } from '@mui/x-data-grid'
+import React, { useCallback, useEffect, useState } from 'react'
+import { DataGrid, GridPaginationModel, GridSortModel } from '@mui/x-data-grid'
 import DialogAdd from './DialogAdd'
 import { Box } from '@mui/material'
 import PageBar from '../../components/PageBar'
 import { columns } from './FeedColumns'
-
-const rows = [
-  {
-    id: '1.',
-    name: 'เหยื่อสด',
-    code: 'สด',
-    price: 40,
-    unit: 'ลัง',
-    priceUpdatedDate: '02/08/2566',
-  },
-  {
-    id: '2.',
-    name: 'อาหารเม็ด',
-    code: 'เม็ด',
-    price: 940,
-    unit: 'ถุง',
-    priceUpdatedDate: '02/08/2566',
-  },
-]
+import { FeedCollection } from '../../models/schema/feed'
+import { PageOptions } from '../../models/api/pageOptions'
+import { firstCapital } from '../../utils/string'
+import { getFeedListApi } from '../../services/feedCollection.service'
+import ErrorAlert from '../../components/ErrorAlert'
 
 const Feed: React.FC = () => {
-  const [dialogOpen, setDialogOpen] = React.useState(false)
-  const [initialSortModel, setInitialSortModel] = React.useState<GridSortModel>(
-    [
-      {
-        field: 'id',
-        sort: 'desc',
-      },
-    ]
-  )
+  const [feedRows, setFeedRows] = useState<FeedCollection[]>([])
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [pageOption, setPageOption] = useState<PageOptions>({
+    page: 0,
+    pageSize: 10,
+    orderBy: '"Id" desc',
+    keyword: '',
+  })
 
-  const handleSortModelChange = (newSortModel: any) => {
-    setInitialSortModel(newSortModel)
+  const handlePageModelChange = async (newPageModel: GridPaginationModel) => {
+    setPageOption({
+      ...pageOption,
+      page: newPageModel.page,
+      pageSize: newPageModel.pageSize,
+    })
   }
+
+  const handleSortModelChange = useCallback(
+    (sortModel: GridSortModel) => {
+      if (sortModel.length && sortModel[0].field) {
+        setPageOption({
+          ...pageOption,
+          orderBy: `"${firstCapital(sortModel[0].field)}" ${sortModel[0].sort}`,
+        })
+      }
+    },
+    [pageOption]
+  )
 
   const handleDialogOpen = () => {
     setDialogOpen(true)
@@ -51,15 +53,42 @@ const Feed: React.FC = () => {
     console.log('New Feed:', newFeed)
   }
 
+  const getFeedList = useCallback(async () => {
+    setIsLoading(true)
+    await getFeedListApi(pageOption)
+      .then((res) => {
+        if (res.result) setFeedRows(res.data.items)
+        else ErrorAlert(res)
+      })
+      .catch((err) => ErrorAlert(err))
+    setIsLoading(false)
+  }, [pageOption])
+
+  useEffect(() => {
+    getFeedList()
+  }, [getFeedList])
+
   return (
     <Box>
       <PageBar title='รายการเหยื่อ' handleDialogOpen={handleDialogOpen} />
       <Box sx={{ height: 600, width: '100%' }}>
         <DataGrid
-          rows={rows}
+          rows={feedRows}
           columns={columns}
-          sortModel={initialSortModel}
+          onPaginationModelChange={handlePageModelChange}
           onSortModelChange={handleSortModelChange}
+          paginationModel={{
+            pageSize: pageOption.pageSize,
+            page: pageOption.page,
+          }}
+          rowCount={feedRows.length || 0}
+          paginationMode='server'
+          disableRowSelectionOnClick
+          loading={isLoading}
+          autoHeight
+          // onRowDoubleClick={handleRowDblClick}
+          pageSizeOptions={[10, 50, 100]}
+          pagination
           sx={{
             '& .MuiDataGrid-columnHeaders': {
               backgroundColor: '#FAF8EE',

@@ -1,6 +1,6 @@
 import { Base } from './base'
 
-export interface FeedCollection extends Base {
+export interface CreateFeedCollection extends Base {
   id?: number
   code: string
   name: string
@@ -13,4 +13,12 @@ export interface FeedPriceHistory {
   feedCollectionId: number
   price: number
   priceUpdatedDate: string
+}
+
+export interface FeedCollection extends Base {
+  id: number
+  clientId: number
+  code: string
+  name: string
+  unit: string
 }

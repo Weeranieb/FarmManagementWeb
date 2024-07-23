@@ -1,4 +1,4 @@
-import React from 'react'
+import { FC } from 'react'
 import {
   Box,
   Typography,
@@ -7,13 +7,15 @@ import {
   Button,
 } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
+import { useTranslation } from 'react-i18next'
 
 interface PageBarProps {
   title: string
   handleDialogOpen: () => void
 }
 
-const PageBar: React.FC<PageBarProps> = ({ title, handleDialogOpen }) => {
+const PageBar: FC<PageBarProps> = ({ title, handleDialogOpen }) => {
+  const { t } = useTranslation()
   return (
     <Box
       display='flex'
@@ -57,7 +59,7 @@ const PageBar: React.FC<PageBarProps> = ({ title, handleDialogOpen }) => {
             padding: '4px 20px',
           }}
         >
-          เพิ่ม
+          {t('add')}
         </Button>
       </Box>
     </Box>

@@ -2,6 +2,7 @@ import { GridColDef } from '@mui/x-data-grid'
 import { Box } from '@mui/material'
 import { Info as InfoIcon, Delete as DeleteIcon } from '@mui/icons-material'
 import Swal from 'sweetalert2'
+import { timeToDate } from '../../utils/string'
 
 const handleInfoClick = () => {
   console.log('Info icon clicked') // Implement your logic here
@@ -62,9 +63,15 @@ export const columns: GridColDef[] = [
     headerAlign: 'center',
   },
   {
-    field: 'priceUpdatedDate',
+    field: 'updatedDate',
     headerName: 'อัปเดทวันที่',
     flex: 0.15,
+    valueFormatter: (params) => {
+      if (params.value == null) {
+        return ''
+      }
+      return timeToDate(params.value)
+    },
   },
   {
     field: 'info',
