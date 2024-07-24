@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { FC, useEffect, useState } from 'react'
 import {
   Grid,
   FormControl,
@@ -11,6 +11,10 @@ import dayjs, { Dayjs } from 'dayjs'
 import YearMonthSelect from '../../components/YearMonthSelect'
 import DialogWrapper from '../../components/DialogWrapper'
 import { DownloadFormInput } from './DailyFeedPage'
+import { FeedCollection } from '../../models/schema/feed'
+import { Farm } from '../../models/schema/farm'
+import { getFarmListApi } from '../../services/farm.service'
+import { getFeedListApi } from '../../services/feedCollection.service'
 
 interface DialogDownloadFormProps {
   open: boolean
@@ -19,20 +23,42 @@ interface DialogDownloadFormProps {
   downloadType: 'year' | 'month' | ''
 }
 
-const DialogDownloadForm: React.FC<DialogDownloadFormProps> = ({
+const DialogDownloadForm: FC<DialogDownloadFormProps> = ({
   open,
   onClose,
   onSubmit,
   downloadType,
 }) => {
-  const [formData, setFormData] = React.useState<DownloadFormInput>({
+  const [feedCollection, setFeedCollection] = useState<FeedCollection[]>([])
+  const [farms, setFarms] = useState<Farm[]>([])
+
+  useEffect(() => {
+    const getFeedList = async () => {
+      const res = await getFeedListApi({
+        page: 0,
+        pageSize: 100,
+        orderBy: '"Name"',
+      })
+      if (res.result) setFeedCollection(res.data.items)
+    }
+
+    const getFarms = async () => {
+      const res = await getFarmListApi()
+      if (res.result) setFarms(res.data)
+    }
+
+    getFeedList()
+    getFarms()
+  }, [])
+
+  const [formData, setFormData] = useState<DownloadFormInput>({
     farm: '',
     type: '',
     date: dayjs().format('YYYY-MM-DD'),
     downloadType: '',
   })
 
-  React.useEffect(() => {
+  useEffect(() => {
     setFormData((prevData) => ({
       ...prevData,
       downloadType,
@@ -56,7 +82,7 @@ const DialogDownloadForm: React.FC<DialogDownloadFormProps> = ({
   }
 
   const handleFormSubmit = () => {
-    console.log(formData)
+    console.log('formData Submit', formData)
     onSubmit(formData)
     onClose()
   }
@@ -78,8 +104,11 @@ const DialogDownloadForm: React.FC<DialogDownloadFormProps> = ({
               onChange={handleSelectChange}
               label='ประเภท'
             >
-              <MenuItem value='เหยื่อสด'>เหยื่อสด</MenuItem>
-              <MenuItem value='อาหารเม็ด'>อาหารเม็ด</MenuItem>
+              {feedCollection.map((feed, index) => (
+                <MenuItem key={index} value={feed.id}>
+                  {feed.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>
@@ -92,9 +121,11 @@ const DialogDownloadForm: React.FC<DialogDownloadFormProps> = ({
               onChange={handleSelectChange}
               label='ฟาร์ม'
             >
-              <MenuItem value=''>ทั้งหมด</MenuItem>
-              <MenuItem value='ฟาร์ม 1'>ฟาร์ม 1</MenuItem>
-              <MenuItem value='ฟาร์ม 2'>ฟาร์ม 2</MenuItem>
+              {farms.map((farm, index) => (
+                <MenuItem key={index} value={farm.id}>
+                  {farm.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>
