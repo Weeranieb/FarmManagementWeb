@@ -7,7 +7,7 @@ import {
 import api from './apiClient'
 import handleResponseError from './handleError'
 
-const getFeedListApi = async (pageOption: {
+const getFeedPageApi = async (pageOption: {
   page: number
   pageSize: number
   orderBy: string
@@ -43,4 +43,4 @@ const createFeedCollectionApi = async (
     .catch((err) => handleResponseError(err))
 }
 
-export { getFeedListApi, createFeedCollectionApi }
+export { getFeedPageApi as getFeedListApi, createFeedCollectionApi }

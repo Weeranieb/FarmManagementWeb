@@ -1,23 +1,46 @@
 import { TextField, Box, MenuItem, Button, Typography } from '@mui/material'
-import React from 'react'
+import { ChangeEvent, useState, FC, useEffect } from 'react'
 import DateSelect from '../../components/DateSelect'
 import { SearchDailyFeedProps } from './DailyFeedPage'
 import dayjs, { Dayjs } from 'dayjs'
+import { FeedCollection } from '../../models/schema/feed'
+import { getFeedListApi } from '../../services/feedCollection.service'
+import { getFarmListApi } from '../../services/farm.service'
+import { Farm } from '../../models/schema/farm'
 
 interface SearchProps {
   searchFormData: SearchDailyFeedProps
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  handleInputChange: (e: ChangeEvent<HTMLInputElement>) => void
   handleDateChange: (date: Dayjs | null) => void
   handleDialogSearch: () => void
 }
 
-const Search: React.FC<SearchProps> = ({
+const Search: FC<SearchProps> = ({
   searchFormData,
   handleInputChange,
   handleDateChange,
   handleDialogSearch,
 }) => {
-  const farms = ['Farm 1', 'Farm 2', 'Farm 3']
+  const [feedCollection, setFeedCollection] = useState<FeedCollection[]>([])
+  const [farms, setFarms] = useState<Farm[]>([])
+  useEffect(() => {
+    const getFeedList = async () => {
+      const res = await getFeedListApi({
+        page: 0,
+        pageSize: 100,
+        orderBy: '"Name"',
+      })
+      if (res.result) setFeedCollection(res.data.items)
+    }
+
+    const getFarms = async () => {
+      const res = await getFarmListApi()
+      if (res.result) setFarms(res.data)
+    }
+
+    getFeedList()
+    getFarms()
+  }, [])
 
   return (
     <Box display='flex' alignItems='center' justifyContent='center' p={2}>
@@ -31,9 +54,11 @@ const Search: React.FC<SearchProps> = ({
         onChange={handleInputChange}
         select
       >
-        <MenuItem value=''>ทั้งหมด</MenuItem>
-        <MenuItem value='เหยื่อสด'>เหยื่อสด</MenuItem>
-        <MenuItem value='อาหารเม็ด'>อาหารเม็ด</MenuItem>
+        {feedCollection.map((feed, index) => (
+          <MenuItem key={index} value={feed.id}>
+            {feed.name}
+          </MenuItem>
+        ))}
       </TextField>
 
       <TextField
@@ -46,10 +71,9 @@ const Search: React.FC<SearchProps> = ({
         onChange={handleInputChange}
         select
       >
-        <MenuItem value=''>ทั้งหมด</MenuItem>
         {farms.map((farm, index) => (
-          <MenuItem key={index} value={farm}>
-            {farm}
+          <MenuItem key={index} value={farm.id}>
+            {farm.name}
           </MenuItem>
         ))}
       </TextField>
