@@ -10,24 +10,25 @@ import {
 import dayjs, { Dayjs } from 'dayjs'
 import YearMonthSelect from '../../components/YearMonthSelect'
 import DialogWrapper from '../../components/DialogWrapper'
-import { DownloadFormInput } from './DailyFeedPage'
+// import { DownloadFormInput } from './DailyFeedPage'
 import { FeedCollection } from '../../models/schema/feed'
 import { Farm } from '../../models/schema/farm'
 import { getFarmListApi } from '../../services/farm.service'
 import { getFeedListApi } from '../../services/feedCollection.service'
+import { DownloadExcelProps } from '../../models/schema/dailyFeed'
 
 interface DialogDownloadFormProps {
   open: boolean
   onClose: () => void
-  onSubmit: (data: DownloadFormInput) => void
-  downloadType: 'year' | 'month' | ''
+  onSubmit: (data: DownloadExcelProps) => void
+  type: 'year' | 'month' | ''
 }
 
 const DialogDownloadForm: FC<DialogDownloadFormProps> = ({
   open,
   onClose,
   onSubmit,
-  downloadType,
+  type,
 }) => {
   const [feedCollection, setFeedCollection] = useState<FeedCollection[]>([])
   const [farms, setFarms] = useState<Farm[]>([])
@@ -51,19 +52,19 @@ const DialogDownloadForm: FC<DialogDownloadFormProps> = ({
     getFarms()
   }, [])
 
-  const [formData, setFormData] = useState<DownloadFormInput>({
-    farm: '',
+  const [formData, setFormData] = useState<DownloadExcelProps>({
+    farmId: 0,
     type: '',
     date: dayjs().format('YYYY-MM-DD'),
-    downloadType: '',
+    feedId: 0,
   })
 
   useEffect(() => {
     setFormData((prevData) => ({
       ...prevData,
-      downloadType,
+      type: type,
     }))
-  }, [downloadType])
+  }, [type])
 
   const handleDateChange = (date: Dayjs | null) => {
     const formattedDate = date ? date.format('YYYY-MM-DD') : ''
@@ -99,8 +100,8 @@ const DialogDownloadForm: FC<DialogDownloadFormProps> = ({
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>ประเภท</InputLabel>
             <Select
-              name='type'
-              value={formData.type}
+              name='feedId'
+              value={formData.feedId}
               onChange={handleSelectChange}
               label='ประเภท'
             >
@@ -116,8 +117,8 @@ const DialogDownloadForm: FC<DialogDownloadFormProps> = ({
           <FormControl fullWidth variant='outlined' margin='dense'>
             <InputLabel>ฟาร์ม</InputLabel>
             <Select
-              name='farm'
-              value={formData.farm}
+              name='farmId'
+              value={formData.farmId}
               onChange={handleSelectChange}
               label='ฟาร์ม'
             >

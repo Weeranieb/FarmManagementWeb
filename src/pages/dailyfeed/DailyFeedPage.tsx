@@ -6,6 +6,8 @@ import DownloadForm from './DownloadForm'
 import Upload from './Upload'
 import DialogDownloadForm from './DialogDownloadForm'
 import DialogTable from './DialogTable'
+import { DownloadExcelProps } from '../../models/schema/dailyFeed'
+import { downloadExcelForm } from '../../services/dailyFeed.service'
 
 export interface SearchDailyFeedProps {
   date: string
@@ -13,12 +15,6 @@ export interface SearchDailyFeedProps {
   type: string
 }
 
-export interface DownloadFormInput {
-  date: string
-  farm: string
-  type: string
-  downloadType: 'year' | 'month' | ''
-}
 const DailyFeed: React.FC = () => {
   const [formData, setFormData] = useState<SearchDailyFeedProps>({
     date: dayjs().format('YYYY-MM-DD'),
@@ -26,11 +22,11 @@ const DailyFeed: React.FC = () => {
     type: '',
   })
 
-  const [downloadFormData, setDownloadFormData] = useState<DownloadFormInput>({
+  const [downloadFormData, setDownloadFormData] = useState<DownloadExcelProps>({
     date: dayjs().format('YYYY-MM-DD'),
-    farm: '',
+    farmId: 0,
     type: '',
-    downloadType: '',
+    feedId: 0,
   })
   const [openDialog, setOpenDialog] = useState(false)
   const [dialogOpenDownloadForm, setDialogOpenDownloadForm] = useState(false)
@@ -55,8 +51,36 @@ const DailyFeed: React.FC = () => {
     }))
   }
 
-  const handleFormSubmitDownloadForm = (data: DownloadFormInput) => {
-    console.log(data)
+  const handleFormSubmitDownloadForm = async (data: DownloadExcelProps) => {
+    try {
+      const fileBlob = await downloadExcelForm(data)
+
+      // Create a link to download the file
+      const url = window.URL.createObjectURL(fileBlob)
+      const link = document.createElement('a')
+      link.href = url
+
+      // Set the download attribute to suggest a filename
+      let filename = ''
+      if (data.type === 'year') {
+        filename = `ฟอร์มรายปี_${data.date.slice(0, 4)}_ไอดี_${
+          data.feedId
+        }.xlsx`
+      } else if (data.type === 'month') {
+        filename = `ฟอร์มรายเดือน_${data.date.slice(0, 7)}_ไอดี_${
+          data.feedId
+        }.xlsx`
+      }
+      link.setAttribute('download', filename)
+      document.body.appendChild(link)
+      link.click()
+
+      // Cleanup the URL and remove the link
+      link.parentNode?.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Failed to download the file:', error)
+    }
   }
 
   const handleFormSubmitTable = () => {
@@ -68,10 +92,10 @@ const DailyFeed: React.FC = () => {
     setOpenDialog(true)
   }
 
-  const handleOpenDialogDownloadForm = (downloadType: 'year' | 'month') => {
+  const handleOpenDialogDownloadForm = (type: 'year' | 'month') => {
     setDownloadFormData((prevData) => ({
       ...prevData,
-      downloadType,
+      type,
     }))
     setDialogOpenDownloadForm(true)
   }
@@ -147,7 +171,7 @@ const DailyFeed: React.FC = () => {
         open={dialogOpenDownloadForm}
         onClose={handleDialogDownloadFormClose}
         onSubmit={handleFormSubmitDownloadForm}
-        downloadType={downloadFormData.downloadType}
+        type={downloadFormData.type}
       />
     </Box>
   )
