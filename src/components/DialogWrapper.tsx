@@ -17,7 +17,7 @@ interface StyledDialogWrapperProps extends DialogProps {
   open: boolean
   onClose: () => void
   handleFormSubmit?: () => void
-  islarge?: boolean
+  islarge: boolean
   children: React.ReactNode
 }
 

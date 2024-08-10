@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { FC, useEffect, useState } from 'react'
 import {
   TextField,
   Grid,
@@ -11,11 +11,14 @@ import {
 } from '@mui/material'
 import { styled } from '@mui/system'
 import DialogWrapperWithCancel from '../../components/DialogWrapperWithCancel'
+import { getDailyFeedByMonth } from '../../services/dailyFeed.service'
+import { DailyFeed, SearchDailyFeedProps } from '../../models/schema/dailyFeed'
 
 interface DialogTableProps {
   open: boolean
   onClose: () => void
   onSubmit: (data: any) => void
+  searchData: SearchDailyFeedProps
 }
 
 const CustomTableCell = styled(TableCell)(({ theme }) => ({
@@ -45,18 +48,35 @@ const HeaderTableCell = styled(TableCell)(({ theme }) => ({
   },
 }))
 
-const DialogTable: React.FC<DialogTableProps> = ({
+const DialogTable: FC<DialogTableProps> = ({
   open,
   onClose,
   onSubmit,
+  searchData,
 }) => {
   const initialData = Array.from({ length: 30 }, () => Array(15).fill(''))
+  const [feedCollection, setFeedCollection] = useState<DailyFeed[]>([])
 
-  const [tableData, setTableData] = React.useState<string[][]>(initialData)
-  const [editing, setEditing] = React.useState<{
+  const [tableData, setTableData] = useState<string[][]>(initialData)
+  const [editing, setEditing] = useState<{
     row: number
     col: number
   } | null>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const getDailyFeeds = async () => {
+      const res = await getDailyFeedByMonth(
+        searchData.feedId,
+        searchData.farmId,
+        searchData.date
+      )
+      console.log('getDailyFeeds -> res', res)
+      if (res.result) setFeedCollection(res.data)
+    }
+
+    getDailyFeeds()
+  }, [open, searchData])
 
   const handleTableDataChange = (
     rowIndex: number,

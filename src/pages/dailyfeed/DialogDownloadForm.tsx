@@ -94,6 +94,7 @@ const DialogDownloadForm: FC<DialogDownloadFormProps> = ({
       onClose={onClose}
       title='กรอกข้อมูล'
       handleFormSubmit={handleFormSubmit}
+      islarge={false}
     >
       <Grid container spacing={3} alignItems='center'>
         <Grid item xs={4}>

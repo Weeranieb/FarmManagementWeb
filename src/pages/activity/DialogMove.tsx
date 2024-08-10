@@ -157,6 +157,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
       onClose={onClose}
       title='กรอกข้อมูล: ย้าย'
       handleFormSubmit={handleFormSubmit}
+      islarge={false}
     >
       <Grid container spacing={3} alignItems='center'>
         <Grid item xs={2} container alignItems='center' justifyContent='center'>

@@ -173,6 +173,7 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
       onClose={onClose}
       title='เพิ่มข้อมูล'
       handleFormSubmit={handleFormSubmit}
+      islarge={false}
     >
       <Grid container spacing={3}>
         <GridTextField

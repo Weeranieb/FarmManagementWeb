@@ -6,20 +6,17 @@ import DownloadForm from './DownloadForm'
 import Upload from './Upload'
 import DialogDownloadForm from './DialogDownloadForm'
 import DialogTable from './DialogTable'
-import { DownloadExcelProps } from '../../models/schema/dailyFeed'
+import {
+  DownloadExcelProps,
+  SearchDailyFeedProps,
+} from '../../models/schema/dailyFeed'
 import { downloadExcelForm } from '../../services/dailyFeed.service'
 
-export interface SearchDailyFeedProps {
-  date: string
-  farm: string
-  type: string
-}
-
 const DailyFeed: React.FC = () => {
-  const [formData, setFormData] = useState<SearchDailyFeedProps>({
+  const [searchFormData, setSearchFormData] = useState<SearchDailyFeedProps>({
     date: dayjs().format('YYYY-MM-DD'),
-    farm: '',
-    type: '',
+    farmId: 0,
+    feedId: 0,
   })
 
   const [downloadFormData, setDownloadFormData] = useState<DownloadExcelProps>({
@@ -37,7 +34,7 @@ const DailyFeed: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormData((prevData) => ({
+    setSearchFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }))
@@ -45,7 +42,7 @@ const DailyFeed: React.FC = () => {
 
   const handleDateChange = (date: Dayjs | null) => {
     const formattedDate = date ? date.format('YYYY-MM-DD') : ''
-    setFormData((prevData) => ({
+    setSearchFormData((prevData) => ({
       ...prevData,
       date: formattedDate,
     }))
@@ -85,11 +82,12 @@ const DailyFeed: React.FC = () => {
 
   const handleFormSubmitTable = () => {
     // setOpenDialog(true)
-    console.log(formData)
+    console.log(searchFormData)
   }
 
   const handleOpenDialogTable = () => {
     setOpenDialog(true)
+    console.log(searchFormData)
   }
 
   const handleOpenDialogDownloadForm = (type: 'year' | 'month') => {
@@ -123,7 +121,7 @@ const DailyFeed: React.FC = () => {
 
       {/* Filters Section */}
       <Search
-        searchFormData={formData}
+        searchFormData={searchFormData}
         handleInputChange={handleInputChange}
         handleDateChange={handleDateChange}
         handleDialogSearch={handleOpenDialogTable}
@@ -164,6 +162,7 @@ const DailyFeed: React.FC = () => {
         open={openDialog}
         onClose={handleCloseDialog}
         onSubmit={handleFormSubmitTable}
+        searchData={searchFormData}
       />
 
       {/* Dialog for Download Form Result */}

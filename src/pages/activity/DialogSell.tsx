@@ -221,6 +221,7 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
       onClose={onClose}
       title='กรอกข้อมูล: ขาย'
       handleFormSubmit={handleFormSubmit}
+      islarge={false}
     >
       <Grid container spacing={3}>
         <GridSelect

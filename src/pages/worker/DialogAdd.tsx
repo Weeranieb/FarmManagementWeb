@@ -68,7 +68,12 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
   }
 
   return (
-    <DialogWrapper open={open} onClose={onClose} onSubmit={handleFormSubmit}>
+    <DialogWrapper
+      open={open}
+      onClose={onClose}
+      onSubmit={handleFormSubmit}
+      islarge={false}
+    >
       <Grid container spacing={3}>
         <Grid item xs={6}>
           <TextField

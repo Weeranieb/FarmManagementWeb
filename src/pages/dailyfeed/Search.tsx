@@ -1,12 +1,12 @@
 import { TextField, Box, MenuItem, Button, Typography } from '@mui/material'
 import { ChangeEvent, useState, FC, useEffect } from 'react'
-import { SearchDailyFeedProps } from './DailyFeedPage'
 import dayjs, { Dayjs } from 'dayjs'
 import { FeedCollection } from '../../models/schema/feed'
 import { getFeedListApi } from '../../services/feedCollection.service'
 import { getFarmListApi } from '../../services/farm.service'
 import { Farm } from '../../models/schema/farm'
 import YearMonthSelect from '../../components/YearMonthSelect'
+import { SearchDailyFeedProps } from '../../models/schema/dailyFeed'
 
 interface SearchProps {
   searchFormData: SearchDailyFeedProps
@@ -46,11 +46,11 @@ const Search: FC<SearchProps> = ({
     <Box display='flex' alignItems='center' justifyContent='center' p={2}>
       <TextField
         label='ประเภท'
-        name='type'
+        name='feedId'
         variant='outlined'
         size='medium'
         sx={{ width: 150, mr: 3 }}
-        value={searchFormData.type}
+        value={searchFormData.feedId}
         onChange={handleInputChange}
         select
       >
@@ -63,11 +63,11 @@ const Search: FC<SearchProps> = ({
 
       <TextField
         label='ฟาร์ม'
-        name='farm'
+        name='farmId'
         variant='outlined'
         size='medium'
         sx={{ width: 150, mr: 3 }}
-        value={searchFormData.farm}
+        value={searchFormData.farmId}
         onChange={handleInputChange}
         select
       >

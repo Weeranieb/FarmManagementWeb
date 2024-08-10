@@ -15,7 +15,7 @@ interface DialogWrapperWithEditProps extends DialogProps {
   onClose: () => void
   handleFormSubmit?: () => void
   handleCancel?: () => void
-  islarge?: boolean
+  islarge: boolean
   children: React.ReactNode
 }
 
