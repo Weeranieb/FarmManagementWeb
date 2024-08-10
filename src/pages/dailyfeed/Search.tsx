@@ -1,12 +1,12 @@
 import { TextField, Box, MenuItem, Button, Typography } from '@mui/material'
 import { ChangeEvent, useState, FC, useEffect } from 'react'
-import DateSelect from '../../components/DateSelect'
 import { SearchDailyFeedProps } from './DailyFeedPage'
 import dayjs, { Dayjs } from 'dayjs'
 import { FeedCollection } from '../../models/schema/feed'
 import { getFeedListApi } from '../../services/feedCollection.service'
 import { getFarmListApi } from '../../services/farm.service'
 import { Farm } from '../../models/schema/farm'
+import YearMonthSelect from '../../components/YearMonthSelect'
 
 interface SearchProps {
   searchFormData: SearchDailyFeedProps
@@ -78,7 +78,7 @@ const Search: FC<SearchProps> = ({
         ))}
       </TextField>
 
-      <DateSelect
+      <YearMonthSelect
         label='วันที่ทำ'
         value={dayjs(searchFormData.date)}
         onChange={(date) => handleDateChange(date)}
