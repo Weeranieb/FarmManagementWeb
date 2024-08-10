@@ -14,6 +14,10 @@ import DialogWrapperWithCancel from '../../components/DialogWrapperWithCancel'
 import { getDailyFeedByMonth } from '../../services/dailyFeed.service'
 import { DailyFeed, SearchDailyFeedProps } from '../../models/schema/dailyFeed'
 import { AbbrvMonthsThai } from '../../utils/time'
+import { getFeedApi } from '../../services/feedCollection.service'
+import { FeedCollection } from '../../models/schema/feed'
+import { FarmWithActive } from '../../models/schema/activePond'
+import { getFarmWithActiveApi } from '../../services/activePond.service'
 
 interface DialogTableProps {
   open: boolean
@@ -55,48 +59,84 @@ const DialogTable: FC<DialogTableProps> = ({
   onSubmit,
   searchData,
 }) => {
-  const initialData = Array.from({ length: 30 }, () => Array(15).fill(''))
-  const [feedCollection, setFeedCollection] = useState<DailyFeed[]>([])
-  // get year from searchData.date
-  const year: number = parseInt(searchData.date.split('-')[0])
-  const month: number = parseInt(searchData.date.split('-')[1])
-
-  const [tableData, setTableData] = useState<string[][]>(initialData)
+  const [feedCollection, setFeedCollection] = useState<FeedCollection>()
+  const [dailyFeed, setDailyFeed] = useState<DailyFeed[]>([])
+  const [pondList, setPondList] = useState<FarmWithActive[]>([])
+  const [tableData, setTableData] = useState<string[][]>([])
   const [editing, setEditing] = useState<{
     row: number
     col: number
   } | null>(null)
 
+  // get year and month from searchData.date
+  const year: number = parseInt(searchData.date.split('-')[0])
+  const month: number = parseInt(searchData.date.split('-')[1])
+
   useEffect(() => {
     if (!open) return
-    const getDailyFeeds = async () => {
-      const res = await getDailyFeedByMonth(
-        searchData.feedId,
-        searchData.farmId,
-        searchData.date
-      )
-      console.log('getDailyFeeds -> res', res)
-      if (res.result) setFeedCollection(res.data)
+
+    const fetchData = async () => {
+      try {
+        const [dailyFeedRes, feedRes, pondListRes] = await Promise.all([
+          getDailyFeedByMonth(
+            searchData.feedId,
+            searchData.farmId,
+            searchData.date
+          ),
+          getFeedApi(searchData.feedId),
+          getFarmWithActiveApi(searchData.farmId),
+        ])
+
+        if (dailyFeedRes.result) setDailyFeed(dailyFeedRes.data)
+        if (feedRes.result) setFeedCollection(feedRes.data)
+        if (pondListRes.result) setPondList(pondListRes.data)
+      } catch (error) {
+        console.error('Error fetching data', error)
+      }
     }
 
-    getDailyFeeds()
+    fetchData()
   }, [open, searchData])
+
+  useEffect(() => {
+    if (dailyFeed.length === 0 || pondList.length === 0) return
+
+    const length = new Date(year, month, 0).getDate()
+    const initialTableData = Array.from({ length: length }, () =>
+      Array(pondList.length).fill('')
+    )
+    dailyFeed.forEach((feed) => {
+      const day = new Date(feed.feedDate).getDate() - 1 // adjust to 0-based index
+      const pondIndex = pondList.findIndex((pond) => pond.id === feed.pondId)
+      if (pondIndex >= 0) {
+        initialTableData[day][pondIndex] = feed.amount
+      }
+    })
+
+    setTableData(initialTableData)
+  }, [dailyFeed, pondList, month, year])
 
   const handleTableDataChange = (
     rowIndex: number,
     colIndex: number,
     value: string
   ) => {
+    const numericValue = value === '' ? '' : parseFloat(value).toString()
     setTableData((prevData) => {
       const updatedData = [...prevData]
-      updatedData[rowIndex][colIndex] = value
+      updatedData[rowIndex][colIndex] = numericValue
       return updatedData
     })
   }
 
   const handleFormSubmit = () => {
-    console.log(tableData)
-    onSubmit(tableData)
+    // Convert tableData from string[][] to number[][]
+    const numericTableData = tableData.map((row) =>
+      row.map((cell) => (cell === '' ? '' : parseFloat(cell)))
+    )
+
+    console.log('numeric table Data', numericTableData)
+    onSubmit(numericTableData)
     onClose()
   }
 
@@ -117,7 +157,9 @@ const DialogTable: FC<DialogTableProps> = ({
     <DialogWrapperWithCancel
       open={open}
       onClose={onClose}
-      title={`เหยื่อสด เดือน${AbbrvMonthsThai[month]} ปี ${year + 543}`}
+      title={`${feedCollection?.name} เดือน${AbbrvMonthsThai[month]} ปี ${
+        year + 543
+      }`}
       handleFormSubmit={handleFormSubmit}
       handleCancel={handleCancel}
       islarge
@@ -127,10 +169,8 @@ const DialogTable: FC<DialogTableProps> = ({
           <TableHead>
             <TableRow>
               <HeaderTableCell style={{ width: '5%' }}>วัน</HeaderTableCell>
-              {[...Array(15)].map((_, index) => (
-                <HeaderTableCell key={index}>{`บ่อ ${
-                  index + 1
-                }`}</HeaderTableCell>
+              {pondList.map((pond, index) => (
+                <HeaderTableCell key={index}>{`${pond.name}`}</HeaderTableCell>
               ))}
             </TableRow>
           </TableHead>
@@ -146,6 +186,7 @@ const DialogTable: FC<DialogTableProps> = ({
                   >
                     {editing?.row === rowIndex && editing?.col === colIndex ? (
                       <TextField
+                        type='number'
                         value={cell}
                         onChange={(e) =>
                           handleTableDataChange(

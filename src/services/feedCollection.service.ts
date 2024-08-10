@@ -43,4 +43,17 @@ const createFeedCollectionApi = async (
     .catch((err) => handleResponseError(err))
 }
 
-export { getFeedPageApi as getFeedListApi, createFeedCollectionApi }
+const getFeedApi = async (
+  id: number
+): Promise<BaseResponse<FeedCollection>> => {
+  const url = `feedcollection/${id}`
+  return api
+    .get<BaseResponse<FeedCollection>>(url)
+    .then((res) => {
+      if (res.data.result) return res.data
+      else return handleResponseError(res)
+    })
+    .catch((err) => handleResponseError(err))
+}
+
+export { getFeedPageApi as getFeedListApi, createFeedCollectionApi, getFeedApi }
