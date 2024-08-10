@@ -130,9 +130,42 @@ const DialogTable: FC<DialogTableProps> = ({
   }
 
   const handleFormSubmit = () => {
-    // Convert tableData from string[][] to number[][]
-    const numericTableData = tableData.map((row) =>
-      row.map((cell) => (cell === '' ? '' : parseFloat(cell)))
+    // Convert tableData from string[][] to DailyFeed[]
+    const numericTableData: DailyFeed[] = tableData.flatMap(
+      (row, rowIndex) =>
+        row
+          .map((cell, colIndex) => {
+            // Find corresponding pond and feed information
+            const pond = pondList[colIndex]
+
+            if (pond) {
+              // Find existing feed entry for the current date and pond
+              const existingFeed = dailyFeed.find(
+                (feed) =>
+                  feed.pondId === pond.id &&
+                  new Date(feed.feedDate).getDate() === rowIndex + 1
+              )
+
+              // Create DailyFeed entry, including ID if available
+              return cell !== ''
+                ? {
+                    id: existingFeed ? existingFeed.id : 0, // Use existing ID or -1 for new entries
+                    activePondId: searchData.farmId, // Replace with actual data if available
+                    pondId: pond.id,
+                    feedCollectionId: searchData.feedId,
+                    amount: parseFloat(cell),
+                    feedDate: `${year}-${month.toString().padStart(2, '0')}-${(
+                      rowIndex + 1
+                    )
+                      .toString()
+                      .padStart(2, '0')}T00:00:00.000Z`,
+                  }
+                : null
+            }
+
+            return null
+          })
+          .filter((feed): feed is DailyFeed => feed !== null) // Filter out null entries
     )
 
     console.log('numeric table Data', numericTableData)
