@@ -34,7 +34,7 @@ const DialogWrapperWithCancel: React.FC<DialogWrapperWithEditProps> = ({
       onClose={onClose}
       fullWidth
       maxWidth={islarge ? 'xl' : 'md'}
-      islarge={islarge}
+      islarge
     >
       <StyledDialogTitle>
         {title}

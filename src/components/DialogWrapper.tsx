@@ -83,7 +83,7 @@ const DialogWrapper: React.FC<StyledDialogWrapperProps> = ({
       onClose={onClose}
       fullWidth
       maxWidth={islarge ? 'xl' : 'md'}
-      islarge={islarge}
+      islarge
     >
       <StyledDialogTitle>
         {title}

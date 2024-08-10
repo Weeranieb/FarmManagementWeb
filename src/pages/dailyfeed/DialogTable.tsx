@@ -13,6 +13,7 @@ import { styled } from '@mui/system'
 import DialogWrapperWithCancel from '../../components/DialogWrapperWithCancel'
 import { getDailyFeedByMonth } from '../../services/dailyFeed.service'
 import { DailyFeed, SearchDailyFeedProps } from '../../models/schema/dailyFeed'
+import { AbbrvMonthsThai } from '../../utils/time'
 
 interface DialogTableProps {
   open: boolean
@@ -56,6 +57,9 @@ const DialogTable: FC<DialogTableProps> = ({
 }) => {
   const initialData = Array.from({ length: 30 }, () => Array(15).fill(''))
   const [feedCollection, setFeedCollection] = useState<DailyFeed[]>([])
+  // get year from searchData.date
+  const year: number = parseInt(searchData.date.split('-')[0])
+  const month: number = parseInt(searchData.date.split('-')[1])
 
   const [tableData, setTableData] = useState<string[][]>(initialData)
   const [editing, setEditing] = useState<{
@@ -113,10 +117,10 @@ const DialogTable: FC<DialogTableProps> = ({
     <DialogWrapperWithCancel
       open={open}
       onClose={onClose}
-      title='เหยื่อสด เดือนมิ.ย. ปี 2565'
+      title={`เหยื่อสด เดือน${AbbrvMonthsThai[month]} ปี ${year + 543}`}
       handleFormSubmit={handleFormSubmit}
       handleCancel={handleCancel}
-      islarge={true}
+      islarge
     >
       <Grid item xs={12} sx={{ paddingLeft: 0 }}>
         <Table sx={{ marginLeft: 0 }}>
