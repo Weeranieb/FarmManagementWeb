@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { FC, useCallback, useEffect, useState } from 'react'
 import { DataGrid, GridPaginationModel, GridSortModel } from '@mui/x-data-grid'
 import DialogAdd from './DialogAdd'
 import { Box } from '@mui/material'
@@ -14,7 +14,7 @@ import {
 import ErrorAlert from '../../components/ErrorAlert'
 import SuccessAlert from '../../components/SuccessAlert'
 
-const Feed: React.FC = () => {
+const Feed: FC = () => {
   const [feedRows, setFeedRows] = useState<FeedCollection[]>([])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -54,7 +54,6 @@ const Feed: React.FC = () => {
   }
 
   const handleFormSubmit = async (newFeed: any) => {
-    console.log('New Feed:', newFeed)
     await createFeedCollectionApi(newFeed)
       .then((res) => {
         if (res.result) {

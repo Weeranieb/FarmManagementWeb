@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import { FC, ChangeEvent, useEffect, useState } from 'react'
 import { TextField, MenuItem } from '@mui/material'
 import { Farm } from '../../models/schema/farm'
 import { getFarmListApi } from '../../services/farm.service'
 import { FilterNumberProps } from '../../models/props/filterprop'
 import { useTranslation } from 'react-i18next'
 
-const FarmFilter: React.FC<FilterNumberProps> = ({ value, onChange }) => {
+const FarmFilter: FC<FilterNumberProps> = ({ value, onChange }) => {
   const [farms, setFarms] = useState<Farm[]>([])
   const { t } = useTranslation()
   useEffect(() => {
@@ -21,7 +21,7 @@ const FarmFilter: React.FC<FilterNumberProps> = ({ value, onChange }) => {
     getFarms()
   }, [])
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     onChange(Number(event.target.value))
   }
   return (

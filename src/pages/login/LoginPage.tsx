@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { MouseEvent, useState, useEffect, ChangeEvent, FormEvent } from 'react'
 import {
   TextField,
   Button,
@@ -43,11 +43,10 @@ const LoginPage = () => {
   }, [])
 
   const handleClickShowPassword = () => setShowPassword(!showPassword)
-  const handleMouseDownPassword = (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => event.preventDefault()
+  const handleMouseDownPassword = (event: MouseEvent<HTMLButtonElement>) =>
+    event.preventDefault()
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setLoginData((prevState) => ({
       ...prevState,
@@ -55,11 +54,11 @@ const LoginPage = () => {
     }))
   }
 
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRememberMe(e.target.checked)
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     // Check for empty fields

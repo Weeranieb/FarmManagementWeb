@@ -1,4 +1,4 @@
-import React from 'react'
+import { FC, useState } from 'react'
 import { DataGrid, GridSortModel } from '@mui/x-data-grid'
 import { Box } from '@mui/material'
 import DialogAdd from './DialogAdd'
@@ -24,17 +24,15 @@ const rows = [
   },
 ]
 
-const Worker: React.FC = () => {
-  const [dialogOpen, setDialogOpen] = React.useState(false)
+const Worker: FC = () => {
+  const [dialogOpen, setDialogOpen] = useState(false)
 
-  const [initialSortModel, setInitialSortModel] = React.useState<GridSortModel>(
-    [
-      {
-        field: 'id',
-        sort: 'desc',
-      },
-    ]
-  )
+  const [initialSortModel, setInitialSortModel] = useState<GridSortModel>([
+    {
+      field: 'id',
+      sort: 'desc',
+    },
+  ])
 
   const handleSortModelChange = (newSortModel: any) => {
     setInitialSortModel(newSortModel)

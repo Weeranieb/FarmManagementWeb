@@ -1,4 +1,4 @@
-import React from 'react'
+import { FC } from 'react'
 import {
   Grid,
   Card,
@@ -10,7 +10,7 @@ import {
 import { BarChart, PieChart } from '@mui/x-charts'
 import { axisClasses } from '@mui/x-charts/ChartsAxis'
 
-const StatsBottom: React.FC = () => {
+const StatsBottom: FC = () => {
   const valueFormatter = (value: number | null) => `${value} แสนบาท`
   const dataset = [
     {

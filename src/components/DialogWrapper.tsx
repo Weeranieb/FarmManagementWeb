@@ -1,4 +1,4 @@
-import React from 'react'
+import { FC, ReactNode } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -18,7 +18,7 @@ interface StyledDialogWrapperProps extends DialogProps {
   onClose: () => void
   handleFormSubmit?: () => void
   islarge: boolean
-  children: React.ReactNode
+  children: ReactNode
 }
 
 export const StyledDialog = styled(Dialog)<StyledDialogWrapperProps>(
@@ -69,7 +69,7 @@ export const CustomButton = styled(Button)(({ theme }) => ({
   },
 }))
 
-const DialogWrapper: React.FC<StyledDialogWrapperProps> = ({
+const DialogWrapper: FC<StyledDialogWrapperProps> = ({
   title,
   open,
   onClose,

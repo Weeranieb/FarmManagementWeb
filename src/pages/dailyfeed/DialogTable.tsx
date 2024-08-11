@@ -131,15 +131,14 @@ const DialogTable: FC<DialogTableProps> = ({
 
   const handleFormSubmit = () => {
     // Convert tableData from string[][] to DailyFeed[]
-    const numericTableData: DailyFeed[] = tableData.flatMap(
+    const payload: DailyFeed[] = tableData.flatMap(
       (row, rowIndex) =>
         row
           .map((cell, colIndex) => {
             // Find corresponding pond and feed information
             const pond = pondList[colIndex]
 
-            if (pond) {
-              // Find existing feed entry for the current date and pond
+            if (pond && cell !== '') {
               const existingFeed = dailyFeed.find(
                 (feed) =>
                   feed.pondId === pond.id &&
@@ -147,20 +146,29 @@ const DialogTable: FC<DialogTableProps> = ({
               )
 
               // Create DailyFeed entry, including ID if available
-              return cell !== ''
-                ? {
-                    id: existingFeed ? existingFeed.id : 0, // Use existing ID or -1 for new entries
-                    activePondId: searchData.farmId, // Replace with actual data if available
-                    pondId: pond.id,
-                    feedCollectionId: searchData.feedId,
-                    amount: parseFloat(cell),
-                    feedDate: `${year}-${month.toString().padStart(2, '0')}-${(
-                      rowIndex + 1
-                    )
-                      .toString()
-                      .padStart(2, '0')}T00:00:00.000Z`,
-                  }
-                : null
+              return {
+                id: existingFeed ? existingFeed.id : -1,
+                activePondId: existingFeed
+                  ? existingFeed.activePondId
+                  : undefined,
+                pondId: pond.id,
+                feedCollectionId: searchData.feedId,
+                amount: parseFloat(cell),
+                feedDate: `${year}-${month.toString().padStart(2, '0')}-${(
+                  rowIndex + 1
+                )
+                  .toString()
+                  .padStart(2, '0')}T00:00:00.000Z`,
+                delflag: existingFeed ? existingFeed.delFlag : false,
+                createdDate: existingFeed
+                  ? existingFeed.createdDate
+                  : undefined,
+                createdBy: existingFeed ? existingFeed.createdBy : undefined,
+                updatedDate: existingFeed
+                  ? existingFeed.updatedDate
+                  : undefined,
+                updatedBy: existingFeed ? existingFeed.updatedBy : undefined,
+              } as DailyFeed
             }
 
             return null
@@ -168,8 +176,7 @@ const DialogTable: FC<DialogTableProps> = ({
           .filter((feed): feed is DailyFeed => feed !== null) // Filter out null entries
     )
 
-    console.log('numeric table Data', numericTableData)
-    onSubmit(numericTableData)
+    onSubmit(payload)
     onClose()
   }
 

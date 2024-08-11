@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { FC, useState, ChangeEvent } from 'react'
 import {
   TextField,
   Grid,
@@ -23,8 +23,8 @@ interface DialogAddProps {
   onSubmit: (data: Worker) => void
 }
 
-const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
-  const [formData, setFormData] = React.useState<Worker>({
+const DialogAdd: FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
+  const [formData, setFormData] = useState<Worker>({
     id: 0,
     clientId: 0,
     farmGroupId: 0,
@@ -38,7 +38,7 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
     isActive: true,
   })
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prevData) => ({
       ...prevData,

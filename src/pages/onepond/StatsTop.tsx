@@ -1,7 +1,7 @@
 import { Box, Card, CardContent, Typography } from '@mui/material'
-import React from 'react'
+import { FC } from 'react'
 
-const StatsTop: React.FC = () => {
+const StatsTop: FC = () => {
   const cardData = [
     { title: 'วันที่เริ่มเลี้ยง', text: '27 พ.ย. 2566' },
     { title: 'จำนวนวันที่เลี้ยง', text: '1 ปี 3 เดือน 5 วัน' },

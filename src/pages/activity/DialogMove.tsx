@@ -1,4 +1,4 @@
-import React, { useEffect, useState, FC } from 'react'
+import { ChangeEvent, useEffect, useState, FC } from 'react'
 import { Grid, SelectChangeEvent, Typography } from '@mui/material'
 import dayjs, { Dayjs } from 'dayjs'
 import DialogWrapper from '../../components/DialogWrapper'
@@ -78,7 +78,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
     }
   }, [formData.toFarmId])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prevData) => ({
       ...prevData,
@@ -86,7 +86,7 @@ const DialogMove: FC<DialogMoveProps> = ({ open, onClose, onSubmit }) => {
     }))
   }
 
-  const handleCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCheckbox = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target
     setFormData((prevData) => ({
       ...prevData,

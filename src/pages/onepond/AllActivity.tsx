@@ -1,4 +1,4 @@
-import React from 'react'
+import { FC, useState, MouseEvent } from 'react'
 import {
   Grid,
   Card,
@@ -41,29 +41,27 @@ const historyRows = [
   // Add more rows as needed
 ]
 
-const AllActivity: React.FC = () => {
+const AllActivity: FC = () => {
   const navigate = useNavigate()
 
   const handleHistoryClick = (id: number) => {
     navigate(`/pond/${id}`)
   }
 
-  const [initialSortModel, setInitialSortModel] = React.useState<GridSortModel>(
-    [
-      {
-        field: 'id',
-        sort: 'desc',
-      },
-    ]
-  )
+  const [initialSortModel, setInitialSortModel] = useState<GridSortModel>([
+    {
+      field: 'id',
+      sort: 'desc',
+    },
+  ])
 
   const handleSortModelChange = (newSortModel: any) => {
     setInitialSortModel(newSortModel)
   }
 
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleClick = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
   }
 

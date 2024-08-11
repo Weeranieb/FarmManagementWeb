@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { Box, Typography } from '@mui/material'
 import { getClientApi } from '../../services/client.service'
 
-const HomePage: React.FC = () => {
-  const [farmName, setFarmName] = React.useState('')
+const HomePage: FC = () => {
+  const [farmName, setFarmName] = useState('')
 
   const getFarmName = async () => {
     const data = await getClientApi()

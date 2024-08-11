@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { FC, useState, MouseEvent } from 'react'
 import {
   AppBar,
   Toolbar,
@@ -27,7 +27,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { clearUser } from '../redux/reducers/user'
 import { RootState } from '../redux/store'
 
-const TopBar: React.FC = () => {
+const TopBar: FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [notificationEl, setNotificationEl] = useState<null | HTMLElement>(null)
   const dataUser = useSelector((state: RootState) => state.user)
@@ -38,7 +38,7 @@ const TopBar: React.FC = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
 
-  const handleClickProfile = (event: React.MouseEvent<HTMLElement>) => {
+  const handleClickProfile = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
   }
 
@@ -46,7 +46,7 @@ const TopBar: React.FC = () => {
     setAnchorEl(null)
   }
 
-  const handleClickNotifications = (event: React.MouseEvent<HTMLElement>) => {
+  const handleClickNotifications = (event: MouseEvent<HTMLElement>) => {
     setNotificationEl(event.currentTarget)
   }
 

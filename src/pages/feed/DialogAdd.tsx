@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useState, FC } from 'react'
 import {
   TextField,
   IconButton,
@@ -51,7 +51,7 @@ const AddRowFab = styled(Fab)(({ theme }) => ({
   },
 }))
 
-const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
+const DialogAdd: FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
   const [formData, setFormData] = useState<CreateFeedCollection>({
     name: '',
     code: '',

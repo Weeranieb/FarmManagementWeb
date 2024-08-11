@@ -1,4 +1,4 @@
-import React from 'react'
+import { FC, ReactNode } from 'react'
 import { DialogProps, Grid, IconButton } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
 import {
@@ -16,10 +16,10 @@ interface DialogWrapperWithEditProps extends DialogProps {
   handleFormSubmit?: () => void
   handleCancel?: () => void
   islarge: boolean
-  children: React.ReactNode
+  children: ReactNode
 }
 
-const DialogWrapperWithCancel: React.FC<DialogWrapperWithEditProps> = ({
+const DialogWrapperWithCancel: FC<DialogWrapperWithEditProps> = ({
   title,
   open,
   onClose,

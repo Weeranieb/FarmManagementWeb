@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { FC, Fragment, useState } from 'react'
 import {
   Drawer,
   List,
@@ -29,7 +29,7 @@ import {
 import { useDispatch } from 'react-redux'
 import { clearUser } from '../redux/reducers/user'
 
-const Sidebar: React.FC = () => {
+const Sidebar: FC = () => {
   const [isSubMenuOpen, setIsSubMenuOpen] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
   const navigate = useNavigate()
@@ -94,7 +94,7 @@ const Sidebar: React.FC = () => {
         }}
       >
         {items.map((item) => (
-          <React.Fragment key={item.text}>
+          <Fragment key={item.text}>
             <ListItem
               onClick={() => {
                 if (item.text === 'กรอกข้อมูล') {
@@ -170,7 +170,7 @@ const Sidebar: React.FC = () => {
                 </List>
               </Collapse>
             )}
-          </React.Fragment>
+          </Fragment>
         ))}
       </List>
       <List
@@ -191,7 +191,7 @@ const Sidebar: React.FC = () => {
         }}
       >
         {secondaryItems.map((item) => (
-          <React.Fragment key={item.text}>
+          <Fragment key={item.text}>
             <ListItem
               onClick={() => {
                 if (item.text === 'กรอกข้อมูล') {
@@ -233,7 +233,7 @@ const Sidebar: React.FC = () => {
               </ListItemIcon>
               <ListItemText primary={item.text} />
             </ListItem>
-          </React.Fragment>
+          </Fragment>
         ))}
       </List>
       <ListItem sx={{ mt: 12 }}>

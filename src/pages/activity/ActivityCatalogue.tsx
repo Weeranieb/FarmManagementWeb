@@ -1,4 +1,4 @@
-import React from 'react'
+import { FC, ChangeEvent } from 'react'
 import { TextField, MenuItem } from '@mui/material'
 import { FilterStringProps } from '../../models/props/filterprop'
 import { useTranslation } from 'react-i18next'
@@ -9,8 +9,8 @@ const pairFilterMap = {
   SELL: 'ขาย',
 }
 
-const ModeFilter: React.FC<FilterStringProps> = ({ value, onChange }) => {
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+const ModeFilter: FC<FilterStringProps> = ({ value, onChange }) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value)
   }
   const { t } = useTranslation()

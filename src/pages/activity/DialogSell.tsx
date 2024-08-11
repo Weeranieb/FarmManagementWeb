@@ -1,4 +1,4 @@
-import React, { useEffect, useState, FC } from 'react'
+import { ChangeEvent, useEffect, useState, FC } from 'react'
 import {
   IconButton,
   Grid,
@@ -105,7 +105,7 @@ const DialogSell: FC<DialogSellProps> = ({ open, onClose, onSubmit }) => {
     }
   }, [formData.farmId])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, checked, type } = e.target
     const newValue =
       type === 'checkbox'

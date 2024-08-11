@@ -1,4 +1,4 @@
-import React from 'react'
+import { FC } from 'react'
 import { styled } from '@mui/system'
 import { Button } from '@mui/material'
 
@@ -22,7 +22,7 @@ const StyledButton = styled(Button, {
   },
 }))
 
-const ActiveButton: React.FC<{ isActive?: boolean }> = ({ isActive }) => {
+const ActiveButton: FC<{ isActive?: boolean }> = ({ isActive }) => {
   return (
     <StyledButton variant='contained' isActive={isActive}>
       {isActive ? 'ปัจจุบัน' : 'ปิดแล้ว'}

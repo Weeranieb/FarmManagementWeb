@@ -1,9 +1,8 @@
-// src/components/SidebarHeader.tsx
-import React from 'react'
+import { FC } from 'react'
 import { Box, Typography } from '@mui/material'
 import SetMealIcon from '@mui/icons-material/SetMeal'
 
-const SidebarHeader: React.FC = () => {
+const SidebarHeader: FC = () => {
   return (
     <Box sx={{ pt: 2, pb: 3, textAlign: 'center', backgroundColor: '#FAF8EE' }}>
       <Box display='flex' alignItems='center' justifyContent='center'>

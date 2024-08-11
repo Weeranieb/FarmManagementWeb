@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { FC, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
 import HomePage from './pages/home/HomePage'
@@ -21,7 +21,7 @@ import { getUserApi } from './services/user.service'
 import { checkIsTokenValid } from './utils/token'
 import i18n from './i18n/i18n'
 
-const App: React.FC = () => {
+const App: FC = () => {
   const dispatch = useDispatch()
 
   const getUser = async () => {

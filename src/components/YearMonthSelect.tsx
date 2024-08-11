@@ -1,4 +1,4 @@
-import React from 'react'
+import { FC } from 'react'
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs, { Dayjs } from 'dayjs'
@@ -11,7 +11,7 @@ interface DateSelectProps {
   sx?: any
 }
 
-const YearMonthSelect: React.FC<DateSelectProps> = ({
+const YearMonthSelect: FC<DateSelectProps> = ({
   label,
   value,
   onChange,

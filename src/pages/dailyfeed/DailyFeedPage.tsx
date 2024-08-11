@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { FC, useState, ChangeEvent } from 'react'
 import { Box, Typography, Grid, Divider } from '@mui/material'
 import dayjs, { Dayjs } from 'dayjs'
 import Search from './Search'
@@ -7,12 +7,18 @@ import Upload from './Upload'
 import DialogDownloadForm from './DialogDownloadForm'
 import DialogTable from './DialogTable'
 import {
+  DailyFeed as DailySchema,
   DownloadExcelProps,
   SearchDailyFeedProps,
 } from '../../models/schema/dailyFeed'
-import { downloadExcelForm } from '../../services/dailyFeed.service'
+import {
+  bulkUploadDailyFeed,
+  downloadExcelForm,
+} from '../../services/dailyFeed.service'
+import ErrorAlert from '../../components/ErrorAlert'
+import SuccessAlert from '../../components/SuccessAlert'
 
-const DailyFeed: React.FC = () => {
+const DailyFeed: FC = () => {
   const [searchFormData, setSearchFormData] = useState<SearchDailyFeedProps>({
     date: dayjs().format('YYYY-MM-DD'),
     farmId: 0,
@@ -32,7 +38,7 @@ const DailyFeed: React.FC = () => {
     setDialogOpenDownloadForm(false)
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setSearchFormData((prevData) => ({
       ...prevData,
@@ -80,9 +86,20 @@ const DailyFeed: React.FC = () => {
     }
   }
 
-  const handleFormSubmitTable = () => {
-    // setOpenDialog(true)
-    console.log(searchFormData)
+  const handleFormSubmitTable = async (dailyFeedPayload: DailySchema[]) => {
+    console.log('from submit', dailyFeedPayload)
+    await bulkUploadDailyFeed(dailyFeedPayload)
+      .then((res) => {
+        if (res.result) {
+          SuccessAlert()
+          console.log('Success')
+        } else {
+          ErrorAlert(res)
+        }
+      })
+      .catch((err) => {
+        ErrorAlert(err)
+      })
   }
 
   const handleOpenDialogTable = () => {

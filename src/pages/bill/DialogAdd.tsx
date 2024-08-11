@@ -1,4 +1,4 @@
-import * as React from 'react'
+import { FC, ChangeEvent, useState } from 'react'
 import {
   TextField,
   Grid,
@@ -19,8 +19,8 @@ interface DialogAddProps {
   onSubmit: (data: Bill) => void
 }
 
-const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
-  const [formData, setFormData] = React.useState<Bill>({
+const DialogAdd: FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
+  const [formData, setFormData] = useState<Bill>({
     id: 0,
     type: '',
     other: '',
@@ -29,9 +29,9 @@ const DialogAdd: React.FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
     paymentDate: dayjs().format('YYYY-MM-DD'), // Initialize with today's date
   })
 
-  const [isOtherType, setIsOtherType] = React.useState(false)
+  const [isOtherType, setIsOtherType] = useState(false)
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prevData) => ({
       ...prevData,

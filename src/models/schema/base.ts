@@ -1,5 +1,5 @@
 export interface Base {
-  delflag?: boolean
+  delFlag?: boolean
   createdDate?: Date
   createdBy?: string
   updatedDate?: Date

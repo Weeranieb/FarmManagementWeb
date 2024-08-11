@@ -1,10 +1,9 @@
-// src/components/Layout.tsx
-import React from 'react'
+import { FC, ReactNode } from 'react'
 import { Box } from '@mui/material'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
 
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const Layout: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <Box sx={{ display: 'flex', height: '100vh', backgroundColor: '#D1D3D3' }}>
       <TopBar />

@@ -1,4 +1,4 @@
-import React from 'react'
+import { FC } from 'react'
 import { useParams } from 'react-router-dom'
 import { Box, Typography, Stack } from '@mui/material'
 import StatsTop from './StatsTop'
@@ -6,7 +6,7 @@ import StatsBottom from './StatsBottom'
 import ActiveButton from '../../components/ActiveButton'
 import AllActivity from './AllActivity'
 
-const OnePond: React.FC = () => {
+const OnePond: FC = () => {
   const { id } = useParams<{ id: string }>()
 
   return (
