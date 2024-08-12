@@ -33,7 +33,7 @@ const TopBar: FC = () => {
   const dataUser = useSelector((state: RootState) => state.user)
   const [notifications, setNotifications] = useState([
     { id: 1, message: 'New message received', path: '/' },
-    { id: 2, message: 'Server downtime scheduled', path: '/settings' },
+    { id: 2, message: 'Server downtime scheduled', path: '/setting' },
   ])
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -134,7 +134,7 @@ const TopBar: FC = () => {
           <Divider />
           <MenuItem
             sx={{ padding: '8px 20px' }}
-            onClick={() => handleMenuItemClick('/settings')}
+            onClick={() => handleMenuItemClick('/setting')}
           >
             <ListItemIcon>
               <Settings fontSize='small' />
