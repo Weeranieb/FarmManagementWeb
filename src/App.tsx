@@ -63,6 +63,18 @@ const App: FC = () => {
                   <Route path='dailyFeed' element={<DailyFeed />} />
                   <Route path='pond/:id' element={<OnePond />} />
                   <Route path='setting' element={<SettingPage />} />
+                  <Route path='setting' element={<SettingPage />}>
+                    <Route path='general' element={<div>ทัวไป</div>} />
+                    <Route path='farm-group' element={<div>กลุ่มฟาร์ม</div>} />
+                    <Route
+                      path='add-customer'
+                      element={<div>เพิ่มลูกค้า</div>}
+                    />
+                    <Route
+                      path='add-farm-pond'
+                      element={<div>เพิ่มฟาร์มและบ่อปลา</div>}
+                    />
+                  </Route>
                 </Route>
               </Routes>
             </Layout>

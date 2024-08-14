@@ -1,5 +1,6 @@
-import { ReactNode, FC, useEffect, useState, SyntheticEvent } from 'react'
-import { Box, Tab, Tabs, TextField, Typography } from '@mui/material'
+import { ReactNode, FC, useEffect, useState } from 'react'
+import { Box, Tab, Tabs, Typography } from '@mui/material'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 interface TabPanelProps {
   children?: ReactNode
@@ -15,11 +16,25 @@ function a11yProps(index: number) {
 }
 
 const SettingPage: FC = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [value, setValue] = useState(0)
 
-  const handleChange = (event: SyntheticEvent, newValue: number) => {
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue)
+    const path = ['general', 'farm-group', 'add-customer', 'add-farm-pond'][
+      newValue
+    ]
+    navigate(`/setting/${path}`)
   }
+
+  useEffect(() => {
+    const paths = ['general', 'farm-group', 'add-customer', 'add-farm-pond']
+    const index = paths.indexOf(location.pathname.split('/').pop() || '')
+    if (index !== -1) {
+      setValue(index)
+    }
+  }, [location])
 
   function CustomTabPanel(props: TabPanelProps) {
     const { children, value, index, ...other } = props
@@ -59,10 +74,30 @@ const SettingPage: FC = () => {
       </Box>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={value} onChange={handleChange}>
-          <Tab label='ทั่วไป' {...a11yProps(0)} />
-          <Tab label='กลุ่มฟาร์ม' {...a11yProps(1)} />
-          <Tab label='เพิ่มลูกค้า' {...a11yProps(2)} />
-          <Tab label='เพิ่มฟาร์มและบ่อปลา' {...a11yProps(3)} />
+          <Tab
+            label='ทั่วไป'
+            {...a11yProps(0)}
+            component={Link}
+            to='/setting/general'
+          />
+          <Tab
+            label='กลุ่มฟาร์ม'
+            {...a11yProps(1)}
+            component={Link}
+            to='/setting/farm-group'
+          />
+          <Tab
+            label='เพิ่มลูกค้า'
+            {...a11yProps(2)}
+            component={Link}
+            to='/setting/add-customer'
+          />
+          <Tab
+            label='เพิ่มฟาร์มและบ่อปลา'
+            {...a11yProps(3)}
+            component={Link}
+            to='/setting/add-farm-pond'
+          />
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
