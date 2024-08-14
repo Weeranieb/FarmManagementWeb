@@ -55,7 +55,7 @@ const Sidebar: FC = () => {
       icon: <EditIcon />,
       route: '',
       subItems: [
-        { text: 'เหยื่อรายวัน', route: '/dailyFeed' },
+        { text: 'เหยื่อรายวัน', route: '/daily-feed' },
         { text: 'เติม/ย้าย/ขาย', route: '/activity' },
         { text: 'รายการเหยื่อ', route: '/feed' },
       ],

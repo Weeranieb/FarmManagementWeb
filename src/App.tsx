@@ -60,9 +60,8 @@ const App: FC = () => {
                   <Route path='/feed' element={<Feed />} />
                   <Route path='bill' element={<Bill />} />
                   <Route path='worker' element={<Worker />} />
-                  <Route path='dailyFeed' element={<DailyFeed />} />
+                  <Route path='daily-feed' element={<DailyFeed />} />
                   <Route path='pond/:id' element={<OnePond />} />
-                  <Route path='setting' element={<SettingPage />} />
                   <Route path='setting' element={<SettingPage />}>
                     <Route path='general' element={<div>ทัวไป</div>} />
                     <Route path='farm-group' element={<div>กลุ่มฟาร์ม</div>} />
