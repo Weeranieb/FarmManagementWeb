@@ -109,13 +109,13 @@ const SettingPage: FC = () => {
         ทั่วไป
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
-        <FarmList />
+        กลุ่มฟาร์ม
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
         เพิ่มลูกค้า
       </CustomTabPanel>
       <CustomTabPanel value={value} index={3}>
-        เพิ่มฟาร์มและบ่อปลา
+        <FarmList />
       </CustomTabPanel>
     </Box>
   )
