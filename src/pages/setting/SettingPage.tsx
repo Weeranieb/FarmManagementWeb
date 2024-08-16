@@ -1,4 +1,4 @@
-import { ReactNode, FC, useEffect, useState } from 'react'
+import { ReactNode, FC, useEffect, useState, SyntheticEvent } from 'react'
 import { Box, Tab, Tabs, Typography } from '@mui/material'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
@@ -20,7 +20,7 @@ const SettingPage: FC = () => {
   const location = useLocation()
   const [value, setValue] = useState(0)
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleChange = (event: SyntheticEvent, newValue: number) => {
     setValue(newValue)
     const path = ['general', 'farm-group', 'add-customer', 'add-farm-pond'][
       newValue
@@ -79,24 +79,28 @@ const SettingPage: FC = () => {
             {...a11yProps(0)}
             component={Link}
             to='/setting/general'
+            sx={{ fontSize: '1.12rem' }}
           />
           <Tab
             label='กลุ่มฟาร์ม'
             {...a11yProps(1)}
             component={Link}
             to='/setting/farm-group'
+            sx={{ fontSize: '1.12rem' }}
           />
           <Tab
             label='เพิ่มลูกค้า'
             {...a11yProps(2)}
             component={Link}
             to='/setting/add-customer'
+            sx={{ fontSize: '1.12rem' }}
           />
           <Tab
             label='เพิ่มฟาร์มและบ่อปลา'
             {...a11yProps(3)}
             component={Link}
             to='/setting/add-farm-pond'
+            sx={{ fontSize: '1.12rem' }}
           />
         </Tabs>
       </Box>
