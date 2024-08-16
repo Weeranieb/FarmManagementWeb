@@ -1,6 +1,7 @@
 import { ReactNode, FC, useEffect, useState, SyntheticEvent } from 'react'
 import { Box, Tab, Tabs, Typography } from '@mui/material'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import FarmList from './FarmList'
 
 interface TabPanelProps {
   children?: ReactNode
@@ -108,7 +109,7 @@ const SettingPage: FC = () => {
         ทั่วไป
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
-        กลุ่มฟาร์ม
+        <FarmList />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
         เพิ่มลูกค้า
