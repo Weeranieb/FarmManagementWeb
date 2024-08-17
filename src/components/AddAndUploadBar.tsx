@@ -1,8 +1,9 @@
 import { FC } from 'react'
-import { Box, Button } from '@mui/material'
+import { Box, Button, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
-const AddAndUploadBar: FC<{ handleDialogOpen: () => void }> = ({
+const AddAndUploadBar: FC<{ title: string; handleDialogOpen: () => void }> = ({
+  title,
   handleDialogOpen,
 }) => {
   const { t } = useTranslation()
@@ -10,10 +11,19 @@ const AddAndUploadBar: FC<{ handleDialogOpen: () => void }> = ({
   return (
     <Box
       display='flex'
-      justifyContent='flex-end'
+      justifyContent='space-between'
       alignItems='center'
       width='100%'
     >
+      <Typography
+        variant='h4'
+        component='h4'
+        style={{ margin: 0, padding: '0 10px' }}
+        gutterBottom
+        fontWeight='bold'
+      >
+        {title}
+      </Typography>
       <Box display='flex' alignItems='center' gap={2}>
         <Button
           variant='outlined'
