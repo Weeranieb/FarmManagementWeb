@@ -3,6 +3,8 @@ import { Box, Tab, Tabs, Typography } from '@mui/material'
 import { Link, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import FarmList from './FarmList'
 import FarmDetail from './FarmDetail'
+import ClientList from './ClientList'
+import FarmGroupList from './FarmGroupList'
 
 function a11yProps(index: number) {
   return {
@@ -18,14 +20,12 @@ const SettingPage: FC = () => {
 
   const handleChange = (event: SyntheticEvent, newValue: number) => {
     setValue(newValue)
-    const path = ['general', 'farm-group', 'add-customer', 'add-farm-pond'][
-      newValue
-    ]
+    const path = ['general', 'farm-group', 'client', 'farm-pond'][newValue]
     navigate(`/setting/${path}`)
   }
 
   useEffect(() => {
-    const paths = ['general', 'farm-group', 'add-customer', 'add-farm-pond']
+    const paths = ['general', 'farm-group', 'client', 'farm-pond']
     const index = paths.indexOf(location.pathname.split('/').pop() || '')
     if (index !== -1) {
       setValue(index)
@@ -62,7 +62,7 @@ const SettingPage: FC = () => {
             sx={{ fontSize: '1.12rem' }}
           />
           <Tab
-            label='กลุ่มฟาร์ม'
+            label='จัดกลุ่มฟาร์ม'
             {...a11yProps(1)}
             component={Link}
             to='/setting/farm-group'
@@ -72,14 +72,14 @@ const SettingPage: FC = () => {
             label='เพิ่มลูกค้า'
             {...a11yProps(2)}
             component={Link}
-            to='/setting/add-customer'
+            to='/setting/client'
             sx={{ fontSize: '1.12rem' }}
           />
           <Tab
             label='เพิ่มฟาร์มและบ่อปลา'
             {...a11yProps(3)}
             component={Link}
-            to='/setting/add-farm-pond'
+            to='/setting/farm-pond'
             sx={{ fontSize: '1.12rem' }}
           />
         </Tabs>
@@ -88,30 +88,11 @@ const SettingPage: FC = () => {
       {/* Render components based on the route */}
       <Routes>
         <Route path='general' element={<Typography>ทั่วไป</Typography>} />
-        <Route
-          path='farm-group'
-          element={<Typography>กลุ่มฟาร์ม</Typography>}
-        />
-        <Route
-          path='add-customer'
-          element={<Typography>เพิ่มลูกค้า</Typography>}
-        />
-        {/* <Route path='add-customer/:id' element={<CustomerDetails />} /> */}
-        <Route path='add-farm-pond' element={<FarmList />} />
-        <Route path='add-farm-pond/:id' element={<FarmDetail />} />
+        <Route path='farm-group' element={<FarmGroupList />} />
+        <Route path='client' element={<ClientList />} />
+        <Route path='farm-pond' element={<FarmList />} />
+        <Route path='farm-pond/:id' element={<FarmDetail />} />
       </Routes>
-      {/* <CustomTabPanel value={value} index={0}>
-        ทั่วไป
-      </CustomTabPanel>
-      <CustomTabPanel value={value} index={1}>
-        กลุ่มฟาร์ม
-      </CustomTabPanel>
-      <CustomTabPanel value={value} index={2}>
-        เพิ่มลูกค้า
-      </CustomTabPanel>
-      <CustomTabPanel value={value} index={3}>
-        <FarmList />
-      </CustomTabPanel> */}
     </Box>
   )
 }

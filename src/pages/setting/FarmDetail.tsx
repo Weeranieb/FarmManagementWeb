@@ -1,8 +1,10 @@
 import {
   Box,
   Card,
+  CardActions,
   CardContent,
   Grid,
+  IconButton,
   InputAdornment,
   TextField,
   Typography,
@@ -11,6 +13,8 @@ import { FC } from 'react'
 import { useParams } from 'react-router-dom'
 import AddAndUploadBar from '../../components/AddAndUploadBar'
 import SearchIcon from '@mui/icons-material/Search'
+import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete'
 import { useTranslation } from 'react-i18next'
 
 const FarmDetail: FC = () => {
@@ -59,6 +63,16 @@ const FarmDetail: FC = () => {
                 <Typography variant='h6'>{pond.name}</Typography>
                 <Typography variant='body2'>ID: {pond.id}</Typography>
               </CardContent>
+              <CardActions
+                sx={{ display: 'flex', justifyContent: 'flex-end', padding: 1 }}
+              >
+                <IconButton sx={{ color: '#9e9e9e' }}>
+                  <EditIcon />
+                </IconButton>
+                <IconButton sx={{ color: '#9e9e9e' }}>
+                  <DeleteIcon />
+                </IconButton>
+              </CardActions>
             </Card>
           </Grid>
         ))}

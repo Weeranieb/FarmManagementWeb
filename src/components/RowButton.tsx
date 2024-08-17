@@ -5,7 +5,7 @@ interface RowButtonProps {
   name: string
   id: number
   code: string
-  clientName: string
+  clientName?: string
   onClick: () => void
 }
 
@@ -33,7 +33,7 @@ const RowButton: FC<RowButtonProps> = ({
         paddingY: 1,
         paddingX: 2,
         borderRadius: 2,
-        border: `2px solid #CEBCA1`,
+        border: '2px solid #CEBCA1',
       }}
       onClick={onClick}
     >
@@ -57,13 +57,15 @@ const RowButton: FC<RowButtonProps> = ({
           </Typography>
         </Box>
       </Box>
-      <Typography
-        variant='h6'
-        component='div'
-        sx={{ fontWeight: 'bold', textAlign: 'right' }}
-      >
-        {clientName}
-      </Typography>
+      {clientName && (
+        <Typography
+          variant='h6'
+          component='div'
+          sx={{ fontWeight: 'bold', textAlign: 'right' }}
+        >
+          {clientName}
+        </Typography>
+      )}
     </Button>
   )
 }

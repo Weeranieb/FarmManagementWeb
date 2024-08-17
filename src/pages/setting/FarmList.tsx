@@ -2,7 +2,7 @@ import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box } from '@mui/material'
 import RowButton from '../../components/RowButton'
-import SearchBar from '../../components/ClientSearchBar'
+import ClientSearchBar from '../../components/ClientSearchBar'
 import { useNavigate } from 'react-router-dom'
 
 const FarmList: FC = () => {
@@ -26,7 +26,7 @@ const FarmList: FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <SearchBar
+      <ClientSearchBar
         handleDialogOpen={() => {
           console.log('open dialog')
         }}
@@ -40,7 +40,7 @@ const FarmList: FC = () => {
             code={row.code}
             clientName={row.clientName}
             onClick={() => {
-              navigate(`/setting/add-farm-pond/${row.id}`)
+              navigate(`/setting/farm-pond/${row.id}`)
             }}
           />
         ))}

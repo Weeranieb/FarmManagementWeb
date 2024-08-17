@@ -9,7 +9,7 @@ const mockDropdownOptions = [
   { id: 2, name: 'ปรีชาฟาร์ม' },
 ]
 
-const SearchBar: FC<{ handleDialogOpen: () => void }> = ({
+const ClientSearchBar: FC<{ handleDialogOpen: () => void }> = ({
   handleDialogOpen,
 }) => {
   const { t } = useTranslation()
@@ -61,4 +61,4 @@ const SearchBar: FC<{ handleDialogOpen: () => void }> = ({
   )
 }
 
-export default SearchBar
+export default ClientSearchBar
