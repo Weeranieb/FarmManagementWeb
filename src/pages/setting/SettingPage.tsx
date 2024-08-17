@@ -5,6 +5,8 @@ import FarmList from './FarmList'
 import FarmDetail from './FarmDetail'
 import ClientList from './ClientList'
 import FarmGroupList from './FarmGroupList'
+import FarmGroupDetail from './FarmGroupDetail'
+import General from './General'
 
 function a11yProps(index: number) {
   return {
@@ -87,8 +89,9 @@ const SettingPage: FC = () => {
 
       {/* Render components based on the route */}
       <Routes>
-        <Route path='general' element={<Typography>ทั่วไป</Typography>} />
+        <Route path='general' element={<General />} />
         <Route path='farm-group' element={<FarmGroupList />} />
+        <Route path='farm-group/:id' element={<FarmGroupDetail />} />
         <Route path='client' element={<ClientList />} />
         <Route path='farm-pond' element={<FarmList />} />
         <Route path='farm-pond/:id' element={<FarmDetail />} />
