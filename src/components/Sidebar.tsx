@@ -36,6 +36,12 @@ const Sidebar: FC = () => {
   const location = useLocation()
   const dispatch = useDispatch()
 
+  const isActive = (route: string) => {
+    if (route === '/') return location.pathname === '/'
+    else if (route === '') return location.pathname.startsWith('/activity')
+    return location.pathname.startsWith(route)
+  }
+
   const handleSubMenuToggle = () => {
     setIsSubMenuOpen(!isSubMenuOpen)
   }
@@ -108,9 +114,8 @@ const Sidebar: FC = () => {
                 p: 1.7,
                 pl: 2,
                 borderRadius: '0.543rem',
-                backgroundColor:
-                  location.pathname === item.route ? '#CEBCA1' : 'inherit',
-                color: location.pathname === item.route ? 'white' : 'inherit',
+                backgroundColor: isActive(item.route) ? '#CEBCA1' : 'inherit',
+                color: isActive(item.route) ? 'white' : 'inherit',
                 '&:hover': {
                   fontWeight: 'bolder',
                   borderRadius: '0.543rem',
@@ -124,7 +129,7 @@ const Sidebar: FC = () => {
             >
               <ListItemIcon
                 sx={{
-                  color: location.pathname === item.route ? 'white' : 'inherit',
+                  color: isActive(item.route) ? 'white' : 'inherit',
                 }}
               >
                 {item.icon}
@@ -210,9 +215,8 @@ const Sidebar: FC = () => {
                 p: 1.7,
                 pl: 2,
                 borderRadius: '0.543rem',
-                backgroundColor:
-                  location.pathname === item.route ? '#CEBCA1' : 'inherit',
-                color: location.pathname === item.route ? 'white' : 'inherit',
+                backgroundColor: isActive(item.route) ? '#CEBCA1' : 'inherit',
+                color: isActive(item.route) ? 'white' : 'inherit',
                 '&:hover': {
                   fontWeight: 'bolder',
                   borderRadius: '0.543rem',
@@ -226,7 +230,7 @@ const Sidebar: FC = () => {
             >
               <ListItemIcon
                 sx={{
-                  color: location.pathname === item.route ? 'white' : 'inherit',
+                  color: isActive(item.route) ? 'white' : 'inherit',
                 }}
               >
                 {item.icon}

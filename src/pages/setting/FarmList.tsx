@@ -1,9 +1,9 @@
 import { FC } from 'react'
-
 import { useTranslation } from 'react-i18next'
-import SearchBar from '../../components/SearchBar'
-import { Box, Button } from '@mui/material'
+import { Box } from '@mui/material'
 import RowButton from '../../components/RowButton'
+import SearchBar from '../../components/ClientSearchBar'
+import { useNavigate } from 'react-router-dom'
 
 const FarmList: FC = () => {
   const rows = [
@@ -22,9 +22,10 @@ const FarmList: FC = () => {
   ]
 
   const { t } = useTranslation()
+  const navigate = useNavigate()
 
   return (
-    <>
+    <Box sx={{ p: 3 }}>
       <SearchBar
         handleDialogOpen={() => {
           console.log('open dialog')
@@ -39,12 +40,12 @@ const FarmList: FC = () => {
             code={row.code}
             clientName={row.clientName}
             onClick={() => {
-              console.log(`Clicked on ${row.name}`)
+              navigate(`/setting/add-farm-pond/${row.id}`)
             }}
           />
         ))}
       </Box>
-    </>
+    </Box>
   )
 }
 

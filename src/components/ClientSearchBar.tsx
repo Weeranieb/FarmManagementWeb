@@ -4,9 +4,9 @@ import SearchIcon from '@mui/icons-material/Search'
 import { useTranslation } from 'react-i18next'
 
 const mockDropdownOptions = [
-  { id: 0, name: 'All' },
-  { id: 1, name: 'Farm 1' },
-  { id: 2, name: 'Farm 2' },
+  { id: 0, name: 'ทั้งหมด' },
+  { id: 1, name: 'บุญมาฟาร์ม' },
+  { id: 2, name: 'ปรีชาฟาร์ม' },
 ]
 
 const SearchBar: FC<{ handleDialogOpen: () => void }> = ({
@@ -18,7 +18,7 @@ const SearchBar: FC<{ handleDialogOpen: () => void }> = ({
     <Box display='flex' justifyContent='space-between' alignItems='center'>
       <TextField
         select
-        label='ฟาร์ม'
+        label='ลูกค้า'
         variant='outlined'
         size='small'
         sx={{ width: 150, mr: 2 }}

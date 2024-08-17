@@ -1,13 +1,8 @@
-import { ReactNode, FC, useEffect, useState, SyntheticEvent } from 'react'
+import { FC, useEffect, useState, SyntheticEvent } from 'react'
 import { Box, Tab, Tabs, Typography } from '@mui/material'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import FarmList from './FarmList'
-
-interface TabPanelProps {
-  children?: ReactNode
-  index: number
-  value: number
-}
+import FarmDetail from './FarmDetail'
 
 function a11yProps(index: number) {
   return {
@@ -36,22 +31,6 @@ const SettingPage: FC = () => {
       setValue(index)
     }
   }, [location])
-
-  function CustomTabPanel(props: TabPanelProps) {
-    const { children, value, index, ...other } = props
-
-    return (
-      <div
-        role='tabpanel'
-        hidden={value !== index}
-        id={`simple-tabpanel-${index}`}
-        aria-labelledby={`simple-tab-${index}`}
-        {...other}
-      >
-        {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-      </div>
-    )
-  }
 
   return (
     <Box>
@@ -105,7 +84,23 @@ const SettingPage: FC = () => {
           />
         </Tabs>
       </Box>
-      <CustomTabPanel value={value} index={0}>
+
+      {/* Render components based on the route */}
+      <Routes>
+        <Route path='general' element={<Typography>ทั่วไป</Typography>} />
+        <Route
+          path='farm-group'
+          element={<Typography>กลุ่มฟาร์ม</Typography>}
+        />
+        <Route
+          path='add-customer'
+          element={<Typography>เพิ่มลูกค้า</Typography>}
+        />
+        {/* <Route path='add-customer/:id' element={<CustomerDetails />} /> */}
+        <Route path='add-farm-pond' element={<FarmList />} />
+        <Route path='add-farm-pond/:id' element={<FarmDetail />} />
+      </Routes>
+      {/* <CustomTabPanel value={value} index={0}>
         ทั่วไป
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
@@ -116,7 +111,7 @@ const SettingPage: FC = () => {
       </CustomTabPanel>
       <CustomTabPanel value={value} index={3}>
         <FarmList />
-      </CustomTabPanel>
+      </CustomTabPanel> */}
     </Box>
   )
 }
