@@ -13,4 +13,14 @@ const getFarmListApi = async (): Promise<BaseResponse<Farm[]>> => {
     .catch((err) => handleResponseError(err))
 }
 
-export { getFarmListApi }
+const getFarmApi = async (id: number): Promise<BaseResponse<Farm>> => {
+  return api
+    .get(`farm/${id}`)
+    .then((res) => {
+      if (res.data.result) return res.data
+      else return handleResponseError(res.data)
+    })
+    .catch((err) => handleResponseError(err))
+}
+
+export { getFarmListApi, getFarmApi }
