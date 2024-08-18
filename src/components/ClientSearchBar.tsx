@@ -1,29 +1,47 @@
-import { FC } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { Box, TextField, InputAdornment, Button, MenuItem } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import { useTranslation } from 'react-i18next'
+import { Client } from '../models/schema/client'
+import { getAllClientsApi } from '../services/client.service'
+import ErrorAlert from './ErrorAlert'
 
-const mockDropdownOptions = [
-  { id: 0, name: 'ทั้งหมด' },
-  { id: 1, name: 'บุญมาฟาร์ม' },
-  { id: 2, name: 'ปรีชาฟาร์ม' },
-]
-
-const ClientSearchBar: FC<{ handleDialogOpen: () => void }> = ({
-  handleDialogOpen,
-}) => {
+const ClientSearchBar: FC<{
+  value: number
+  handleOnChange: (value: number) => void
+  handleDialogOpen: () => void
+}> = ({ value, handleOnChange, handleDialogOpen }) => {
   const { t } = useTranslation()
+  const [clients, setClients] = useState<Client[]>([])
+
+  useEffect(() => {
+    const getClients = async () => {
+      await getAllClientsApi()
+        .then((res) => {
+          if (res.result) setClients(res.data)
+          else ErrorAlert(res)
+        })
+        .catch((err) => ErrorAlert(err))
+    }
+
+    getClients()
+  }, [])
 
   return (
     <Box display='flex' justifyContent='space-between' alignItems='center'>
       <TextField
         select
-        label='ลูกค้า'
+        label={t('client')}
         variant='outlined'
         size='small'
+        value={value}
+        onChange={(event) => handleOnChange(Number(event.target.value))}
         sx={{ width: 150, mr: 2 }}
       >
-        {mockDropdownOptions.map((option) => (
+        <MenuItem key='all' value={0}>
+          {t('all')}
+        </MenuItem>
+        {clients.map((option) => (
           <MenuItem key={option.id} value={option.id}>
             {t(option.name)}
           </MenuItem>
@@ -34,7 +52,7 @@ const ClientSearchBar: FC<{ handleDialogOpen: () => void }> = ({
         <TextField
           variant='outlined'
           size='small'
-          placeholder='ค้นหา'
+          placeholder={t('search')}
           InputProps={{
             startAdornment: (
               <InputAdornment position='start'>

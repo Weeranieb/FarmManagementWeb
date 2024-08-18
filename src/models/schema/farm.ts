@@ -6,3 +6,8 @@ export interface Farm extends Base {
   code: string
   name: string
 }
+
+export interface ClientWithFarms extends Farm {
+  clientName: string
+  clientId: number
+}

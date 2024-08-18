@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 interface RowButtonProps {
   name: string
   id: number
-  code: string
+  code?: string
   clientName?: string
   onClick: () => void
 }
@@ -56,7 +56,7 @@ const RowButton: FC<RowButtonProps> = ({
           }}
         >
           <Typography variant='body2' sx={{ fontSize: '0.875rem' }}>
-            {t('id')}: {id} {t('code')}: {code}
+            {t('id')}: {id} {code && ` ${t('code')}: ${code}`}
           </Typography>
         </Box>
       </Box>
