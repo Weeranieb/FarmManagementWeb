@@ -1,5 +1,4 @@
 import { FC } from 'react'
-import { useTranslation } from 'react-i18next'
 import { Box } from '@mui/material'
 import RowButton from '../../components/RowButton'
 import ClientSearchBar from '../../components/ClientSearchBar'
@@ -20,8 +19,6 @@ const FarmList: FC = () => {
       clientName: 'Client 2',
     },
   ]
-
-  const { t } = useTranslation()
   const navigate = useNavigate()
 
   return (

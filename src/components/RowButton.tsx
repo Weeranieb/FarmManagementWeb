@@ -1,5 +1,6 @@
 import { FC } from 'react'
 import { Button, Box, Typography } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 
 interface RowButtonProps {
   name: string
@@ -16,6 +17,8 @@ const RowButton: FC<RowButtonProps> = ({
   clientName,
   onClick,
 }) => {
+  const { t } = useTranslation()
+
   return (
     <Button
       variant='contained'
@@ -53,7 +56,7 @@ const RowButton: FC<RowButtonProps> = ({
           }}
         >
           <Typography variant='body2' sx={{ fontSize: '0.875rem' }}>
-            ID: {id} Code: {code}
+            {t('id')}: {id} {t('code')}: {code}
           </Typography>
         </Box>
       </Box>

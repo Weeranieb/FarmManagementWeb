@@ -25,6 +25,7 @@ const FarmGroupList: FC = () => {
   return (
     <Box sx={{ p: 3 }}>
       <SearchBar
+        title={t('farmGroup')}
         handleDialogOpen={() => {
           console.log('open dialog')
         }}

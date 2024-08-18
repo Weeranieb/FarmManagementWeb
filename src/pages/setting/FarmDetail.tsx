@@ -31,6 +31,7 @@ const FarmDetail: FC = () => {
   return (
     <Box sx={{ p: 3 }}>
       <AddAndUploadBar
+        // TODO
         title={'ฟาร์ม 1'}
         handleDialogOpen={() => console.log('open dialog')}
       />
@@ -55,7 +56,9 @@ const FarmDetail: FC = () => {
             <Card variant='outlined'>
               <CardContent>
                 <Typography variant='h6'>{pond.name}</Typography>
-                <Typography variant='body2'>ID: {pond.id}</Typography>
+                <Typography variant='body2'>
+                  {t('id')}: {pond.id}
+                </Typography>
               </CardContent>
               <CardActions
                 sx={{ display: 'flex', justifyContent: 'flex-end', padding: 1 }}

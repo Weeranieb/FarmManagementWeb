@@ -8,5 +8,9 @@
   "add": "Add",
   "box": "Box",
   "bag": "Bag",
-  "upload": "Upload"
+  "upload": "Upload",
+  "id": "ID",
+  "code": "Code",
+  "farmGroup": "Farm Group",
+  "client": "Client"
 }
