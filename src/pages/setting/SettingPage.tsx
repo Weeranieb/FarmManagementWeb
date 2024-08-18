@@ -22,12 +22,12 @@ const SettingPage: FC = () => {
 
   const handleChange = (event: SyntheticEvent, newValue: number) => {
     setValue(newValue)
-    const path = ['general', 'farm-group', 'client', 'farm-pond'][newValue]
+    const path = ['', 'farm-group', 'client', 'farm-pond'][newValue]
     navigate(`/setting/${path}`)
   }
 
   useEffect(() => {
-    const paths = ['general', 'farm-group', 'client', 'farm-pond']
+    const paths = ['', 'farm-group', 'client', 'farm-pond']
     const index = paths.indexOf(location.pathname.split('/').pop() || '')
     if (index !== -1) {
       setValue(index)
@@ -60,7 +60,7 @@ const SettingPage: FC = () => {
             label='ทั่วไป'
             {...a11yProps(0)}
             component={Link}
-            to='/setting/general'
+            to='/setting/'
             sx={{ fontSize: '1.12rem' }}
           />
           <Tab
@@ -89,7 +89,7 @@ const SettingPage: FC = () => {
 
       {/* Render components based on the route */}
       <Routes>
-        <Route path='general' element={<General />} />
+        <Route path='' element={<General />} />
         <Route path='farm-group' element={<FarmGroupList />} />
         <Route path='farm-group/:id' element={<FarmGroupDetail />} />
         <Route path='client' element={<ClientList />} />
