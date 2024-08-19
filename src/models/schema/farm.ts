@@ -1,4 +1,4 @@
-import { Base } from './base'
+import { AddName, Base } from './base'
 
 export interface Farm extends Base {
   id: number
@@ -12,8 +12,6 @@ export interface ClientWithFarms extends Farm {
   clientId: number
 }
 
-export interface AddFarm {
+export interface AddFarm extends AddName {
   clientId: number
-  name: string
-  code: string
 }

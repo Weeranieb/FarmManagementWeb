@@ -5,3 +5,8 @@ export interface Base {
   updatedDate?: Date
   updatedBy?: string
 }
+
+export interface AddName {
+  name: string
+  code: string
+}

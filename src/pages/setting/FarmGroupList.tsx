@@ -1,37 +1,68 @@
-import { FC } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Grid } from '@mui/material'
 import RowButton from '../../components/RowButton'
 import SearchBar from '../../components/SearchBar'
 import { useNavigate } from 'react-router-dom'
+import SuccessAlert from '../../components/SuccessAlert'
+import ErrorAlert from '../../components/ErrorAlert'
+import {
+  createFarmGroupApi,
+  getAllFarmGroupApi,
+} from '../../services/farmGroup.service'
+import DialogAddFarmGroup from './DialogAddFarmGroup'
+import { FarmGroup } from '../../models/schema/farmGroup'
 
 const FarmGroupList: FC = () => {
-  const rows = [
-    {
-      id: 1,
-      name: 'บ้านบุญมา',
-      code: 'Boonma',
-    },
-    {
-      id: 2,
-      name: 'บ้านระกาศ',
-      code: 'BanRakat',
-    },
-  ]
-
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [farmGroups, setFarmGroups] = useState<FarmGroup[]>([])
+
+  useEffect(() => {
+    const getFarmGroupList = async () => {
+      await getAllFarmGroupApi()
+        .then((res) => {
+          if (res.result) {
+            setFarmGroups(res.data)
+          } else {
+            ErrorAlert(res)
+          }
+        })
+        .catch((err) => ErrorAlert(err))
+    }
+
+    getFarmGroupList()
+  }, [])
+
+  const handleDialogOpen = () => {
+    setDialogOpen(true)
+  }
+
+  const handleDialogClose = () => {
+    setDialogOpen(false)
+  }
+
+  const handleFormSubmit = async (newFarmGroup: any) => {
+    await createFarmGroupApi(newFarmGroup)
+      .then((res) => {
+        if (res.result) {
+          SuccessAlert()
+          window.location.reload()
+        } else {
+          ErrorAlert(res)
+        }
+      })
+      .catch((err) => {
+        ErrorAlert(err)
+      })
+  }
 
   return (
     <Box sx={{ p: 3 }}>
-      <SearchBar
-        title={t('farmGroup')}
-        handleDialogOpen={() => {
-          console.log('open dialog')
-        }}
-      />
+      <SearchBar title={t('farmGroup')} handleDialogOpen={handleDialogOpen} />
       <Grid container spacing={2} mt={1}>
-        {rows.map((row) => (
+        {farmGroups.map((row) => (
           <Grid item xs={12} sm={4} key={row.id}>
             <RowButton
               name={row.name}
@@ -44,6 +75,11 @@ const FarmGroupList: FC = () => {
           </Grid>
         ))}
       </Grid>
+      <DialogAddFarmGroup
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        onSubmit={handleFormSubmit}
+      />
     </Box>
   )
 }
