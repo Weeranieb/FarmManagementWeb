@@ -1,5 +1,5 @@
 import { BaseResponse } from '../models/api/baseResponse'
-import { Farm } from '../models/schema/farm'
+import { AddFarm, Farm } from '../models/schema/farm'
 import api from './apiClient'
 import handleResponseError from './handleError'
 
@@ -23,4 +23,15 @@ const getFarmApi = async (id: number): Promise<BaseResponse<Farm>> => {
     .catch((err) => handleResponseError(err))
 }
 
-export { getFarmListApi, getFarmApi }
+const createFarmApi = async (data: AddFarm): Promise<BaseResponse<Farm>> => {
+  const url = 'farm'
+  return api
+    .post<BaseResponse<Farm>>(url, data)
+    .then((res) => {
+      if (res.data.result) return res.data
+      else return handleResponseError(res.data)
+    })
+    .catch((err) => handleResponseError(err))
+}
+
+export { getFarmListApi, getFarmApi, createFarmApi }

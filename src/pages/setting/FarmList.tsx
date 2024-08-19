@@ -9,26 +9,39 @@ import {
 } from '../../services/client.service'
 import ErrorAlert from '../../components/ErrorAlert'
 import { ClientWithFarms } from '../../models/schema/farm'
+import DialogAddFarm from './DialogAddFarm'
+import { createFarmApi } from '../../services/farm.service'
+import SuccessAlert from '../../components/SuccessAlert'
 
 const FarmList: FC = () => {
-  const rows = [
-    {
-      id: 1,
-      name: 'Farm 1',
-      code: 'F1',
-      clientName: 'Client 1',
-    },
-    {
-      id: 2,
-      name: 'Farm 2',
-      code: 'F2',
-      clientName: 'Client 2',
-    },
-  ]
   const navigate = useNavigate()
 
   const [selectedClient, setSelectedClient] = useState<number>(0)
+  const [dialogOpen, setDialogOpen] = useState(false)
   const [farms, setFarms] = useState<ClientWithFarms[]>([])
+
+  const handleDialogOpen = () => {
+    setDialogOpen(true)
+  }
+
+  const handleDialogClose = () => {
+    setDialogOpen(false)
+  }
+
+  const handleFormSubmit = async (newFarm: any) => {
+    await createFarmApi(newFarm)
+      .then((res) => {
+        if (res.result) {
+          SuccessAlert()
+          window.location.reload()
+        } else {
+          ErrorAlert(res)
+        }
+      })
+      .catch((err) => {
+        ErrorAlert(err)
+      })
+  }
 
   useEffect(() => {
     const getAllClientWithFarms = async () => {
@@ -66,9 +79,7 @@ const FarmList: FC = () => {
       <ClientSearchBar
         value={selectedClient}
         handleOnChange={setSelectedClient}
-        handleDialogOpen={() => {
-          console.log('open dialog')
-        }}
+        handleDialogOpen={handleDialogOpen}
       />
       <Box display='flex' flexDirection='column' mt={1}>
         {farms.map((row) => (
@@ -84,6 +95,11 @@ const FarmList: FC = () => {
           />
         ))}
       </Box>
+      <DialogAddFarm
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        onSubmit={handleFormSubmit}
+      />
     </Box>
   )
 }

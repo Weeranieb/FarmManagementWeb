@@ -11,3 +11,9 @@ export interface ClientWithFarms extends Farm {
   clientName: string
   clientId: number
 }
+
+export interface AddFarm {
+  clientId: number
+  name: string
+  code: string
+}
