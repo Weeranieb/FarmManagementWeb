@@ -6,3 +6,8 @@ export interface FarmGroup extends Base {
   code: string
   name: string
 }
+
+export interface AddFarmOnFarmGroup {
+  farmGroupId: number
+  farmId: number
+}

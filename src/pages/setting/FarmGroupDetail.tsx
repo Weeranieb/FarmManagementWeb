@@ -22,6 +22,9 @@ import {
   getFarmGroupAPi,
 } from '../../services/farmGroup.service'
 import ErrorAlert from '../../components/ErrorAlert'
+import DialogAddFarmInGroup from './DialogAddFarmInGroup'
+import { createFarmOnFarmGroupApi } from '../../services/farmOnFarmGroup'
+import SuccessAlert from '../../components/SuccessAlert'
 
 const FarmGroupDetail: FC = () => {
   // farmGroup id
@@ -30,6 +33,31 @@ const FarmGroupDetail: FC = () => {
 
   const [farms, setFarms] = useState<Farm[]>([])
   const [farmGroup, setFarmGroup] = useState<FarmGroup>()
+  const [dialogOpen, setDialogOpen] = useState(false)
+
+  const handleDialogOpen = () => {
+    setDialogOpen(true)
+  }
+
+  const handleDialogClose = () => {
+    setDialogOpen(false)
+  }
+
+  const handleFormSubmit = async (payload: any) => {
+    payload['farmGroupId'] = parseInt(id ?? '', 10)
+    await createFarmOnFarmGroupApi(payload)
+      .then((res) => {
+        if (res.result) {
+          SuccessAlert()
+          window.location.reload()
+        } else {
+          ErrorAlert(res)
+        }
+      })
+      .catch((err) => {
+        ErrorAlert(err)
+      })
+  }
 
   useEffect(() => {
     const farmGroupId = parseInt(id ?? '', 10)
@@ -69,7 +97,7 @@ const FarmGroupDetail: FC = () => {
     <Box sx={{ p: 3 }}>
       <PageBarWithAdd
         title={`${t('group')}: ${farmGroup?.name}`}
-        handleDialogOpen={() => console.log('open dialog')}
+        handleDialogOpen={handleDialogOpen}
       />
       <Box display='flex' alignItems='center' sx={{ pb: 4, mt: 3 }}>
         <TextField
@@ -105,6 +133,11 @@ const FarmGroupDetail: FC = () => {
           </Grid>
         ))}
       </Grid>
+      <DialogAddFarmInGroup
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        onSubmit={handleFormSubmit}
+      />
     </Box>
   )
 }
