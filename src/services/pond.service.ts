@@ -15,4 +15,15 @@ const getPondListApi = async (
     .catch((err) => handleResponseError(err))
 }
 
-export { getPondListApi }
+const createPondApi = async (data: Pond): Promise<BaseResponse<Pond>> => {
+  const url = 'pond'
+  return api
+    .post<BaseResponse<Pond>>(url, data)
+    .then((res) => {
+      if (res.data.result) return res.data
+      else return handleResponseError(res.data)
+    })
+    .catch((err) => handleResponseError(err))
+}
+
+export { getPondListApi, createPondApi }

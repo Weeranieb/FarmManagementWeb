@@ -20,7 +20,9 @@ import { Farm } from '../../models/schema/farm'
 import { Pond } from '../../models/schema/pond'
 import { getFarmApi } from '../../services/farm.service'
 import ErrorAlert from '../../components/ErrorAlert'
-import { getPondListApi } from '../../services/pond.service'
+import { createPondApi, getPondListApi } from '../../services/pond.service'
+import DialogAddPond from './DialogAddPond'
+import SuccessAlert from '../../components/SuccessAlert'
 
 const FarmDetail: FC = () => {
   // Parse id to a number
@@ -30,6 +32,40 @@ const FarmDetail: FC = () => {
 
   const [farm, setFarm] = useState<Farm>()
   const [ponds, setPonds] = useState<Pond[]>([])
+  const [dialogAddOpen, setDialogAddOpen] = useState(false)
+  const [dialogUploadOpen, setDialogUploadOpen] = useState(false)
+
+  const handleDialogOpen = (type: string) => {
+    if (type === 'add') {
+      setDialogAddOpen(true)
+    } else {
+      setDialogUploadOpen(true)
+    }
+  }
+
+  const handleDialogClose = (type: string) => {
+    if (type === 'add') {
+      setDialogAddOpen(false)
+    } else {
+      setDialogUploadOpen(false)
+    }
+  }
+
+  const handleAddFormSubmit = async (payload: any) => {
+    payload['farmId'] = parseInt(id ?? '', 10)
+    await createPondApi(payload)
+      .then((res) => {
+        if (res.result) {
+          SuccessAlert()
+          window.location.reload()
+        } else {
+          ErrorAlert(res)
+        }
+      })
+      .catch((err) => {
+        ErrorAlert(err)
+      })
+  }
 
   useEffect(() => {
     const getFarm = async () => {
@@ -69,7 +105,7 @@ const FarmDetail: FC = () => {
     <Box sx={{ p: 3 }}>
       <AddAndUploadBar
         title={farm ? farm.name : t('farm')}
-        handleDialogOpen={() => console.log('open dialog')}
+        handleDialogOpen={handleDialogOpen}
       />
       <Box display='flex' alignItems='center' sx={{ pb: 4, mt: 3 }}>
         <TextField
@@ -110,6 +146,11 @@ const FarmDetail: FC = () => {
           </Grid>
         ))}
       </Grid>
+      <DialogAddPond
+        open={dialogAddOpen}
+        onClose={handleDialogClose}
+        onSubmit={handleAddFormSubmit}
+      />
     </Box>
   )
 }

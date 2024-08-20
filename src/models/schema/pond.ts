@@ -6,3 +6,7 @@ export interface Pond extends Base {
   code: string
   name: string
 }
+
+export interface AddPond extends Base {
+  farmId: number
+}

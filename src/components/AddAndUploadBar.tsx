@@ -2,10 +2,10 @@ import { FC } from 'react'
 import { Box, Button, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 
-const AddAndUploadBar: FC<{ title: string; handleDialogOpen: () => void }> = ({
-  title,
-  handleDialogOpen,
-}) => {
+const AddAndUploadBar: FC<{
+  title: string
+  handleDialogOpen: (type: string) => void
+}> = ({ title, handleDialogOpen }) => {
   const { t } = useTranslation()
 
   return (
@@ -27,7 +27,9 @@ const AddAndUploadBar: FC<{ title: string; handleDialogOpen: () => void }> = ({
       <Box display='flex' alignItems='center' gap={2}>
         <Button
           variant='outlined'
-          onClick={handleDialogOpen}
+          onClick={() => {
+            handleDialogOpen('add')
+          }}
           sx={{
             backgroundColor: '#CEBCA1',
             color: '#4B4B4C',
@@ -40,7 +42,9 @@ const AddAndUploadBar: FC<{ title: string; handleDialogOpen: () => void }> = ({
 
         <Button
           variant='outlined'
-          onClick={handleDialogOpen}
+          onClick={() => {
+            handleDialogOpen('upload')
+          }}
           sx={{
             backgroundColor: '#CEBCA1',
             color: '#4B4B4C',
