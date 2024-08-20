@@ -1,5 +1,6 @@
 import { BaseResponse } from '../models/api/baseResponse'
 import { AddName } from '../models/schema/base'
+import { Farm } from '../models/schema/farm'
 import { FarmGroup } from '../models/schema/farmGroup'
 import api from './apiClient'
 import handleResponseError from './handleError'
@@ -27,4 +28,33 @@ const getAllFarmGroupApi = async (): Promise<BaseResponse<FarmGroup[]>> => {
     .catch((err) => handleResponseError(err))
 }
 
-export { createFarmGroupApi, getAllFarmGroupApi }
+const getFarmByFarmGroupIdApi = async (
+  id: number
+): Promise<BaseResponse<Farm[]>> => {
+  return api
+    .get(`farmGroup/${id}/farmList`)
+    .then((res) => {
+      if (res.data.result) return res.data
+      else return handleResponseError(res.data)
+    })
+    .catch((err) => handleResponseError(err))
+}
+
+const getFarmGroupAPi = async (
+  id: number
+): Promise<BaseResponse<FarmGroup>> => {
+  return api
+    .get(`farmGroup/${id}`)
+    .then((res) => {
+      if (res.data.result) return res.data
+      else return handleResponseError(res.data)
+    })
+    .catch((err) => handleResponseError(err))
+}
+
+export {
+  createFarmGroupApi,
+  getAllFarmGroupApi,
+  getFarmByFarmGroupIdApi,
+  getFarmGroupAPi,
+}

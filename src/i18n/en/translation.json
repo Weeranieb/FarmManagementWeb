@@ -12,5 +12,6 @@
   "id": "ID",
   "code": "Code",
   "farmGroup": "Farm Group",
-  "client": "Client"
+  "client": "Client",
+  "group": "Group"
 }
