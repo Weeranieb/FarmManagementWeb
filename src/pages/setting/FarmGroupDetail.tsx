@@ -23,7 +23,7 @@ import {
 } from '../../services/farmGroup.service'
 import ErrorAlert from '../../components/ErrorAlert'
 import DialogAddFarmInGroup from './DialogAddFarmInGroup'
-import { createFarmOnFarmGroupApi } from '../../services/farmOnFarmGroup'
+import { createFarmOnFarmGroupApi } from '../../services/farmOnFarmGroup.service'
 import SuccessAlert from '../../components/SuccessAlert'
 
 const FarmGroupDetail: FC = () => {

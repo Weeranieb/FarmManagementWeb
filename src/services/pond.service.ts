@@ -1,4 +1,4 @@
-import { BaseResponse } from '../models/api/baseResponse'
+import { BaseResponse, BooleanResponse } from '../models/api/baseResponse'
 import { Pond } from '../models/schema/pond'
 import api from './apiClient'
 import handleResponseError from './handleError'
@@ -26,4 +26,15 @@ const createPondApi = async (data: Pond): Promise<BaseResponse<Pond>> => {
     .catch((err) => handleResponseError(err))
 }
 
-export { getPondListApi, createPondApi }
+const updatePondApi = async (data: Pond): Promise<BooleanResponse> => {
+  const url = 'pond'
+  return api
+    .put<BooleanResponse>(url, data)
+    .then((res) => {
+      if (res.data.result) return res.data
+      else return handleResponseError(res.data)
+    })
+    .catch((err) => handleResponseError(err))
+}
+
+export { getPondListApi, createPondApi, updatePondApi }

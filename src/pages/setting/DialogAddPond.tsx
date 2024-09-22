@@ -1,20 +1,35 @@
-import { FC, ChangeEvent, useState } from 'react'
+import { FC, ChangeEvent, useState, useEffect } from 'react'
 import { Grid } from '@mui/material'
 import DialogWrapper from '../../components/DialogWrapper'
 import GridTextField from '../../components/grid/GridTextField'
 import { AddName } from '../../models/schema/base'
+import { Pond } from '../../models/schema/pond'
 
 interface DialogAddProps {
   open: boolean
   onClose: (type: string) => void
   onSubmit: (data: AddName) => void
+  pond?: Pond | null
 }
 
-const DialogAddPond: FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
+const DialogAddPond: FC<DialogAddProps> = ({
+  open,
+  onClose,
+  onSubmit,
+  pond,
+}) => {
   const [formData, setFormData] = useState<AddName>({
-    name: '',
-    code: '',
+    name: pond?.name || '',
+    code: pond?.code || '',
   })
+
+  useEffect(() => {
+    if (pond) {
+      setFormData({ name: pond.name, code: pond.code })
+    } else {
+      setFormData({ name: '', code: '' })
+    }
+  }, [pond])
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
@@ -51,7 +66,7 @@ const DialogAddPond: FC<DialogAddProps> = ({ open, onClose, onSubmit }) => {
     <DialogWrapper
       open={open}
       onClose={handleClose}
-      title='กรอกข้อมูล'
+      title={pond ? 'แก้ไขข้อมูล' : 'กรอกข้อมูล'} // Update title based on mode
       handleFormSubmit={handleFormSubmit}
       islarge={false}
     >
