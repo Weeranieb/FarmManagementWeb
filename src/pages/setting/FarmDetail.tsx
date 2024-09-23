@@ -22,11 +22,13 @@ import { getFarmApi } from '../../services/farm.service'
 import ErrorAlert from '../../components/ErrorAlert'
 import {
   createPondApi,
+  deletePondApi,
   getPondListApi,
   updatePondApi,
 } from '../../services/pond.service'
 import DialogAddPond from './DialogAddPond'
 import SuccessAlert from '../../components/SuccessAlert'
+import Swal from 'sweetalert2'
 
 const FarmDetail: FC = () => {
   // Parse id to a number
@@ -73,6 +75,40 @@ const FarmDetail: FC = () => {
         window.location.reload()
       } else {
         ErrorAlert(response)
+      }
+    } catch (err) {
+      ErrorAlert(err)
+    }
+  }
+
+  const handleDelete = async (id: number) => {
+    try {
+      const result = await Swal.fire({
+        // title: t('confirm_delete'),
+        // text: t('confirm_delete_text'),
+        // icon: 'warning',
+        // showCancelButton: true,
+        // confirmButtonColor: '#d33',
+        // cancelButtonColor: '#3085d6',
+        // confirmButtonText: t('delete'),
+        // cancelButtonText: t('cancel'),
+        title: 'ยืนยันการลบข้อมูล',
+        text: 'คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนี้? \nข้อมูลจะถูกลบถาวรและไม่สามารถกู้คืนได้!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'ลบข้อมูล',
+        cancelButtonText: 'ยกเลิก',
+      })
+      if (result.isConfirmed) {
+        const res = await deletePondApi(id)
+        if (res.result) {
+          SuccessAlert()
+          window.location.reload()
+        } else {
+          ErrorAlert(res)
+        }
       }
     } catch (err) {
       ErrorAlert(err)
@@ -153,7 +189,10 @@ const FarmDetail: FC = () => {
                 >
                   <EditIcon />
                 </IconButton>
-                <IconButton sx={{ color: '#9e9e9e' }}>
+                <IconButton
+                  sx={{ color: '#9e9e9e' }}
+                  onClick={() => handleDelete(pond.id)}
+                >
                   <DeleteIcon />
                 </IconButton>
               </CardActions>

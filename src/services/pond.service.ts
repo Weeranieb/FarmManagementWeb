@@ -37,4 +37,15 @@ const updatePondApi = async (data: Pond): Promise<BooleanResponse> => {
     .catch((err) => handleResponseError(err))
 }
 
-export { getPondListApi, createPondApi, updatePondApi }
+const deletePondApi = async (id: number): Promise<BooleanResponse> => {
+  const url = `pond/${id}`
+  return api
+    .delete<BooleanResponse>(url)
+    .then((res) => {
+      if (res.data.result) return res.data
+      else return handleResponseError(res.data)
+    })
+    .catch((err) => handleResponseError(err))
+}
+
+export { getPondListApi, createPondApi, updatePondApi, deletePondApi }
