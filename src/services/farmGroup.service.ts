@@ -40,7 +40,7 @@ const getFarmByFarmGroupIdApi = async (
     .catch((err) => handleResponseError(err))
 }
 
-const getFarmGroupAPi = async (
+const getFarmGroupApi = async (
   id: number
 ): Promise<BaseResponse<FarmGroup>> => {
   return api
@@ -52,9 +52,22 @@ const getFarmGroupAPi = async (
     .catch((err) => handleResponseError(err))
 }
 
+const deleteFarmGroupApi = async (
+  id: number
+): Promise<BaseResponse<boolean>> => {
+  return api
+    .delete(`farmGroup/${id}`)
+    .then((res) => {
+      if (res.data.result) return res.data
+      else return handleResponseError(res.data)
+    })
+    .catch((err) => handleResponseError(err))
+}
+
 export {
   createFarmGroupApi,
   getAllFarmGroupApi,
   getFarmByFarmGroupIdApi,
-  getFarmGroupAPi,
+  getFarmGroupApi,
+  deleteFarmGroupApi,
 }

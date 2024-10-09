@@ -1,6 +1,7 @@
 import { FC } from 'react'
-import { Button, Box, Typography } from '@mui/material'
+import { Button, Box, Typography, IconButton } from '@mui/material'
 import { useTranslation } from 'react-i18next'
+import DeleteIcon from '@mui/icons-material/Delete'
 
 interface RowButtonProps {
   name: string
@@ -8,6 +9,7 @@ interface RowButtonProps {
   code?: string
   clientName?: string
   onClick: () => void
+  onDelete?: () => void
 }
 
 const RowButton: FC<RowButtonProps> = ({
@@ -16,6 +18,7 @@ const RowButton: FC<RowButtonProps> = ({
   code,
   clientName,
   onClick,
+  onDelete,
 }) => {
   const { t } = useTranslation()
 
@@ -64,10 +67,15 @@ const RowButton: FC<RowButtonProps> = ({
         <Typography
           variant='h6'
           component='div'
-          sx={{ fontWeight: 'bold', textAlign: 'right' }}
+          sx={{ fontWeight: 'bold', textAlign: 'right', marginRight: 2 }}
         >
           {clientName}
         </Typography>
+      )}
+      {onDelete && (
+        <IconButton sx={{ color: '#9e9e9e' }}>
+          <DeleteIcon />
+        </IconButton>
       )}
     </Button>
   )

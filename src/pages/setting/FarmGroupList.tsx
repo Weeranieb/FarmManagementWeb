@@ -8,10 +8,12 @@ import SuccessAlert from '../../components/SuccessAlert'
 import ErrorAlert from '../../components/ErrorAlert'
 import {
   createFarmGroupApi,
+  deleteFarmGroupApi,
   getAllFarmGroupApi,
 } from '../../services/farmGroup.service'
 import DialogAddFarmGroup from './DialogAddFarmGroup'
 import { FarmGroup } from '../../models/schema/farmGroup'
+import Swal from 'sweetalert2'
 
 const FarmGroupList: FC = () => {
   const { t } = useTranslation()
@@ -58,6 +60,32 @@ const FarmGroupList: FC = () => {
       })
   }
 
+  const handleDelete = async (id: number) => {
+    try {
+      const result = await Swal.fire({
+        title: 'ยืนยันการลบข้อมูล',
+        text: 'คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนี้? \nข้อมูลจะถูกลบถาวรและไม่สามารถกู้คืนได้!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'ลบข้อมูล',
+        cancelButtonText: 'ยกเลิก',
+      })
+      if (result.isConfirmed) {
+        const res = await deleteFarmGroupApi(id)
+        if (res.result) {
+          SuccessAlert()
+          window.location.reload()
+        } else {
+          ErrorAlert(res)
+        }
+      }
+    } catch (err) {
+      ErrorAlert(err)
+    }
+  }
+
   return (
     <Box sx={{ p: 3 }}>
       <SearchBar title={t('farmGroup')} handleDialogOpen={handleDialogOpen} />
@@ -70,6 +98,9 @@ const FarmGroupList: FC = () => {
               code={row.code}
               onClick={() => {
                 navigate(`/setting/farm-group/${row.id}`)
+              }}
+              onDelete={() => {
+                handleDelete(row.id)
               }}
             />
           </Grid>

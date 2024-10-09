@@ -1,4 +1,4 @@
-import { BaseResponse } from '../models/api/baseResponse'
+import { BaseResponse, BooleanResponse } from '../models/api/baseResponse'
 import { AddFarmOnFarmGroup } from '../models/schema/farmGroup'
 import { FarmOnFarmGroup } from '../models/schema/farmOnFarmGroup'
 import api from './apiClient'
@@ -17,4 +17,17 @@ const createFarmOnFarmGroupApi = async (
     .catch((err) => handleResponseError(err))
 }
 
-export { createFarmOnFarmGroupApi }
+const deleteFarmOnFarmGroupApi = async (
+  id: number
+): Promise<BooleanResponse> => {
+  const url = `farmOnFarmGroup/${id}`
+  return api
+    .delete<BooleanResponse>(url)
+    .then((res) => {
+      if (res.data.result) return res.data
+      else return handleResponseError(res.data)
+    })
+    .catch((err) => handleResponseError(err))
+}
+
+export { createFarmOnFarmGroupApi, deleteFarmOnFarmGroupApi }

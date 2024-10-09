@@ -5,13 +5,10 @@ import {
   CardContent,
   Grid,
   IconButton,
-  InputAdornment,
-  TextField,
   Typography,
 } from '@mui/material'
 import { FC, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import SearchIcon from '@mui/icons-material/Search'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { useTranslation } from 'react-i18next'
 import PageBarWithAdd from '../../components/PageBarWithAdd'
@@ -19,12 +16,16 @@ import { Farm } from '../../models/schema/farm'
 import { FarmGroup } from '../../models/schema/farmGroup'
 import {
   getFarmByFarmGroupIdApi,
-  getFarmGroupAPi,
+  getFarmGroupApi,
 } from '../../services/farmGroup.service'
 import ErrorAlert from '../../components/ErrorAlert'
 import DialogAddFarmInGroup from './DialogAddFarmInGroup'
-import { createFarmOnFarmGroupApi } from '../../services/farmOnFarmGroup.service'
+import {
+  createFarmOnFarmGroupApi,
+  deleteFarmOnFarmGroupApi,
+} from '../../services/farmOnFarmGroup.service'
 import SuccessAlert from '../../components/SuccessAlert'
+import Swal from 'sweetalert2'
 
 const FarmGroupDetail: FC = () => {
   // farmGroup id
@@ -59,11 +60,37 @@ const FarmGroupDetail: FC = () => {
       })
   }
 
+  const handleDelete = async (id: number) => {
+    try {
+      const result = await Swal.fire({
+        title: 'ยืนยันการลบข้อมูล',
+        text: 'คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนี้? \nข้อมูลจะถูกลบถาวรและไม่สามารถกู้คืนได้!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'ลบข้อมูล',
+        cancelButtonText: 'ยกเลิก',
+      })
+      if (result.isConfirmed) {
+        const res = await deleteFarmOnFarmGroupApi(id)
+        if (res.result) {
+          SuccessAlert()
+          window.location.reload()
+        } else {
+          ErrorAlert(res)
+        }
+      }
+    } catch (err) {
+      ErrorAlert(err)
+    }
+  }
+
   useEffect(() => {
     const farmGroupId = parseInt(id ?? '', 10)
     const getFarmGroup = async () => {
       if (id !== undefined) {
-        await getFarmGroupAPi(farmGroupId)
+        await getFarmGroupApi(farmGroupId)
           .then((res) => {
             if (res.result) {
               setFarmGroup(res.data)
@@ -99,22 +126,7 @@ const FarmGroupDetail: FC = () => {
         title={`${t('group')}: ${farmGroup?.name}`}
         handleDialogOpen={handleDialogOpen}
       />
-      <Box display='flex' alignItems='center' sx={{ pb: 4, mt: 3 }}>
-        <TextField
-          variant='outlined'
-          size='small'
-          placeholder='ค้นหา'
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position='start'>
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-          fullWidth
-        />
-      </Box>
-      <Grid container spacing={2}>
+      <Grid container spacing={2} mt={1}>
         {farms.map((farm) => (
           <Grid item xs={12} sm={6} md={3} key={farm.id}>
             <Card variant='outlined'>
@@ -125,7 +137,10 @@ const FarmGroupDetail: FC = () => {
               <CardActions
                 sx={{ display: 'flex', justifyContent: 'flex-end', padding: 1 }}
               >
-                <IconButton sx={{ color: '#9e9e9e' }}>
+                <IconButton
+                  sx={{ color: '#9e9e9e' }}
+                  onClick={() => handleDelete(farm.id)}
+                >
                   <DeleteIcon />
                 </IconButton>
               </CardActions>
