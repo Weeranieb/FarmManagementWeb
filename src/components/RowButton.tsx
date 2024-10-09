@@ -28,20 +28,19 @@ const RowButton: FC<RowButtonProps> = ({
       sx={{
         marginTop: 2,
         width: '100%',
-        backgroundColor: '#FAF8EE',
-        color: '#4B4B4C',
-        fontSize: '1rem',
-        textAlign: 'left',
         display: 'flex',
-        flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingY: 1,
-        paddingX: 2,
-        borderRadius: 2,
+        backgroundColor: '#FAF8EE',
         border: '2px solid #CEBCA1',
+        borderRadius: 2,
+        paddingY: 1,
+        color: '#4B4B4C',
+        paddingX: 2,
+        fontSize: '1rem',
+        textAlign: 'left',
+        flexDirection: 'row',
       }}
-      onClick={onClick}
     >
       <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
         <Typography
@@ -67,13 +66,19 @@ const RowButton: FC<RowButtonProps> = ({
         <Typography
           variant='h6'
           component='div'
-          sx={{ fontWeight: 'bold', textAlign: 'right', marginRight: 2 }}
+          sx={{ fontWeight: 'bold', textAlign: 'right', marginTop: 1 }}
         >
           {clientName}
         </Typography>
       )}
       {onDelete && (
-        <IconButton sx={{ color: '#9e9e9e' }}>
+        <IconButton
+          sx={{ color: '#9e9e9e' }}
+          onClick={(e) => {
+            e.stopPropagation()
+            onDelete()
+          }}
+        >
           <DeleteIcon />
         </IconButton>
       )}
