@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link } from 'react-router-dom'
 import { Fish, Mail, Lock } from 'lucide-react'
 
 interface LoginPageProps {
@@ -25,7 +24,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           <div className='inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-2xl mb-4'>
             <Fish size={40} className='text-blue-600' />
           </div>
-          <h1 className='text-4xl text-white mb-2'>BoonmaFarm</h1>
+          <h1 className='text-4xl text-white mb-2'>Boonma Farm</h1>
           <p className='text-blue-100 text-lg'>Farm Management System</p>
         </div>
 
@@ -98,18 +97,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               Sign In
             </button>
           </form>
-
-          <div className='mt-6 text-center'>
-            <p className='text-sm text-gray-600'>
-              Don't have an account?{' '}
-              <Link
-                to='/register'
-                className='text-blue-600 hover:text-blue-700'
-              >
-                Register here
-              </Link>
-            </p>
-          </div>
         </div>
 
         {/* Footer */}
