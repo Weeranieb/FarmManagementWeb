@@ -85,7 +85,10 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 />
                 <span className='text-sm text-gray-600'>Remember me</span>
               </label>
-              <a href='#' className='text-sm text-blue-600 hover:text-blue-700'>
+              <a
+                href='/forgot-password'
+                className='text-sm text-blue-600 hover:text-blue-700'
+              >
                 Forgot password?
               </a>
             </div>
