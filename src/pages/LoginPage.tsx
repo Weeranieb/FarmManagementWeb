@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Fish, Mail, Lock } from 'lucide-react'
 
 interface LoginPageProps {
@@ -7,6 +8,7 @@ interface LoginPageProps {
 }
 
 export function LoginPage({ onLogin }: LoginPageProps) {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
@@ -14,6 +16,8 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     onLogin(email, password)
+    // Navigate to dashboard after login
+    navigate('/dashboard')
   }
 
   return (

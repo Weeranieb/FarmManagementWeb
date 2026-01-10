@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { LoginPage } from './pages/LoginPage'
 import { ForgotPasswordPage } from './pages/ForgotPassword'
+import { MainLayout } from './layouts/MainLayout'
 
 export const router = createBrowserRouter([
   {
@@ -26,5 +27,18 @@ export const router = createBrowserRouter([
   {
     path: '/forgot-password',
     element: <ForgotPasswordPage />,
+  },
+
+  // Protected routes with MainLayout
+  {
+    element: <MainLayout />, // Wraps all child routes
+    children: [
+      {
+        path: '/dashboard',
+        // element: <DashboardPage />,
+        element: <div>Dashboard</div>,
+      },
+      // ... other protected routes
+    ],
   },
 ])
