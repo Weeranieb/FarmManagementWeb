@@ -5,6 +5,8 @@ import { MainLayout } from './layouts/MainLayout'
 import { DashboardPage } from './pages/Dashboard'
 import { FarmsListPage } from './pages/FarmListPage'
 import { FarmDetailPage } from './pages/FarmDetailPage'
+import { PondsListPage } from './pages/PondListPage'
+import { PondDetailPage } from './pages/PondDetailPage'
 
 export const router = createBrowserRouter([
   {
@@ -47,6 +49,14 @@ export const router = createBrowserRouter([
       {
         path: '/farms/:id',
         element: <FarmDetailPage />,
+      },
+      {
+        path: '/ponds',
+        element: <PondsListPage />,
+      },
+      {
+        path: '/ponds/:id',
+        element: <PondDetailPage />,
       },
     ],
   },
