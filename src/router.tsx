@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import { LoginPage } from './pages/LoginPage'
 import { ForgotPasswordPage } from './pages/ForgotPassword'
 import { MainLayout } from './layouts/MainLayout'
+import { DashboardPage } from './pages/Dashboard'
 
 export const router = createBrowserRouter([
   {
@@ -35,10 +36,8 @@ export const router = createBrowserRouter([
     children: [
       {
         path: '/dashboard',
-        // element: <DashboardPage />,
-        element: <div>Dashboard</div>,
+        element: <DashboardPage />,
       },
-      // ... other protected routes
     ],
   },
 ])
