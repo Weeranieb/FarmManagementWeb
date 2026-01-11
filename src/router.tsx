@@ -3,6 +3,8 @@ import { LoginPage } from './pages/LoginPage'
 import { ForgotPasswordPage } from './pages/ForgotPassword'
 import { MainLayout } from './layouts/MainLayout'
 import { DashboardPage } from './pages/Dashboard'
+import { FarmsListPage } from './pages/FarmListPage'
+import { FarmDetailPage } from './pages/FarmDetailPage'
 
 export const router = createBrowserRouter([
   {
@@ -37,6 +39,14 @@ export const router = createBrowserRouter([
       {
         path: '/dashboard',
         element: <DashboardPage />,
+      },
+      {
+        path: '/farms',
+        element: <FarmsListPage />,
+      },
+      {
+        path: '/farms/:id',
+        element: <FarmDetailPage />,
       },
     ],
   },

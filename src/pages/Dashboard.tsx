@@ -21,7 +21,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { Link } from 'react-router-dom'
-import { mockFarms, mockPonds, mockWorkers } from '../mockData/mockData'
+import { mockFarms, mockPonds, mockWorkers } from '../data/mockData'
 
 export function DashboardPage() {
   const stats = [
