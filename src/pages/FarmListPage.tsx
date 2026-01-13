@@ -1,22 +1,23 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, Plus, Edit, Eye, MapPin, Grid } from 'lucide-react'
-import { mockFarms } from '../data/mockData'
+import { Search, Plus, Edit, Eye, Calendar } from 'lucide-react'
+import { useFarmsQuery } from '../hooks/useFarm'
 
 export function FarmsListPage() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const { data: farms = [], isLoading, error } = useFarmsQuery()
 
-  const filteredFarms = mockFarms.filter((farm) => {
-    const matchesSearch =
-      farm.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      farm.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      farm.location.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredFarms = useMemo(() => {
+    if (!farms.length) return []
 
-    const matchesStatus = statusFilter === 'all' || farm.status === statusFilter
+    return farms.filter((farm) => {
+      const matchesSearch =
+        farm.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        farm.code.toLowerCase().includes(searchTerm.toLowerCase())
 
-    return matchesSearch && matchesStatus
-  })
+      return matchesSearch
+    })
+  }, [farms, searchTerm])
 
   return (
     <div className='space-y-6'>
@@ -42,21 +43,12 @@ export function FarmsListPage() {
             />
             <input
               type='text'
-              placeholder='Search farms by name, code, or location...'
+              placeholder='Search farms by name or code...'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none'
             />
           </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className='px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none'
-          >
-            <option value='all'>All Status</option>
-            <option value='active'>Active</option>
-            <option value='inactive'>Inactive</option>
-          </select>
         </div>
       </div>
 
@@ -64,112 +56,116 @@ export function FarmsListPage() {
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         <div className='bg-white rounded-xl shadow-md p-6'>
           <p className='text-gray-600 text-sm mb-1'>Total Farms</p>
-          <p className='text-3xl text-gray-800'>{mockFarms.length}</p>
+          <p className='text-3xl text-gray-800'>{farms.length}</p>
         </div>
         <div className='bg-white rounded-xl shadow-md p-6'>
-          <p className='text-gray-600 text-sm mb-1'>Active Farms</p>
-          <p className='text-3xl text-green-600'>
-            {mockFarms.filter((f) => f.status === 'active').length}
+          <p className='text-gray-600 text-sm mb-1'>Filtered Results</p>
+          <p className='text-3xl text-green-600'>{filteredFarms.length}</p>
+        </div>
+      </div>
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className='bg-white rounded-xl shadow-md p-12 text-center'>
+          <p className='text-gray-500'>Loading farms...</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className='bg-red-50 border border-red-200 rounded-xl shadow-md p-6'>
+          <p className='text-red-800'>
+            Error loading farms:{' '}
+            {error instanceof Error ? error.message : 'Unknown error'}
           </p>
         </div>
-      </div>
+      )}
 
       {/* Farms List */}
-      <div className='bg-white rounded-xl shadow-md overflow-hidden'>
-        <div className='overflow-x-auto'>
-          <table className='w-full'>
-            <thead className='bg-gray-50 border-b border-gray-200'>
-              <tr>
-                <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  Code
-                </th>
-                <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  Farm Name
-                </th>
-                <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  Location
-                </th>
-                <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  Area (ha)
-                </th>
-                <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  Ponds
-                </th>
-                <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  Status
-                </th>
-                <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className='divide-y divide-gray-200'>
-              {filteredFarms.map((farm) => (
-                <tr
-                  key={farm.id}
-                  className='hover:bg-gray-50 transition-colors'
-                >
-                  <td className='px-6 py-4 text-sm text-gray-900'>
-                    {farm.code}
-                  </td>
-                  <td className='px-6 py-4'>
-                    <Link
-                      to={`/farms/${farm.id}`}
-                      className='text-green-600 hover:text-green-700'
+      {!isLoading && !error && (
+        <>
+          <div className='bg-white rounded-xl shadow-md overflow-hidden'>
+            <div className='overflow-x-auto'>
+              <table className='w-full'>
+                <thead className='bg-gray-50 border-b border-gray-200'>
+                  <tr>
+                    <th className='px-6 py-4 text-left text-sm text-gray-600'>
+                      Code
+                    </th>
+                    <th className='px-6 py-4 text-left text-sm text-gray-600'>
+                      Farm Name
+                    </th>
+                    <th className='px-6 py-4 text-left text-sm text-gray-600'>
+                      Created At
+                    </th>
+                    <th className='px-6 py-4 text-left text-sm text-gray-600'>
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className='divide-y divide-gray-200'>
+                  {filteredFarms.map((farm) => (
+                    <tr
+                      key={farm.id}
+                      className='hover:bg-gray-50 transition-colors'
                     >
-                      {farm.name}
-                    </Link>
-                  </td>
-                  <td className='px-6 py-4 text-sm text-gray-600'>
-                    <div className='flex items-center gap-2'>
-                      <MapPin size={16} className='text-gray-400' />
-                      {farm.location}
-                    </div>
-                  </td>
-                  <td className='px-6 py-4 text-sm text-gray-900'>
-                    {farm.area}
-                  </td>
-                  <td className='px-6 py-4 text-sm text-gray-900'>
-                    <div className='flex items-center gap-2'>
-                      <Grid size={16} className='text-blue-600' />
-                      {farm.pondCount}
-                    </div>
-                  </td>
-                  <td className='px-6 py-4'>
-                    <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs ${
-                        farm.status === 'active'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}
-                    >
-                      {farm.status}
-                    </span>
-                  </td>
-                  <td className='px-6 py-4'>
-                    <div className='flex items-center gap-2'>
-                      <Link
-                        to={`/farms/${farm.id}`}
-                        className='p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors'
-                      >
-                        <Eye size={18} />
-                      </Link>
-                      <button className='p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors'>
-                        <Edit size={18} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                      <td className='px-6 py-4 text-sm text-gray-900'>
+                        {farm.code}
+                      </td>
+                      <td className='px-6 py-4'>
+                        <Link
+                          to={`/farms/${farm.id}`}
+                          className='text-green-600 hover:text-green-700 font-medium'
+                        >
+                          {farm.name}
+                        </Link>
+                      </td>
+                      <td className='px-6 py-4 text-sm text-gray-600'>
+                        <div className='flex items-center gap-2'>
+                          <Calendar size={16} className='text-gray-400' />
+                          {new Date(farm.createdAt).toLocaleDateString()}
+                        </div>
+                      </td>
+                      <td className='px-6 py-4'>
+                        <div className='flex items-center gap-2'>
+                          <Link
+                            to={`/farms/${farm.id}`}
+                            className='p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors'
+                            title='View details'
+                          >
+                            <Eye size={18} />
+                          </Link>
+                          <button
+                            className='p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors'
+                            title='Edit farm'
+                          >
+                            <Edit size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-      {filteredFarms.length === 0 && (
-        <div className='bg-white rounded-xl shadow-md p-12 text-center'>
-          <p className='text-gray-500'>No farms found matching your criteria</p>
-        </div>
+          {filteredFarms.length === 0 && farms.length > 0 && (
+            <div className='bg-white rounded-xl shadow-md p-12 text-center'>
+              <p className='text-gray-500'>
+                No farms found matching your search criteria
+              </p>
+            </div>
+          )}
+
+          {farms.length === 0 && !isLoading && (
+            <div className='bg-white rounded-xl shadow-md p-12 text-center'>
+              <p className='text-gray-500'>
+                No farms found. Create your first farm to get started.
+              </p>
+            </div>
+          )}
+        </>
       )}
     </div>
   )

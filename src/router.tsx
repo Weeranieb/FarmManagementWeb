@@ -7,27 +7,16 @@ import { FarmsListPage } from './pages/FarmListPage'
 import { FarmDetailPage } from './pages/FarmDetailPage'
 import { PondsListPage } from './pages/PondListPage'
 import { PondDetailPage } from './pages/PondDetailPage'
+import { ProtectedRoute } from './components/ProtectedRoute'
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: (
-      <LoginPage
-        onLogin={(email, password) => {
-          console.log(email, password)
-        }}
-      />
-    ),
+    element: <LoginPage />,
   },
   {
     path: '/login',
-    element: (
-      <LoginPage
-        onLogin={(email, password) => {
-          console.log(email, password)
-        }}
-      />
-    ),
+    element: <LoginPage />,
   },
   {
     path: '/forgot-password',
@@ -36,7 +25,11 @@ export const router = createBrowserRouter([
 
   // Protected routes with MainLayout
   {
-    element: <MainLayout />, // Wraps all child routes
+    element: (
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: '/dashboard',

@@ -1,23 +1,18 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Fish, Mail, Lock } from 'lucide-react'
+import { Fish, Lock, User, Eye, EyeOff } from 'lucide-react'
+import { useLoginMutation } from '../hooks/useAuth'
 
-interface LoginPageProps {
-  onLogin: (email: string, password: string) => void
-}
-
-export function LoginPage({ onLogin }: LoginPageProps) {
-  const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+export function LoginPage() {
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const loginMutation = useLoginMutation()
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    onLogin(email, password)
-    // Navigate to dashboard after login
-    navigate('/dashboard')
+    loginMutation.mutate({ username, password })
   }
 
   return (
@@ -41,20 +36,21 @@ export function LoginPage({ onLogin }: LoginPageProps) {
           <form onSubmit={handleSubmit} className='space-y-4'>
             <div>
               <label className='block text-sm text-gray-700 mb-2'>
-                Email Address
+                Username
               </label>
               <div className='relative'>
-                <Mail
+                <User
                   className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'
                   size={20}
                 />
                 <input
-                  type='email'
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  type='text'
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
-                  placeholder='admin@boonmafarm.com'
+                  placeholder='Enter your username'
                   required
+                  disabled={loginMutation.isPending}
                 />
               </div>
             </div>
@@ -69,13 +65,23 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                   size={20}
                 />
                 <input
-                  type='password'
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
+                  className='w-full pl-11 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
                   placeholder='••••••••'
                   required
+                  disabled={loginMutation.isPending}
                 />
+                <button
+                  type='button'
+                  onClick={() => setShowPassword(!showPassword)}
+                  className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors'
+                  disabled={loginMutation.isPending}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
               </div>
             </div>
 
@@ -97,11 +103,20 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               </a>
             </div>
 
+            {loginMutation.isError && (
+              <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm'>
+                {loginMutation.error instanceof Error
+                  ? loginMutation.error.message
+                  : 'Login failed. Please check your credentials.'}
+              </div>
+            )}
+
             <button
               type='submit'
-              className='w-full bg-gradient-to-r from-blue-800 to-blue-600 text-white py-3 rounded-lg hover:shadow-lg transition-all'
+              disabled={loginMutation.isPending}
+              className='w-full bg-gradient-to-r from-blue-800 to-blue-600 text-white py-3 rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed'
             >
-              Sign In
+              {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
         </div>
