@@ -7,7 +7,9 @@ import { FarmsListPage } from './pages/FarmListPage'
 import { FarmDetailPage } from './pages/FarmDetailPage'
 import { PondsListPage } from './pages/PondListPage'
 import { PondDetailPage } from './pages/PondDetailPage'
+import { MasterDataPage } from './pages/MasterDataPage'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { SuperAdminRoute } from './components/SuperAdminRoute'
 
 export const router = createBrowserRouter([
   {
@@ -50,6 +52,14 @@ export const router = createBrowserRouter([
       {
         path: '/ponds/:id',
         element: <PondDetailPage />,
+      },
+      {
+        path: '/admin/master-data',
+        element: (
+          <SuperAdminRoute>
+            <MasterDataPage />
+          </SuperAdminRoute>
+        ),
       },
     ],
   },
