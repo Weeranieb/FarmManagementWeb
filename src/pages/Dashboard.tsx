@@ -22,32 +22,35 @@ import {
 } from 'recharts'
 import { Link } from 'react-router-dom'
 import { mockFarms, mockPonds, mockWorkers } from '../data/mockData'
+import { th } from '../locales/th'
+
+const D = th.dashboard
 
 export function DashboardPage() {
   const stats = [
     {
-      label: 'Total Farms',
+      label: D.totalFarms,
       value: mockFarms.length,
       change: '+2',
       icon: Building,
       color: 'from-blue-600 to-blue-700',
     },
     {
-      label: 'Active Ponds',
+      label: D.activePonds,
       value: mockPonds.filter((p) => p.status === 'active').length,
       change: '+3',
       icon: Fish,
       color: 'from-blue-500 to-blue-600',
     },
     {
-      label: 'Workers',
+      label: D.workers,
       value: mockWorkers.filter((w) => w.status === 'active').length,
       change: '+1',
       icon: Users,
       color: 'from-slate-700 to-slate-800',
     },
     {
-      label: 'Monthly Revenue',
+      label: D.monthlyRevenue,
       value: '฿2.4M',
       change: '+12%',
       icon: DollarSign,
@@ -56,19 +59,19 @@ export function DashboardPage() {
   ]
 
   const monthlyData = [
-    { month: 'Aug', production: 4000, revenue: 2400 },
-    { month: 'Sep', production: 3000, revenue: 1398 },
-    { month: 'Oct', production: 2000, revenue: 9800 },
-    { month: 'Nov', production: 2780, revenue: 3908 },
-    { month: 'Dec', production: 1890, revenue: 4800 },
-    { month: 'Jan', production: 2390, revenue: 3800 },
+    { month: D.months.aug, production: 4000, revenue: 2400 },
+    { month: D.months.sep, production: 3000, revenue: 1398 },
+    { month: D.months.oct, production: 2000, revenue: 9800 },
+    { month: D.months.nov, production: 2780, revenue: 3908 },
+    { month: D.months.dec, production: 1890, revenue: 4800 },
+    { month: D.months.jan, production: 2390, revenue: 3800 },
   ]
 
   const feedData = [
-    { name: 'Premium Pellets', value: 35 },
-    { name: 'Standard Feed', value: 30 },
-    { name: 'Shrimp Mix', value: 20 },
-    { name: 'Organic Feed', value: 15 },
+    { name: D.feedTypes.premiumPellets, value: 35 },
+    { name: D.feedTypes.standardFeed, value: 30 },
+    { name: D.feedTypes.shrimpMix, value: 20 },
+    { name: D.feedTypes.organicFeed, value: 15 },
   ]
 
   const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6']
@@ -76,30 +79,30 @@ export function DashboardPage() {
   const recentActivities = [
     {
       id: 1,
-      action: 'New pond created',
-      detail: 'Pond D1 added to River Delta Farm',
-      time: '2 hours ago',
+      action: D.newPondCreated,
+      detail: D.pondAddedToFarm('บ่อ D1', 'ฟาร์ม River Delta'),
+      time: D.hoursAgo(2),
       icon: Fish,
     },
     {
       id: 2,
-      action: 'Worker hired',
-      detail: 'Somchai Thanarak joined North Valley Farm',
-      time: '5 hours ago',
+      action: D.workerHired,
+      detail: D.workerJoinedFarm('สมชาย ธนารักษ์', 'ฟาร์ม North Valley'),
+      time: D.hoursAgo(5),
       icon: Users,
     },
     {
       id: 3,
-      action: 'Feed order placed',
-      detail: '500kg Premium Fish Pellets ordered',
-      time: '1 day ago',
+      action: D.feedOrderPlaced,
+      detail: D.feedOrderDetail('500 กก.', 'อาหารเม็ดพรีเมียม'),
+      time: D.dayAgo(1),
       icon: Package,
     },
     {
       id: 4,
-      action: 'Farm status updated',
-      detail: 'Coastal Aqua Farm marked as active',
-      time: '2 days ago',
+      action: D.farmStatusUpdated,
+      detail: D.farmMarkedActive('ฟาร์ม Coastal Aqua'),
+      time: D.dayAgo(2),
       icon: Building,
     },
   ]
@@ -108,9 +111,9 @@ export function DashboardPage() {
     <div className='space-y-6'>
       {/* Page Header */}
       <div>
-        <h1 className='text-3xl text-gray-800 mb-2'>Dashboard</h1>
+        <h1 className='text-3xl text-gray-800 mb-2'>{D.title}</h1>
         <p className='text-gray-600'>
-          Welcome back! Here's what's happening with your farms today.
+          {D.subtitle}
         </p>
       </div>
 
@@ -146,7 +149,7 @@ export function DashboardPage() {
         {/* Production & Revenue Chart */}
         <div className='bg-white rounded-xl shadow-md p-6'>
           <div className='flex items-center justify-between mb-6'>
-            <h2 className='text-xl text-gray-800'>Production & Revenue</h2>
+            <h2 className='text-xl text-gray-800'>{D.productionRevenue}</h2>
             <Activity size={20} className='text-gray-400' />
           </div>
           <ResponsiveContainer width='100%' height={300}>
@@ -165,13 +168,13 @@ export function DashboardPage() {
               <Bar
                 dataKey='production'
                 fill='#10b981'
-                name='Production (kg)'
+                name={D.productionKg}
                 radius={[8, 8, 0, 0]}
               />
               <Bar
                 dataKey='revenue'
                 fill='#3b82f6'
-                name='Revenue (฿k)'
+                name={D.revenueK}
                 radius={[8, 8, 0, 0]}
               />
             </BarChart>
@@ -181,7 +184,7 @@ export function DashboardPage() {
         {/* Feed Distribution */}
         <div className='bg-white rounded-xl shadow-md p-6'>
           <div className='flex items-center justify-between mb-6'>
-            <h2 className='text-xl text-gray-800'>Feed Distribution</h2>
+            <h2 className='text-xl text-gray-800'>{D.feedDistribution}</h2>
             <Package size={20} className='text-gray-400' />
           </div>
           <ResponsiveContainer width='100%' height={300}>
@@ -215,7 +218,7 @@ export function DashboardPage() {
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
         {/* Recent Activities */}
         <div className='lg:col-span-2 bg-white rounded-xl shadow-md p-6'>
-          <h2 className='text-xl text-gray-800 mb-4'>Recent Activities</h2>
+          <h2 className='text-xl text-gray-800 mb-4'>{D.recentActivities}</h2>
           <div className='space-y-4'>
             {recentActivities.map((activity) => {
               const Icon = activity.icon
@@ -240,35 +243,35 @@ export function DashboardPage() {
 
         {/* Quick Actions */}
         <div className='bg-white rounded-xl shadow-md p-6'>
-          <h2 className='text-xl text-gray-800 mb-4'>Quick Actions</h2>
+          <h2 className='text-xl text-gray-800 mb-4'>{D.quickActions}</h2>
           <div className='space-y-3'>
             <Link
               to='/farms'
               className='block p-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:shadow-lg transition-all'
             >
-              <p className='text-sm opacity-90'>Manage</p>
-              <p className='text-lg'>Farms</p>
+              <p className='text-sm opacity-90'>{D.manage}</p>
+              <p className='text-lg'>{D.farms}</p>
             </Link>
             <Link
               to='/ponds'
               className='block p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all'
             >
-              <p className='text-sm opacity-90'>View</p>
-              <p className='text-lg'>Ponds</p>
+              <p className='text-sm opacity-90'>{D.view}</p>
+              <p className='text-lg'>{D.ponds}</p>
             </Link>
             <Link
               to='/workers'
               className='block p-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all'
             >
-              <p className='text-sm opacity-90'>Manage</p>
-              <p className='text-lg'>Workers</p>
+              <p className='text-sm opacity-90'>{D.manage}</p>
+              <p className='text-lg'>{D.workers}</p>
             </Link>
             <Link
               to='/feed-collections'
               className='block p-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:shadow-lg transition-all'
             >
-              <p className='text-sm opacity-90'>Check</p>
-              <p className='text-lg'>Feed Prices</p>
+              <p className='text-sm opacity-90'>{D.check}</p>
+              <p className='text-lg'>{D.feedPrices}</p>
             </Link>
           </div>
         </div>

@@ -1,6 +1,9 @@
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, MapPin, Calendar, Grid } from 'lucide-react'
 import { mockFarms, mockPonds } from '../data/mockData'
+import { th } from '../locales/th'
+
+const L = th.farmDetail
 
 export function FarmDetailPage() {
   const { id } = useParams()
@@ -8,7 +11,7 @@ export function FarmDetailPage() {
   const farmPonds = mockPonds.filter((p) => p.farmId === id)
 
   if (!farm) {
-    return <div>Farm not found</div>
+    return <div>{L.farmNotFound}</div>
   }
 
   return (
@@ -32,21 +35,21 @@ export function FarmDetailPage() {
         <div className='bg-white rounded-xl shadow-md p-6'>
           <div className='flex items-center gap-3 mb-4'>
             <MapPin className='text-green-600' size={24} />
-            <p className='text-lg text-gray-800'>Location</p>
+            <p className='text-lg text-gray-800'>{L.location}</p>
           </div>
           <p className='text-2xl text-gray-900'>{farm.location}</p>
         </div>
         <div className='bg-white rounded-xl shadow-md p-6'>
           <div className='flex items-center gap-3 mb-4'>
             <Grid className='text-blue-600' size={24} />
-            <p className='text-lg text-gray-800'>Area</p>
+            <p className='text-lg text-gray-800'>{L.area}</p>
           </div>
-          <p className='text-2xl text-gray-900'>{farm.area} hectares</p>
+          <p className='text-2xl text-gray-900'>{farm.area} {L.hectares}</p>
         </div>
         <div className='bg-white rounded-xl shadow-md p-6'>
           <div className='flex items-center gap-3 mb-4'>
             <Calendar className='text-purple-600' size={24} />
-            <p className='text-lg text-gray-800'>Created</p>
+            <p className='text-lg text-gray-800'>{L.created}</p>
           </div>
           <p className='text-2xl text-gray-900'>{farm.createdAt}</p>
         </div>
@@ -55,7 +58,7 @@ export function FarmDetailPage() {
       {/* Ponds */}
       <div className='bg-white rounded-xl shadow-md p-6'>
         <h2 className='text-xl text-gray-800 mb-4'>
-          Ponds ({farmPonds.length})
+          {L.ponds} ({farmPonds.length})
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
           {farmPonds.map((pond) => (
@@ -75,7 +78,9 @@ export function FarmDetailPage() {
                       : 'bg-gray-100 text-gray-800'
                   }`}
                 >
-                  {pond.status}
+                  {pond.status === 'active'
+                    ? L.statusActive
+                    : L.statusMaintenance}
                 </span>
               </div>
             </Link>

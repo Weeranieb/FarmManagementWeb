@@ -2,6 +2,9 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Fish, Lock, User, Eye, EyeOff } from 'lucide-react'
 import { useLoginMutation } from '../hooks/useAuth'
+import { th } from '../locales/th'
+
+const L = th.login
 
 export function LoginPage() {
   const [username, setUsername] = useState('')
@@ -23,20 +26,20 @@ export function LoginPage() {
           <div className='inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-2xl mb-4'>
             <Fish size={40} className='text-blue-600' />
           </div>
-          <h1 className='text-4xl text-white mb-2'>Boonma Farm</h1>
-          <p className='text-blue-100 text-lg'>Farm Management System</p>
+          <h1 className='text-4xl text-white mb-2'>{L.title}</h1>
+          <p className='text-blue-100 text-lg'>{L.tagline}</p>
         </div>
 
         {/* Login Form */}
         <div className='bg-white rounded-2xl shadow-2xl p-8'>
           <h2 className='text-2xl text-gray-800 mb-6 text-center'>
-            Welcome Back
+            {L.welcomeBack}
           </h2>
 
           <form onSubmit={handleSubmit} className='space-y-4'>
             <div>
               <label className='block text-sm text-gray-700 mb-2'>
-                Username
+                {L.username}
               </label>
               <div className='relative'>
                 <User
@@ -48,7 +51,7 @@ export function LoginPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
-                  placeholder='Enter your username'
+                  placeholder={L.placeholderUsername}
                   required
                   disabled={loginMutation.isPending}
                 />
@@ -57,7 +60,7 @@ export function LoginPage() {
 
             <div>
               <label className='block text-sm text-gray-700 mb-2'>
-                Password
+                {L.password}
               </label>
               <div className='relative'>
                 <Lock
@@ -78,7 +81,7 @@ export function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors'
                   disabled={loginMutation.isPending}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? L.hidePassword : L.showPassword}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -93,13 +96,13 @@ export function LoginPage() {
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className='w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500'
                 />
-                <span className='text-sm text-gray-600'>Remember me</span>
+                <span className='text-sm text-gray-600'>{L.rememberMe}</span>
               </label>
               <a
                 href='/forgot-password'
                 className='text-sm text-blue-600 hover:text-blue-700'
               >
-                Forgot password?
+                {L.forgotPassword}
               </a>
             </div>
 
@@ -107,7 +110,7 @@ export function LoginPage() {
               <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm'>
                 {loginMutation.error instanceof Error
                   ? loginMutation.error.message
-                  : 'Login failed. Please check your credentials.'}
+                  : L.loginFailed}
               </div>
             )}
 
@@ -116,14 +119,14 @@ export function LoginPage() {
               disabled={loginMutation.isPending}
               className='w-full bg-gradient-to-r from-blue-800 to-blue-600 text-white py-3 rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed'
             >
-              {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
+              {loginMutation.isPending ? L.signingIn : L.signIn}
             </button>
           </form>
         </div>
 
         {/* Footer */}
         <p className='text-center text-blue-100 text-sm mt-6'>
-          © 2026 Boonma Farm. All rights reserved.
+          {th.common.copyright}
         </p>
       </div>
     </div>

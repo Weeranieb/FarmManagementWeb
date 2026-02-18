@@ -1,14 +1,21 @@
 // Mock data for BoonmaFarm
 
+export interface Client {
+  id: string
+  name: string
+  status: 'active' | 'inactive'
+}
+
 export interface Farm {
-  id: string;
-  code: string;
-  name: string;
-  location: string;
-  area: number;
-  pondCount: number;
-  status: 'active' | 'inactive';
-  createdAt: string;
+  id: string
+  code: string
+  name: string
+  clientId: string
+  location: string
+  area: number
+  pondCount: number
+  status: 'active' | 'inactive'
+  createdAt: string
 }
 
 export interface Pond {
@@ -60,14 +67,21 @@ export interface PriceHistory {
   price: number;
 }
 
+// Mock Clients
+export const mockClients: Client[] = [
+  { id: '1', name: 'Boonma Farm Co.', status: 'active' },
+  { id: '2', name: 'River Delta Group', status: 'active' },
+  { id: '3', name: 'Coastal Aqua Ltd.', status: 'active' },
+]
+
 // Mock Farms
 export const mockFarms: Farm[] = [
-  { id: '1', code: 'FM001', name: 'North Valley Farm', location: 'Chiang Mai', area: 50, pondCount: 12, status: 'active', createdAt: '2023-01-15' },
-  { id: '2', code: 'FM002', name: 'River Delta Farm', location: 'Bangkok', area: 75, pondCount: 18, status: 'active', createdAt: '2023-03-20' },
-  { id: '3', code: 'FM003', name: 'Coastal Aqua Farm', location: 'Phuket', area: 40, pondCount: 10, status: 'active', createdAt: '2023-05-10' },
-  { id: '4', code: 'FM004', name: 'Mountain Spring Farm', location: 'Chiang Rai', area: 30, pondCount: 8, status: 'inactive', createdAt: '2023-07-22' },
-  { id: '5', code: 'FM005', name: 'Lake View Farm', location: 'Nakhon Sawan', area: 60, pondCount: 15, status: 'active', createdAt: '2023-09-05' },
-];
+  { id: '1', code: 'FM001', name: 'North Valley Farm', clientId: '1', location: 'Chiang Mai', area: 50, pondCount: 12, status: 'active', createdAt: '2023-01-15' },
+  { id: '2', code: 'FM002', name: 'River Delta Farm', clientId: '1', location: 'Bangkok', area: 75, pondCount: 18, status: 'active', createdAt: '2023-03-20' },
+  { id: '3', code: 'FM003', name: 'Coastal Aqua Farm', clientId: '2', location: 'Phuket', area: 40, pondCount: 10, status: 'active', createdAt: '2023-05-10' },
+  { id: '4', code: 'FM004', name: 'Mountain Spring Farm', clientId: '2', location: 'Chiang Rai', area: 30, pondCount: 8, status: 'inactive', createdAt: '2023-07-22' },
+  { id: '5', code: 'FM005', name: 'Lake View Farm', clientId: '3', location: 'Nakhon Sawan', area: 60, pondCount: 15, status: 'active', createdAt: '2023-09-05' },
+]
 
 // Mock Ponds
 export const mockPonds: Pond[] = [

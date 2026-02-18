@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, Plus, Eye, Fish, Building } from 'lucide-react'
 import { mockPonds } from '../data/mockData'
+import { th } from '../locales/th'
+
+const L = th.ponds
 
 export function PondsListPage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -19,12 +22,12 @@ export function PondsListPage() {
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
         <div>
-          <h1 className='text-3xl text-gray-800 mb-2'>Ponds</h1>
-          <p className='text-gray-600'>Manage your aquaculture ponds</p>
+          <h1 className='text-3xl text-gray-800 mb-2'>{L.title}</h1>
+          <p className='text-gray-600'>{L.subtitle}</p>
         </div>
         <button className='flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all'>
           <Plus size={20} />
-          <span>Add Pond</span>
+          <span>{L.addPond}</span>
         </button>
       </div>
 
@@ -37,7 +40,7 @@ export function PondsListPage() {
             />
             <input
               type='text'
-              placeholder='Search ponds...'
+              placeholder={L.searchPlaceholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none'
@@ -48,10 +51,10 @@ export function PondsListPage() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className='px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none'
           >
-            <option value='all'>All Status</option>
-            <option value='active'>Active</option>
-            <option value='inactive'>Inactive</option>
-            <option value='maintenance'>Maintenance</option>
+            <option value='all'>{L.allStatus}</option>
+            <option value='active'>{L.statusActive}</option>
+            <option value='inactive'>{L.statusInactive}</option>
+            <option value='maintenance'>{L.statusMaintenance}</option>
           </select>
         </div>
       </div>
@@ -62,28 +65,28 @@ export function PondsListPage() {
             <thead className='bg-gray-50 border-b border-gray-200'>
               <tr>
                 <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  Code
+                  {L.code}
                 </th>
                 <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  Pond Name
+                  {L.pondName}
                 </th>
                 <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  Farm
+                  {L.farm}
                 </th>
                 <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  Area (ha)
+                  {L.areaHa}
                 </th>
                 <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  Depth (m)
+                  {L.depthM}
                 </th>
                 <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  Stock
+                  {L.stock}
                 </th>
                 <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  Status
+                  {L.status}
                 </th>
                 <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  Actions
+                  {L.actions}
                 </th>
               </tr>
             </thead>
@@ -132,7 +135,11 @@ export function PondsListPage() {
                           : 'bg-gray-100 text-gray-800'
                       }`}
                     >
-                      {pond.status}
+                      {pond.status === 'active'
+                        ? L.statusActive
+                        : pond.status === 'maintenance'
+                          ? L.statusMaintenance
+                          : pond.status}
                     </span>
                   </td>
                   <td className='px-6 py-4'>
