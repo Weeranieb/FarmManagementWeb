@@ -2,6 +2,10 @@ import { Mail, ArrowLeft, CheckCircle } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Fish } from 'lucide-react'
+import { th } from '../locales/th'
+
+const L = th.forgotPassword
+const C = th.common
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -20,19 +24,19 @@ export function ForgotPasswordPage() {
             <div className='inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4'>
               <CheckCircle className='text-green-600' size={32} />
             </div>
-            <h2 className='text-2xl text-gray-800 mb-4'>Check Your Email</h2>
+            <h2 className='text-2xl text-gray-800 mb-4'>{L.checkEmail}</h2>
             <p className='text-gray-600 mb-6'>
-              We've sent password reset instructions to <strong>{email}</strong>
+              {L.checkEmailMessage} <strong>{email}</strong>
             </p>
             <p className='text-sm text-gray-500 mb-6'>
-              Didn't receive the email? Check your spam folder or try again.
+              {L.noEmail}
             </p>
             <Link
               to='/login'
               className='inline-flex items-center gap-2 text-blue-600 hover:text-blue-700'
             >
               <ArrowLeft size={20} />
-              <span>Back to Login</span>
+              <span>{L.backToLogin}</span>
             </Link>
           </div>
         </div>
@@ -48,24 +52,23 @@ export function ForgotPasswordPage() {
           <div className='inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-2xl mb-4'>
             <Fish size={40} className='text-blue-600' />
           </div>
-          <h1 className='text-4xl text-white mb-2'>BoonmaFarm</h1>
-          <p className='text-blue-100 text-lg'>Reset Your Password</p>
+          <h1 className='text-4xl text-white mb-2'>{L.title}</h1>
+          <p className='text-blue-100 text-lg'>{L.tagline}</p>
         </div>
 
         {/* Forgot Password Form */}
         <div className='bg-white rounded-2xl shadow-2xl p-8'>
           <h2 className='text-2xl text-gray-800 mb-2 text-center'>
-            Forgot Password?
+            {L.heading}
           </h2>
           <p className='text-gray-600 text-center mb-6'>
-            Enter your email address and we'll send you instructions to reset
-            your password.
+            {L.description}
           </p>
 
           <form onSubmit={handleSubmit} className='space-y-4'>
             <div>
               <label className='block text-sm text-gray-700 mb-2'>
-                Email Address
+                {L.emailLabel}
               </label>
               <div className='relative'>
                 <Mail
@@ -77,7 +80,7 @@ export function ForgotPasswordPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
-                  placeholder='admin@boonmafarm.com'
+                  placeholder={L.placeholderEmail}
                   required
                 />
               </div>
@@ -87,7 +90,7 @@ export function ForgotPasswordPage() {
               type='submit'
               className='w-full bg-gradient-to-r from-blue-800 to-blue-600 text-white py-3 rounded-lg hover:shadow-lg transition-all'
             >
-              Send Reset Instructions
+              {L.sendInstructions}
             </button>
           </form>
 
@@ -97,14 +100,14 @@ export function ForgotPasswordPage() {
               className='inline-flex items-center gap-2 text-blue-600 hover:text-blue-700'
             >
               <ArrowLeft size={18} />
-              <span>Back to Login</span>
+              <span>{L.backToLogin}</span>
             </Link>
           </div>
         </div>
 
         {/* Footer */}
         <p className='text-center text-blue-100 text-sm mt-6'>
-          © 2026 Boonma Farm. All rights reserved.
+          {C.copyright}
         </p>
       </div>
     </div>

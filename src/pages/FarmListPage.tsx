@@ -2,6 +2,9 @@ import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, Plus, Edit, Eye, Calendar } from 'lucide-react'
 import { useFarmsQuery } from '../hooks/useFarm'
+import { th } from '../locales/th'
+
+const L = th.farms
 
 export function FarmsListPage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -24,12 +27,12 @@ export function FarmsListPage() {
       {/* Header */}
       <div className='flex items-center justify-between'>
         <div>
-          <h1 className='text-3xl text-gray-800 mb-2'>Farms</h1>
-          <p className='text-gray-600'>Manage your aquaculture farms</p>
+          <h1 className='text-3xl text-gray-800 mb-2'>{L.title}</h1>
+          <p className='text-gray-600'>{L.subtitle}</p>
         </div>
         <button className='flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all'>
           <Plus size={20} />
-          <span>Add Farm</span>
+          <span>{L.addFarm}</span>
         </button>
       </div>
 
@@ -43,7 +46,7 @@ export function FarmsListPage() {
             />
             <input
               type='text'
-              placeholder='Search farms by name or code...'
+              placeholder={L.searchPlaceholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none'
@@ -55,11 +58,11 @@ export function FarmsListPage() {
       {/* Stats */}
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         <div className='bg-white rounded-xl shadow-md p-6'>
-          <p className='text-gray-600 text-sm mb-1'>Total Farms</p>
+          <p className='text-gray-600 text-sm mb-1'>{L.totalFarms}</p>
           <p className='text-3xl text-gray-800'>{farms.length}</p>
         </div>
         <div className='bg-white rounded-xl shadow-md p-6'>
-          <p className='text-gray-600 text-sm mb-1'>Filtered Results</p>
+          <p className='text-gray-600 text-sm mb-1'>{L.filteredResults}</p>
           <p className='text-3xl text-green-600'>{filteredFarms.length}</p>
         </div>
       </div>
@@ -67,7 +70,7 @@ export function FarmsListPage() {
       {/* Loading State */}
       {isLoading && (
         <div className='bg-white rounded-xl shadow-md p-12 text-center'>
-          <p className='text-gray-500'>Loading farms...</p>
+          <p className='text-gray-500'>{L.loadingFarms}</p>
         </div>
       )}
 
@@ -75,8 +78,8 @@ export function FarmsListPage() {
       {error && (
         <div className='bg-red-50 border border-red-200 rounded-xl shadow-md p-6'>
           <p className='text-red-800'>
-            Error loading farms:{' '}
-            {error instanceof Error ? error.message : 'Unknown error'}
+            {L.errorLoading}{' '}
+            {error instanceof Error ? error.message : L.unknownError}
           </p>
         </div>
       )}
@@ -90,16 +93,16 @@ export function FarmsListPage() {
                 <thead className='bg-gray-50 border-b border-gray-200'>
                   <tr>
                     <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                      Code
+                      {L.code}
                     </th>
                     <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                      Farm Name
+                      {L.farmName}
                     </th>
                     <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                      Created At
+                      {L.createdAt}
                     </th>
                     <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                      Actions
+                      {L.actions}
                     </th>
                   </tr>
                 </thead>
@@ -131,13 +134,13 @@ export function FarmsListPage() {
                           <Link
                             to={`/farms/${farm.id}`}
                             className='p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors'
-                            title='View details'
+                            title={L.viewDetails}
                           >
                             <Eye size={18} />
                           </Link>
                           <button
                             className='p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors'
-                            title='Edit farm'
+                            title={L.editFarm}
                           >
                             <Edit size={18} />
                           </button>
@@ -153,7 +156,7 @@ export function FarmsListPage() {
           {filteredFarms.length === 0 && farms.length > 0 && (
             <div className='bg-white rounded-xl shadow-md p-12 text-center'>
               <p className='text-gray-500'>
-                No farms found matching your search criteria
+                {L.noMatchingSearch}
               </p>
             </div>
           )}
@@ -161,7 +164,7 @@ export function FarmsListPage() {
           {farms.length === 0 && !isLoading && (
             <div className='bg-white rounded-xl shadow-md p-12 text-center'>
               <p className='text-gray-500'>
-                No farms found. Create your first farm to get started.
+                {L.noFarmsYet}
               </p>
             </div>
           )}

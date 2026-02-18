@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { useAuthQuery } from '../hooks/useAuth'
 import { UserLevel } from '../constants/userLevel'
+import { th } from '../locales/th'
 
 export function MainLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -26,14 +27,15 @@ export function MainLayout() {
   const location = useLocation()
   const { data: user } = useAuthQuery()
   const isSuperAdmin = user?.userLevel === UserLevel.SuperAdmin
+  const L = th.layout
 
   const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/farms', label: 'Farms', icon: Building },
-    { path: '/ponds', label: 'Ponds', icon: Fish },
-    { path: '/workers', label: 'Workers', icon: Users },
-    { path: '/merchants', label: 'Merchants', icon: Store },
-    { path: '/feed-collections', label: 'Feed Collections', icon: Package },
+    { path: '/dashboard', label: L.navDashboard, icon: LayoutDashboard },
+    { path: '/farms', label: L.navFarms, icon: Building },
+    { path: '/ponds', label: L.navPonds, icon: Fish },
+    { path: '/workers', label: L.navWorkers, icon: Users },
+    { path: '/merchants', label: L.navMerchants, icon: Store },
+    { path: '/feed-collections', label: L.navFeedCollections, icon: Package },
   ]
 
   const isActive = (path: string) => {
@@ -76,8 +78,8 @@ export function MainLayout() {
                 <Fish size={24} className='text-white' />
               </div>
               <div>
-                <h1 className='text-xl'>BoonmaFarm</h1>
-                <p className='text-xs text-blue-100'>Farm Management System</p>
+                <h1 className='text-xl'>{L.appName}</h1>
+                <p className='text-xs text-blue-100'>{L.appTagline}</p>
               </div>
             </div>
           </div>
@@ -97,8 +99,8 @@ export function MainLayout() {
                   <User size={18} />
                 </div>
                 <div className='hidden md:block text-sm'>
-                  <p>Admin User</p>
-                  <p className='text-xs text-blue-100'>Administrator</p>
+                  <p>{L.profileUser}</p>
+                  <p className='text-xs text-blue-100'>{L.profileRole}</p>
                 </div>
                 <ChevronDown
                   size={16}
@@ -111,10 +113,10 @@ export function MainLayout() {
                 <div className='absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50'>
                   <div className='px-4 py-3 border-b border-gray-200 bg-gray-50'>
                     <p className='text-sm font-medium text-gray-900'>
-                      Admin User
+                      {L.profileUser}
                     </p>
                     <p className='text-xs text-gray-600'>
-                      admin@boonmafarm.com
+                      {L.profileEmail}
                     </p>
                   </div>
                   <div className='py-2'>
@@ -124,7 +126,7 @@ export function MainLayout() {
                       className='flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-blue-50 transition-colors'
                     >
                       <User size={18} />
-                      <span>My Profile</span>
+                      <span>{L.myProfile}</span>
                     </Link>
                     <Link
                       to='/profile'
@@ -132,7 +134,7 @@ export function MainLayout() {
                       className='flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-blue-50 transition-colors'
                     >
                       <Settings size={18} />
-                      <span>Settings</span>
+                      <span>{L.settings}</span>
                     </Link>
                   </div>
                   <div className='border-t border-gray-200'>
@@ -144,7 +146,7 @@ export function MainLayout() {
                       className='w-full flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 transition-colors'
                     >
                       <LogOut size={18} />
-                      <span>Logout</span>
+                      <span>{L.logout}</span>
                     </button>
                   </div>
                 </div>
@@ -187,7 +189,7 @@ export function MainLayout() {
               <div className='pt-4 mt-4 border-t border-gray-200'>
                 <div className='px-2 mb-2'>
                   <p className='text-xs text-gray-500 uppercase tracking-wider'>
-                    Admin
+                    {L.navAdmin}
                   </p>
                 </div>
                 <Link
@@ -199,7 +201,7 @@ export function MainLayout() {
                   }`}
                 >
                   <Database size={20} />
-                  <span>Master Data</span>
+                  <span>{L.navMasterData}</span>
                 </Link>
               </div>
             )}
@@ -214,7 +216,7 @@ export function MainLayout() {
                 }`}
               >
                 <Settings size={20} />
-                <span>Settings</span>
+                <span>{L.settings}</span>
               </Link>
 
               <button
@@ -222,7 +224,7 @@ export function MainLayout() {
                 className='w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-all'
               >
                 <LogOut size={20} />
-                <span>Logout</span>
+                <span>{L.logout}</span>
               </button>
             </div>
           </nav>

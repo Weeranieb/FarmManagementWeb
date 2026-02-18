@@ -15,6 +15,13 @@ import { useClientListQuery, useInvalidateClientList } from '../hooks/useClient'
 import { farmApi, type FarmResponse } from '../api/farm'
 import { pondApi, type PondResponse } from '../api/pond'
 import { EditMasterDataModal } from '../components/EditMasterDataModal'
+import {
+  formatFarmDisplayNameTH,
+  formatPondDisplayNameTH,
+} from '../constants/masterDataFormatters'
+import { adminMasterDataTh } from '../locales/adminMasterData.th'
+
+const t = adminMasterDataTh
 
 export function AdminMasterDataPage() {
   // ——— useState ———
@@ -165,12 +172,12 @@ export function AdminMasterDataPage() {
     const ownerName = clientForm.contactPerson.trim()
     const contactNumber = clientForm.phone.trim()
     if (!name || !ownerName || !contactNumber) {
-      alert('Please fill in all required fields')
+      alert(t.alertFillRequired)
       return
     }
     try {
       await clientApi.createClient({ name, ownerName, contactNumber })
-      setSuccessMessage(`Client "${name}" created successfully!`)
+      setSuccessMessage(t.successClientCreated(name))
       setShowSuccessMessage(true)
       setTimeout(() => setShowSuccessMessage(false), 5000)
       setClientForm({
@@ -181,14 +188,14 @@ export function AdminMasterDataPage() {
       })
       invalidateClientList()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to create client')
+      alert(err instanceof Error ? err.message : t.alertCreateClientFailed)
     }
   }
 
   const handleFarmSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!farmForm.name.trim()) {
-      alert('Please fill in all fields')
+      alert(t.alertFillRequired)
       return
     }
     if (!selectedClientId) return
@@ -198,25 +205,27 @@ export function AdminMasterDataPage() {
         clientId: Number(selectedClientId),
         name,
       })
-      setSuccessMessage(`Farm "${name}" created for ${selectedClient?.value}!`)
+      setSuccessMessage(
+        t.successFarmCreated(formatFarmDisplayNameTH(name), selectedClient?.value ?? ''),
+      )
       setShowSuccessMessage(true)
       setTimeout(() => setShowSuccessMessage(false), 5000)
       setFarmForm({ name: '' })
       refetchHierarchy()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to create farm')
+      alert(err instanceof Error ? err.message : t.alertCreateFarmFailed)
     }
   }
 
   const handlePondSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedFarmId) {
-      alert('Please select a farm')
+      alert(t.alertSelectFarm)
       return
     }
     const names = pondForms.map((f) => f.name.trim()).filter(Boolean)
     if (names.length === 0) {
-      alert('Please fill in at least one pond name')
+      alert(t.alertAtLeastOnePondName)
       return
     }
     const selectedFarm = clientFarms.find(
@@ -226,17 +235,18 @@ export function AdminMasterDataPage() {
       await pondApi.createPonds({ farmId: Number(selectedFarmId), names })
       const pondCount = names.length
       setSuccessMessage(
-        `${pondCount} pond${pondCount > 1 ? 's' : ''} created in ${selectedFarm?.name}!`,
+        t.successPondsCreated(
+          pondCount,
+          formatFarmDisplayNameTH(selectedFarm?.name ?? ''),
+        ),
       )
       setShowSuccessMessage(true)
       setTimeout(() => setShowSuccessMessage(false), 5000)
       setPondForms([{ name: '' }])
-      const createdFarmId = Number(selectedFarmId)
-      setSelectedFarmId('')
       refetchFarmList()
-      refetchPondsForFarm(createdFarmId)
+      refetchPondsForFarm(Number(selectedFarmId))
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to create ponds')
+      alert(err instanceof Error ? err.message : t.alertCreatePondsFailed)
     }
   }
 
@@ -328,17 +338,17 @@ export function AdminMasterDataPage() {
       }
       const typeLabel =
         editingItem.type === 'client'
-          ? 'Client'
+          ? 'ลูกค้า'
           : editingItem.type === 'farm'
-            ? 'Farm'
-            : 'Pond'
-      setSuccessMessage(`${typeLabel} "${name}" updated successfully!`)
+            ? 'ฟาร์ม'
+            : 'บ่อ'
+      setSuccessMessage(t.successUpdated(typeLabel, name))
       setShowSuccessMessage(true)
       setTimeout(() => setShowSuccessMessage(false), 5000)
       setIsEditModalOpen(false)
       setEditingItem(null)
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to update')
+      alert(err instanceof Error ? err.message : t.alertUpdateFailed)
     }
   }
 
@@ -355,8 +365,8 @@ export function AdminMasterDataPage() {
             <Database size={20} className='text-white' />
           </div>
           <div>
-            <h1 className='text-2xl text-gray-800'>Master Data Management</h1>
-            <p className='text-sm text-gray-600'>Admin Only</p>
+            <h1 className='text-2xl text-gray-800'>{t.pageTitle}</h1>
+            <p className='text-sm text-gray-600'>{t.pageSubtitle}</p>
           </div>
         </div>
       </div>
@@ -385,7 +395,7 @@ export function AdminMasterDataPage() {
               className='flex-1 px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-300 disabled:cursor-not-allowed'
             >
               <option value=''>
-                {clientListLoading ? 'Loading clients...' : 'Select Client'}
+                {clientListLoading ? t.loadingClients : t.selectClient}
               </option>
               {clientList.map((client) => (
                 <option key={client.key} value={String(client.key)}>
@@ -397,11 +407,11 @@ export function AdminMasterDataPage() {
               <div className='flex gap-2 text-xs'>
                 <div className='bg-blue-100 px-2 py-1 rounded'>
                   <span className='text-blue-800'>
-                    {clientFarms.length} Farms
+                    {clientFarms.length} {t.farmsCount}
                   </span>
                 </div>
                 <div className='bg-green-100 px-2 py-1 rounded'>
-                  <span className='text-green-800'>{totalPondCount} Ponds</span>
+                  <span className='text-green-800'>{totalPondCount} {t.pondsCount}</span>
                 </div>
               </div>
             )}
@@ -415,7 +425,7 @@ export function AdminMasterDataPage() {
             <div className='p-4 bg-gradient-to-r from-blue-800 to-blue-600 text-white'>
               <h2 className='text-lg flex items-center gap-2'>
                 <Plus size={20} />
-                Create New
+                {t.createNew}
               </h2>
             </div>
             <div className='flex'>
@@ -431,7 +441,7 @@ export function AdminMasterDataPage() {
                 }`}
               >
                 <Users size={16} />
-                <span>Client</span>
+                <span>{t.tabClient}</span>
               </button>
               <button
                 onClick={() => setActiveTab('farms')}
@@ -442,7 +452,7 @@ export function AdminMasterDataPage() {
                 }`}
               >
                 <Building size={16} />
-                <span>Farm</span>
+                <span>{t.tabFarm}</span>
               </button>
               <button
                 onClick={() => setActiveTab('ponds')}
@@ -453,7 +463,7 @@ export function AdminMasterDataPage() {
                 }`}
               >
                 <Fish size={16} />
-                <span>Pond</span>
+                <span>{t.tabPond}</span>
               </button>
             </div>
           </div>
@@ -463,7 +473,7 @@ export function AdminMasterDataPage() {
               <form onSubmit={handleClientSubmit} className='space-y-4'>
                 <div>
                   <label className='block text-sm text-gray-700 mb-1'>
-                    Client Name <span className='text-red-500'>*</span>
+                    {t.clientName} <span className='text-red-500'>{t.required}</span>
                   </label>
                   <input
                     type='text'
@@ -471,13 +481,13 @@ export function AdminMasterDataPage() {
                     onChange={(e) =>
                       setClientForm({ ...clientForm, name: e.target.value })
                     }
-                    placeholder='e.g., Aqua Marine Co., Ltd.'
+                    placeholder={t.placeholderClientName}
                     className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none'
                   />
                 </div>
                 <div>
                   <label className='block text-sm text-gray-700 mb-1'>
-                    Contact Person <span className='text-red-500'>*</span>
+                    {t.contactPerson} <span className='text-red-500'>{t.required}</span>
                   </label>
                   <input
                     type='text'
@@ -488,13 +498,13 @@ export function AdminMasterDataPage() {
                         contactPerson: e.target.value,
                       })
                     }
-                    placeholder='e.g., John Smith'
+                    placeholder={t.placeholderContactPerson}
                     className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none'
                   />
                 </div>
                 <div>
                   <label className='block text-sm text-gray-700 mb-1'>
-                    Phone <span className='text-red-500'>*</span>
+                    {t.phone} <span className='text-red-500'>{t.required}</span>
                   </label>
                   <input
                     type='tel'
@@ -502,13 +512,13 @@ export function AdminMasterDataPage() {
                     onChange={(e) =>
                       setClientForm({ ...clientForm, phone: e.target.value })
                     }
-                    placeholder='e.g., 081-234-5678'
+                    placeholder={t.placeholderPhone}
                     className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none'
                   />
                 </div>
                 <div>
                   <label className='block text-sm text-gray-700 mb-1'>
-                    Email
+                    {t.email}
                   </label>
                   <input
                     type='email'
@@ -516,7 +526,7 @@ export function AdminMasterDataPage() {
                     onChange={(e) =>
                       setClientForm({ ...clientForm, email: e.target.value })
                     }
-                    placeholder='e.g., contact@aquamarine.com'
+                    placeholder={t.placeholderEmail}
                     className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none'
                   />
                 </div>
@@ -527,7 +537,7 @@ export function AdminMasterDataPage() {
                     className='flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:from-transparent disabled:to-transparent'
                   >
                     <Plus size={16} />
-                    <span>Create Client</span>
+                    <span>{t.createClient}</span>
                   </button>
                   <button
                     type='button'
@@ -541,7 +551,7 @@ export function AdminMasterDataPage() {
                     }
                     className='px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors'
                   >
-                    Reset
+                    {t.reset}
                   </button>
                 </div>
               </form>
@@ -552,19 +562,19 @@ export function AdminMasterDataPage() {
                 {!selectedClientId ? (
                   <div className='text-center py-12 text-gray-500'>
                     <Users size={48} className='mx-auto mb-3 text-gray-400' />
-                    <p className='text-sm'>Please select a client first</p>
+                    <p className='text-sm'>{t.pleaseSelectClientFirst}</p>
                   </div>
                 ) : (
                   <form onSubmit={handleFarmSubmit} className='space-y-4'>
                     <div>
                       <label className='block text-sm text-gray-700 mb-1'>
-                        Farm Name <span className='text-red-500'>*</span>
+                        {t.farmName} <span className='text-red-500'>{t.required}</span>
                       </label>
                       <input
                         type='text'
                         value={farmForm.name}
                         onChange={(e) => handleFarmNameChange(e.target.value)}
-                        placeholder='e.g., Sunrise Valley Farm'
+                        placeholder={t.placeholderFarmName}
                         className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none'
                       />
                     </div>
@@ -575,14 +585,14 @@ export function AdminMasterDataPage() {
                         className='flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:from-transparent disabled:to-transparent'
                       >
                         <Plus size={16} />
-                        <span>Create Farm</span>
+                        <span>{t.createFarm}</span>
                       </button>
                       <button
                         type='button'
                         onClick={() => setFarmForm({ name: '' })}
                         className='px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors'
                       >
-                        Reset
+                        {t.reset}
                       </button>
                     </div>
                   </form>
@@ -595,31 +605,31 @@ export function AdminMasterDataPage() {
                 {!selectedClientId ? (
                   <div className='text-center py-12 text-gray-500'>
                     <Users size={48} className='mx-auto mb-3 text-gray-400' />
-                    <p className='text-sm'>Please select a client first</p>
+                    <p className='text-sm'>{t.pleaseSelectClientFirst}</p>
                   </div>
                 ) : (
                   <form onSubmit={handlePondSubmit} className='space-y-4'>
                     <div>
                       <label className='block text-sm text-gray-700 mb-1'>
-                        Select Farm <span className='text-red-500'>*</span>
+                        {t.selectFarm} <span className='text-red-500'>{t.required}</span>
                       </label>
                       <select
                         value={selectedFarmId}
                         onChange={(e) => setSelectedFarmId(e.target.value)}
                         disabled={farmListLoading}
                         className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-300 disabled:cursor-not-allowed'
-                        aria-label='Select a farm'
+                        aria-label={t.selectFarm}
                       >
                         <option value=''>
                           {farmListLoading
-                            ? 'Loading...'
+                            ? t.loading
                             : clientFarms.length === 0
-                              ? '-- No farms yet. Create one in the Farm tab. --'
-                              : '-- Select a farm --'}
+                              ? `-- ${t.noFarmsYet} --`
+                              : t.selectFarmOption}
                         </option>
                         {clientFarms.map((farm) => (
                           <option key={farm.id} value={String(farm.id)}>
-                            {farm.name}
+                            {formatFarmDisplayNameTH(farm.name)}
                           </option>
                         ))}
                       </select>
@@ -632,7 +642,7 @@ export function AdminMasterDataPage() {
                         >
                           <div className='flex items-center justify-between'>
                             <span className='text-sm text-gray-800'>
-                              Pond {index + 1}
+                              {t.pond} {index + 1}
                             </span>
                             {pondForms.length > 1 && (
                               <button
@@ -640,13 +650,13 @@ export function AdminMasterDataPage() {
                                 onClick={() => removePondForm(index)}
                                 className='px-2 py-1 text-xs border border-red-300 text-red-600 rounded hover:bg-red-50 transition-all'
                               >
-                                Remove
+                                {t.remove}
                               </button>
                             )}
                           </div>
                           <div>
                             <label className='block text-xs text-gray-700 mb-1'>
-                              Pond Name <span className='text-red-500'>*</span>
+                              {t.pondName} <span className='text-red-500'>{t.required}</span>
                             </label>
                             <input
                               type='text'
@@ -654,7 +664,7 @@ export function AdminMasterDataPage() {
                               onChange={(e) =>
                                 updatePondForm(index, 'name', e.target.value)
                               }
-                              placeholder='e.g., Pond D1'
+                              placeholder={t.placeholderPondName}
                               className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none'
                             />
                           </div>
@@ -667,7 +677,7 @@ export function AdminMasterDataPage() {
                       className='w-full flex items-center justify-center gap-2 px-4 py-2 text-sm border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-all'
                     >
                       <Plus size={16} />
-                      <span>Add Another Pond</span>
+                      <span>{t.addAnotherPond}</span>
                     </button>
                     <div className='flex items-center gap-3 pt-4 border-t border-gray-200'>
                       <button
@@ -680,8 +690,7 @@ export function AdminMasterDataPage() {
                       >
                         <Plus size={16} />
                         <span>
-                          Create {pondForms.length} Pond
-                          {pondForms.length > 1 ? 's' : ''}
+                          {t.createPonds} {pondForms.length} {t.pond}
                         </span>
                       </button>
                       <button
@@ -692,7 +701,7 @@ export function AdminMasterDataPage() {
                         }}
                         className='px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors'
                       >
-                        Reset
+                        {t.reset}
                       </button>
                     </div>
                   </form>
@@ -711,7 +720,7 @@ export function AdminMasterDataPage() {
                 ) : (
                   <Building size={20} className='text-blue-600' />
                 )}
-                {activeTab === 'clients' ? 'All Clients' : 'Existing Data'}
+                {activeTab === 'clients' ? t.allClients : t.existingData}
               </h2>
               {selectedClient && activeTab !== 'clients' && (
                 <span className='text-xs text-gray-600'>
@@ -725,11 +734,11 @@ export function AdminMasterDataPage() {
               <>
                 {clientListLoading ? (
                   <div className='text-center py-8 text-gray-500 text-sm'>
-                    Loading...
+                    {t.loading}
                   </div>
                 ) : clientList.length === 0 ? (
                   <div className='text-center py-8 text-gray-500 text-sm'>
-                    No clients found. Create one on the left →
+                    {t.noClientsFound}
                   </div>
                 ) : (
                   clientList.map((client) => (
@@ -747,7 +756,7 @@ export function AdminMasterDataPage() {
                         <button
                           onClick={(e) => handleEditClient(client, e)}
                           className='p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors'
-                          title='Edit client name'
+                          title={t.editClientName}
                         >
                           <Edit2 size={14} />
                         </button>
@@ -763,15 +772,15 @@ export function AdminMasterDataPage() {
                 {!selectedClientId ? (
                   <div className='text-center py-12 text-gray-500 text-sm'>
                     <Users size={48} className='mx-auto mb-3 text-gray-400' />
-                    <p>Select a client to view data</p>
+                    <p>{t.selectClientToViewData}</p>
                   </div>
                 ) : farmListLoading ? (
                   <div className='text-center py-8 text-gray-500 text-sm'>
-                    Loading...
+                    {t.loading}
                   </div>
                 ) : clientFarms.length === 0 ? (
                   <div className='text-center py-8 text-gray-500 text-sm'>
-                    No farms found. Create one on the left →
+                    {t.noFarmsFound}
                   </div>
                 ) : (
                   clientFarms.map((farm) => {
@@ -794,7 +803,7 @@ export function AdminMasterDataPage() {
                               <Building size={16} className='text-blue-600' />
                               <div className='text-left'>
                                 <h4 className='text-sm text-gray-800'>
-                                  {farm.name}
+                                  {formatFarmDisplayNameTH(farm.name)}
                                 </h4>
                               </div>
                             </div>
@@ -806,7 +815,9 @@ export function AdminMasterDataPage() {
                                     : 'bg-gray-100 text-gray-800'
                                 }`}
                               >
-                                {farm.status}
+                                {farm.status === 'active'
+                                  ? t.statusActive
+                                  : t.statusMaintenance}
                               </span>
                               <div className='flex items-center gap-1 text-xs bg-blue-50 px-2 py-1 rounded-full'>
                                 <Fish size={14} className='text-blue-600' />
@@ -826,7 +837,7 @@ export function AdminMasterDataPage() {
                           <button
                             onClick={(e) => handleEditFarm(farm, e)}
                             className='ml-2 p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors'
-                            title='Edit farm name'
+                            title={t.editFarmName}
                           >
                             <Edit2 size={14} />
                           </button>
@@ -835,11 +846,11 @@ export function AdminMasterDataPage() {
                           <div className='border-t border-gray-200 bg-gray-50 p-3'>
                             {pondsLoading ? (
                               <p className='text-center text-gray-500 text-xs py-2'>
-                                Loading ponds...
+                                {t.loadingPonds}
                               </p>
                             ) : farmPonds.length === 0 ? (
                               <p className='text-center text-gray-500 text-xs py-2'>
-                                No ponds yet
+                                {t.noPondsYet}
                               </p>
                             ) : (
                               <div className='space-y-2'>
@@ -855,7 +866,7 @@ export function AdminMasterDataPage() {
                                           className='text-blue-600'
                                         />
                                         <span className='text-xs text-gray-800'>
-                                          {pond.name}
+                                          {formatPondDisplayNameTH(pond.name)}
                                         </span>
                                       </div>
                                       <div className='flex items-center gap-1'>
@@ -864,7 +875,7 @@ export function AdminMasterDataPage() {
                                             handleEditPond(pond, e)
                                           }
                                           className='p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors'
-                                          title='Edit pond name'
+                                          title={t.editPondName}
                                         >
                                           <Edit2 size={12} />
                                         </button>
@@ -877,7 +888,11 @@ export function AdminMasterDataPage() {
                                                 : 'bg-gray-100 text-gray-800'
                                           }`}
                                         >
-                                          {pond.status}
+                                          {pond.status === 'active'
+                                            ? t.statusActive
+                                            : pond.status === 'maintenance'
+                                              ? t.statusMaintenance
+                                              : pond.status}
                                         </span>
                                       </div>
                                     </div>
@@ -908,9 +923,23 @@ export function AdminMasterDataPage() {
             setEditingItem(null)
           }}
           currentName={editingItem.name}
-          title={`Edit ${editingItem.type === 'client' ? 'Client' : editingItem.type === 'farm' ? 'Farm' : 'Pond'} Name`}
+          title={
+            editingItem.type === 'client'
+              ? t.editClientTitle
+              : editingItem.type === 'farm'
+                ? t.editFarmTitle
+                : t.editPondTitle
+          }
           type={editingItem.type}
           onSave={handleSaveEdit}
+          locale={{
+            labelName: t.modalLabelName,
+            placeholderName: t.modalPlaceholderName,
+            errorNameRequired: t.modalErrorNameRequired,
+            save: t.modalSave,
+            cancel: t.modalCancel,
+            close: t.modalClose,
+          }}
         />
       )}
     </div>

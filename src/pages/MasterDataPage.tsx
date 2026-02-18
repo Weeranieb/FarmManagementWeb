@@ -18,7 +18,9 @@ import {
 } from '../api/farm'
 import { pondApi } from '../api/pond'
 import { EditMasterDataModal } from '../components/EditMasterDataModal'
+import { th } from '../locales/th'
 
+const L = th.masterData
 type PondWithFarmId = FarmDetailPondItem & { farmId: number }
 
 export function MasterDataPage() {
@@ -107,32 +109,32 @@ export function MasterDataPage() {
   const handleFarmSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!farmForm.name) {
-      alert('Please fill in all fields')
+      alert(L.alertFillRequired)
       return
     }
     if (!selectedClientId) return
     const name = farmForm.name.trim()
     try {
       await farmApi.createFarm({ clientId: Number(selectedClientId), name })
-      setSuccessMessage(`Farm "${name}" created for ${selectedClient?.value}!`)
+      setSuccessMessage(L.successFarmCreated(name, selectedClient?.value ?? ''))
       setShowSuccessMessage(true)
       setTimeout(() => setShowSuccessMessage(false), 5000)
       setFarmForm({ name: '' })
       refetchHierarchy()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to create farm')
+      alert(err instanceof Error ? err.message : L.alertCreateFarmFailed)
     }
   }
 
   const handlePondSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedFarmId) {
-      alert('Please select a farm')
+      alert(L.alertSelectFarm)
       return
     }
     const names = pondForms.map((f) => f.name.trim()).filter(Boolean)
     if (names.length === 0) {
-      alert('Please fill in at least one pond name')
+      alert(L.alertAtLeastOnePondName)
       return
     }
     const selectedFarm = clientFarms.find(
@@ -141,16 +143,14 @@ export function MasterDataPage() {
     try {
       await pondApi.createPonds({ farmId: Number(selectedFarmId), names })
       const pondCount = names.length
-      setSuccessMessage(
-        `${pondCount} pond${pondCount > 1 ? 's' : ''} created in ${selectedFarm?.name}!`,
-      )
+      setSuccessMessage(L.successPondsCreated(pondCount, selectedFarm?.name ?? ''))
       setShowSuccessMessage(true)
       setTimeout(() => setShowSuccessMessage(false), 5000)
       setPondForms([{ name: '' }])
       setSelectedFarmId('')
       refetchHierarchy()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to create ponds')
+      alert(err instanceof Error ? err.message : L.alertCreatePondsFailed)
     }
   }
 
@@ -212,14 +212,14 @@ export function MasterDataPage() {
       }
       await refetchHierarchy()
       setSuccessMessage(
-        `${editingItem.type === 'farm' ? 'Farm' : 'Pond'} "${name}" updated successfully!`,
+        L.successUpdated(editingItem.type === 'farm' ? 'ฟาร์ม' : 'บ่อ', name),
       )
       setShowSuccessMessage(true)
       setTimeout(() => setShowSuccessMessage(false), 5000)
       setIsEditModalOpen(false)
       setEditingItem(null)
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to update')
+      alert(err instanceof Error ? err.message : L.alertUpdateFailed)
     }
   }
 
@@ -231,8 +231,8 @@ export function MasterDataPage() {
             <Database size={20} className='text-white' />
           </div>
           <div>
-            <h1 className='text-2xl text-gray-800'>Master Data Management</h1>
-            <p className='text-sm text-gray-600'>Admin Only</p>
+            <h1 className='text-2xl text-gray-800'>{L.pageTitle}</h1>
+            <p className='text-sm text-gray-600'>{L.pageSubtitle}</p>
           </div>
         </div>
       </div>
@@ -260,7 +260,7 @@ export function MasterDataPage() {
             className='flex-1 px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-300 disabled:cursor-not-allowed'
           >
             <option value=''>
-              {clientListLoading ? 'Loading clients...' : 'Select Client'}
+              {clientListLoading ? L.loadingClients : L.selectClient}
             </option>
             {clientList.map((client) => (
               <option key={client.key} value={String(client.key)}>
@@ -272,12 +272,12 @@ export function MasterDataPage() {
             <div className='flex gap-2 text-xs'>
               <div className='bg-blue-100 px-2 py-1 rounded'>
                 <span className='text-blue-800'>
-                  {clientFarms.length} Farms
+                  {clientFarms.length} {L.farmsCount}
                 </span>
               </div>
               <div className='bg-green-100 px-2 py-1 rounded'>
                 <span className='text-green-800'>
-                  {clientPonds.length} Ponds
+                  {clientPonds.length} {L.pondsCount}
                 </span>
               </div>
             </div>
@@ -290,10 +290,10 @@ export function MasterDataPage() {
           <div className='bg-white rounded-lg shadow-md flex flex-col overflow-hidden'>
             <div className='border-b border-gray-200'>
               <div className='p-4 bg-gradient-to-r from-blue-800 to-blue-600 text-white'>
-                <h2 className='text-lg flex items-center gap-2'>
-                  <Plus size={20} />
-                  Create New
-                </h2>
+              <h2 className='text-lg flex items-center gap-2'>
+                <Plus size={20} />
+                {L.createNew}
+              </h2>
               </div>
               <div className='flex'>
                 <button
@@ -305,7 +305,7 @@ export function MasterDataPage() {
                   }`}
                 >
                   <Building size={16} />
-                  <span>Farm</span>
+                  <span>{L.tabFarm}</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('ponds')}
@@ -316,7 +316,7 @@ export function MasterDataPage() {
                   }`}
                 >
                   <Fish size={16} />
-                  <span>Pond</span>
+                  <span>{L.tabPond}</span>
                 </button>
               </div>
             </div>
@@ -326,13 +326,13 @@ export function MasterDataPage() {
                 <form onSubmit={handleFarmSubmit} className='space-y-4'>
                   <div>
                     <label className='block text-sm text-gray-700 mb-1'>
-                      Farm Name <span className='text-red-500'>*</span>
+                      {L.farmName} <span className='text-red-500'>{L.required}</span>
                     </label>
                     <input
                       type='text'
                       value={farmForm.name}
                       onChange={(e) => handleFarmNameChange(e.target.value)}
-                      placeholder='e.g., Sunrise Valley Farm'
+                      placeholder={L.placeholderFarmName}
                       className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none'
                       required
                     />
@@ -344,14 +344,14 @@ export function MasterDataPage() {
                       className='flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:from-transparent disabled:to-transparent'
                     >
                       <Plus size={16} />
-                      <span>Create Farm</span>
+                      <span>{L.createFarm}</span>
                     </button>
                     <button
                       type='button'
                       onClick={() => setFarmForm({ name: '' })}
                       className='px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all'
                     >
-                      Reset
+                      {L.reset}
                     </button>
                   </div>
                 </form>
@@ -361,7 +361,7 @@ export function MasterDataPage() {
                 <form onSubmit={handlePondSubmit} className='space-y-4'>
                   <div>
                     <label className='block text-sm text-gray-700 mb-1'>
-                      Select Farm <span className='text-red-500'>*</span>
+                      {L.selectFarm} <span className='text-red-500'>{L.required}</span>
                     </label>
                     <select
                       value={selectedFarmId}
@@ -372,10 +372,10 @@ export function MasterDataPage() {
                     >
                       <option value=''>
                         {farmHierarchyLoading
-                          ? 'Loading farms...'
+                          ? L.loading
                           : farmDropdownOptions.length === 0
-                            ? 'No farms — create a farm first'
-                            : '-- Select a farm --'}
+                            ? L.noFarmsCreateFirst
+                            : L.selectFarmOption}
                       </option>
                       {farmDropdownOptions.map((opt) => (
                         <option key={opt.key} value={String(opt.key)}>
@@ -392,7 +392,7 @@ export function MasterDataPage() {
                       >
                         <div className='flex items-center justify-between'>
                           <span className='text-sm text-gray-800'>
-                            Pond {index + 1}
+                            {L.pond} {index + 1}
                           </span>
                           {pondForms.length > 1 && (
                             <button
@@ -400,13 +400,13 @@ export function MasterDataPage() {
                               onClick={() => removePondForm(index)}
                               className='px-2 py-1 text-xs border border-red-300 text-red-600 rounded hover:bg-red-50 transition-all'
                             >
-                              Remove
+                              {L.remove}
                             </button>
                           )}
                         </div>
                         <div>
                           <label className='block text-xs text-gray-700 mb-1'>
-                            Pond Name <span className='text-red-500'>*</span>
+                            {L.pondName} <span className='text-red-500'>{L.required}</span>
                           </label>
                           <input
                             type='text'
@@ -414,7 +414,7 @@ export function MasterDataPage() {
                             onChange={(e) =>
                               updatePondForm(index, 'name', e.target.value)
                             }
-                            placeholder='e.g., Pond D1'
+                            placeholder={L.placeholderPondName}
                             className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none'
                             required
                           />
@@ -428,7 +428,7 @@ export function MasterDataPage() {
                     className='w-full flex items-center justify-center gap-2 px-4 py-2 text-sm border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-all'
                   >
                     <Plus size={16} />
-                    <span>Add Another Pond</span>
+                    <span>{L.addAnotherPond}</span>
                   </button>
                   <div className='flex items-center gap-3 pt-4 border-t border-gray-200'>
                     <button
@@ -440,8 +440,7 @@ export function MasterDataPage() {
                     >
                       <Plus size={16} />
                       <span>
-                        Create {pondForms.length} Pond
-                        {pondForms.length > 1 ? 's' : ''}
+                        {L.createPonds} {pondForms.length} {L.pond}
                       </span>
                     </button>
                     <button
@@ -452,7 +451,7 @@ export function MasterDataPage() {
                       }}
                       className='px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all'
                     >
-                      Reset
+                      {L.reset}
                     </button>
                   </div>
                 </form>
@@ -465,7 +464,7 @@ export function MasterDataPage() {
               <div className='flex items-center justify-between'>
                 <h2 className='text-lg text-gray-800 flex items-center gap-2'>
                   <Building size={20} className='text-blue-600' />
-                  Existing Data
+                  {L.existingData}
                 </h2>
                 <span className='text-xs text-gray-600'>
                   {selectedClient.value}
@@ -475,11 +474,11 @@ export function MasterDataPage() {
             <div className='flex-1 overflow-y-auto p-4 space-y-3'>
               {farmHierarchyLoading ? (
                 <div className='text-center py-8 text-gray-500 text-sm'>
-                  Loading...
+                  {L.loading}
                 </div>
               ) : clientFarms.length === 0 ? (
                 <div className='text-center py-8 text-gray-500 text-sm'>
-                  No farms found. Create one on the left →
+                  {L.noFarmsYet}
                 </div>
               ) : (
                 clientFarms.map((farm) => {
@@ -520,7 +519,7 @@ export function MasterDataPage() {
                         <button
                           onClick={(e) => handleEditFarm(farm, e)}
                           className='ml-2 p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors'
-                          title='Edit farm name'
+                          title={L.editFarmName}
                         >
                           <Edit2 size={14} />
                         </button>
@@ -529,7 +528,7 @@ export function MasterDataPage() {
                         <div className='border-t border-gray-200 bg-gray-50 p-3'>
                           {farmPonds.length === 0 ? (
                             <p className='text-center text-gray-500 text-xs py-2'>
-                              No ponds yet
+                              {L.noPondsYet}
                             </p>
                           ) : (
                             <div className='space-y-2'>
@@ -552,7 +551,7 @@ export function MasterDataPage() {
                                       <button
                                         onClick={(e) => handleEditPond(pond, e)}
                                         className='p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors'
-                                        title='Edit pond name'
+                                        title={L.editPondName}
                                       >
                                         <Edit2 size={12} />
                                       </button>
@@ -579,11 +578,10 @@ export function MasterDataPage() {
           <div className='text-center p-8'>
             <Users size={48} className='text-blue-600 mx-auto mb-4' />
             <h3 className='text-xl text-blue-900 mb-2'>
-              Select a Client to Get Started
+              {L.selectClientToStart}
             </h3>
             <p className='text-blue-800 text-sm'>
-              Choose a client from the dropdown above to view and manage their
-              farms and ponds
+              {L.chooseClientDescription}
             </p>
           </div>
         </div>
@@ -594,9 +592,19 @@ export function MasterDataPage() {
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           currentName={editingItem.name}
-          title={`Edit ${editingItem.type === 'farm' ? 'Farm' : 'Pond'} Name`}
+          title={
+            editingItem.type === 'farm' ? L.editFarmTitle : L.editPondTitle
+          }
           type={editingItem.type}
           onSave={handleSaveEdit}
+          locale={{
+            labelName: L.modalLabelName,
+            placeholderName: L.modalPlaceholderName,
+            errorNameRequired: L.modalErrorNameRequired,
+            save: L.modalSave,
+            cancel: L.modalCancel,
+            close: L.modalClose,
+          }}
         />
       )}
     </div>
