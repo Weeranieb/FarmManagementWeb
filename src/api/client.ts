@@ -40,15 +40,11 @@ export const clientApi = {
     return apiClient.get<ClientResponse>(`/client/${id}`)
   },
 
-  createClient: async (
-    body: CreateClientRequest,
-  ): Promise<ClientResponse> => {
+  createClient: async (body: CreateClientRequest): Promise<ClientResponse> => {
     return apiClient.post<ClientResponse>('/client', body)
   },
 
-  updateClient: async (
-    body: UpdateClientRequest,
-  ): Promise<void> => {
+  updateClient: async (body: UpdateClientRequest): Promise<void> => {
     return apiClient.put<void>('/client', body)
   },
 }

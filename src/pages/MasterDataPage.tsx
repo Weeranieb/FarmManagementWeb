@@ -589,6 +589,7 @@ export function MasterDataPage() {
 
       {isEditModalOpen && editingItem && (
         <EditMasterDataModal
+          key={`${editingItem.type}-${editingItem.id}`}
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           currentName={editingItem.name}

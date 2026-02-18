@@ -8,8 +8,8 @@ import { FarmDetailPage } from './pages/FarmDetailPage'
 import { PondsListPage } from './pages/PondListPage'
 import { PondDetailPage } from './pages/PondDetailPage'
 import { AdminMasterDataPage } from './pages/AdminMasterDataPage'
-import { ProtectedRoute } from './components/ProtectedRoute'
-import { SuperAdminRoute } from './components/SuperAdminRoute'
+import { ProtectedRoute } from './components/guards/ProtectedRoute'
+import { SuperAdminRoute } from './components/guards/SuperAdminRoute'
 
 export const router = createBrowserRouter([
   {

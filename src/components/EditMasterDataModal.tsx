@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { X } from 'lucide-react'
 
 export interface EditMasterDataModalLocale {
@@ -41,11 +41,6 @@ export function EditMasterDataModal({
   const [name, setName] = useState(currentName)
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    setName(currentName)
-    setError('')
-  }, [currentName, isOpen])
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const trimmed = name.trim()
@@ -62,7 +57,11 @@ export function EditMasterDataModal({
 
   return (
     <div className='fixed inset-0 z-50 flex items-center justify-center'>
-      <div className='absolute inset-0 bg-black/50' onClick={onClose} aria-hidden />
+      <div
+        className='absolute inset-0 bg-black/50'
+        onClick={onClose}
+        aria-hidden
+      />
       <div className='relative bg-white rounded-lg shadow-xl w-full max-w-md mx-4 p-6'>
         <div className='flex items-center justify-between mb-4'>
           <h2 className='text-lg font-semibold text-gray-800'>{title}</h2>

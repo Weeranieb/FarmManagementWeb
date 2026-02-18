@@ -917,6 +917,7 @@ export function AdminMasterDataPage() {
 
       {isEditModalOpen && editingItem && (
         <EditMasterDataModal
+          key={`${editingItem.type}-${editingItem.id}`}
           isOpen={isEditModalOpen}
           onClose={() => {
             setIsEditModalOpen(false)

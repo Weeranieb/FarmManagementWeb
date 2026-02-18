@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom'
-import { useAuthQuery } from '../hooks/useAuth'
-import { th } from '../locales/th'
+import { useAuthQuery } from '../../hooks/useAuth'
+import { th } from '../../locales/th'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
