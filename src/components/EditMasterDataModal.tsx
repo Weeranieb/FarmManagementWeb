@@ -6,7 +6,7 @@ interface EditMasterDataModalProps {
   onClose: () => void
   currentName: string
   title: string
-  type: 'farm' | 'pond'
+  type: 'client' | 'farm' | 'pond'
   onSave: (newName: string) => void
 }
 

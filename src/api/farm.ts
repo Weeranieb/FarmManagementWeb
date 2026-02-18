@@ -47,6 +47,13 @@ export interface FarmResponse {
   pondCount: number
 }
 
+/** Response from GET /farm?clientId=X (list of farms, no ponds). */
+export interface FarmListResponse {
+  farms: FarmResponse[]
+  total: number
+  totalActive: number
+}
+
 export const farmApi = {
   /**
    * Get a single farm by ID
@@ -56,7 +63,15 @@ export const farmApi = {
   },
 
   /**
-   * Get list of farms for the current client
+   * Get list of farms for the current client (no ponds). Super admin may pass clientId.
+   */
+  getFarmList: async (clientId?: number): Promise<FarmListResponse> => {
+    const query = clientId != null ? `?clientId=${clientId}` : ''
+    return apiClient.get<FarmListResponse>(`/farm${query}`)
+  },
+
+  /**
+   * Get list of farms for the current client (legacy)
    */
   getFarms: async (): Promise<Farm[]> => {
     return apiClient.get<Farm[]>('/farm?clientId=1')
