@@ -130,7 +130,7 @@ export function FarmsListPage() {
                       <td className='px-6 py-4 text-sm text-gray-600'>
                         <div className='flex items-center gap-2'>
                           <Grid size={16} className='text-blue-600' />
-                          {farm.pondCount ?? 0}
+                          {L.pondCountWithSuffix(farm.pondCount ?? 0)}
                         </div>
                       </td>
                       <td className='px-6 py-4'>

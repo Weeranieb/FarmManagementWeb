@@ -31,3 +31,12 @@ export function useFarmListQuery(clientId?: number) {
     staleTime: 5 * 60 * 1000,
   })
 }
+
+export function useFarmHierarchyQuery(clientId?: number) {
+  return useQuery({
+    queryKey: [...farmKeys.all, 'hierarchy', clientId ?? 'default'] as const,
+    queryFn: () => farmApi.getFarmHierarchy(clientId),
+    enabled: clientId != null && clientId > 0,
+    staleTime: 5 * 60 * 1000,
+  })
+}
