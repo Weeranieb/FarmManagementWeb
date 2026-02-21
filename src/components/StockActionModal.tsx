@@ -54,6 +54,7 @@ interface StockActionModalProps {
   isOpen: boolean
   onClose: () => void
   availablePonds?: StockActionModalPond[]
+  initialActionType?: ActionType
 }
 
 export function StockActionModal({
@@ -61,8 +62,9 @@ export function StockActionModal({
   isOpen,
   onClose,
   availablePonds,
+  initialActionType = 'add',
 }: StockActionModalProps) {
-  const [actionType, setActionType] = useState<ActionType>('add')
+  const [actionType, setActionType] = useState<ActionType>(initialActionType)
   const [quantity, setQuantity] = useState<number>(0)
   const [avgWeight, setAvgWeight] = useState<number>(0)
   const [pricePerUnit, setPricePerUnit] = useState<number>(0)
