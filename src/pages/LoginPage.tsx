@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { FormEvent } from 'react'
 import { Fish, Lock, User, Eye, EyeOff } from 'lucide-react'
-import { useLoginMutation } from '../hooks/useAuth'
+import { useLoginMutation, getRememberedUsername } from '../hooks/useAuth'
 import { th } from '../locales/th'
 
 const L = th.login
@@ -13,9 +13,17 @@ export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const loginMutation = useLoginMutation()
 
+  useEffect(() => {
+    const remembered = getRememberedUsername()
+    if (remembered) {
+      setUsername(remembered)
+      setRememberMe(true)
+    }
+  }, [])
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    loginMutation.mutate({ username, password })
+    loginMutation.mutate({ username, password, rememberMe })
   }
 
   return (

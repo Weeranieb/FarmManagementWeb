@@ -20,21 +20,28 @@ export function useAuthQuery() {
   })
 }
 
-/**
- * Hook for login mutation
- */
+const REMEMBERED_USERNAME_KEY = 'boonmafarm_remembered_username'
+
 export function useLoginMutation() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
 
   return useMutation({
     mutationFn: (credentials: LoginRequest) => authApi.login(credentials),
-    onSuccess: () => {
-      // Invalidate and refetch user data
+    onSuccess: (_data, variables) => {
+      if (variables.rememberMe && variables.username) {
+        localStorage.setItem(REMEMBERED_USERNAME_KEY, variables.username)
+      } else {
+        localStorage.removeItem(REMEMBERED_USERNAME_KEY)
+      }
       queryClient.invalidateQueries({ queryKey: authKeys.user() })
       navigate('/dashboard')
     },
   })
+}
+
+export function getRememberedUsername(): string | null {
+  return localStorage.getItem(REMEMBERED_USERNAME_KEY)
 }
 
 /**
