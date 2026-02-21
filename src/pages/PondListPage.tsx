@@ -1,38 +1,106 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, Plus, Eye, Fish, Building } from 'lucide-react'
-import { mockPonds } from '../data/mockData'
+import { Search, Eye, Plus, Fish, Building, Calendar } from 'lucide-react'
+import { useFarmHierarchyQuery } from '../hooks/useFarm'
+import { useClient } from '../contexts/ClientContext'
 import { StatusBadge } from '../components/StatusBadge'
+import { StockActionModal } from '../components/StockActionModal'
 import { th } from '../locales/th'
 
 const L = th.ponds
 
+type PondWithFarm = {
+  id: number
+  name: string
+  status: string
+  farmId: number
+  farmName: string
+}
+
+function flattenPonds(
+  hierarchy: {
+    id: number
+    name: string
+    status: string
+    ponds: { id: number; name: string; status: string }[]
+  }[],
+): PondWithFarm[] {
+  return hierarchy.flatMap((farm) =>
+    farm.ponds.map((p) => ({
+      id: p.id,
+      name: p.name,
+      status: p.status,
+      farmId: farm.id,
+      farmName: farm.name,
+    })),
+  )
+}
+
 export function PondsListPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [farmFilter, setFarmFilter] = useState<string>('all')
+  const [selectedPond, setSelectedPond] = useState<PondWithFarm | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const { selectedClientId } = useClient()
+  const clientId = selectedClientId ? Number(selectedClientId) : undefined
+  const { data: hierarchy, isLoading, error } = useFarmHierarchyQuery(clientId)
 
-  const filteredPonds = mockPonds.filter((pond) => {
-    const matchesSearch =
-      pond.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pond.code.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || pond.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
+  const ponds = useMemo(
+    () => (hierarchy ? flattenPonds(hierarchy) : []),
+    [hierarchy],
+  )
+  const farms = useMemo(() => hierarchy ?? [], [hierarchy])
+
+  const filteredPonds = useMemo(() => {
+    const term = searchTerm.toLowerCase().trim()
+    return ponds.filter(
+      (pond) =>
+        (!term || pond.name.toLowerCase().includes(term)) &&
+        (statusFilter === 'all' || pond.status === statusFilter) &&
+        (farmFilter === 'all' || String(pond.farmId) === farmFilter),
+    )
+  }, [ponds, searchTerm, statusFilter, farmFilter])
+
+  const activeCount = useMemo(
+    () => ponds.filter((p) => p.status === 'active').length,
+    [ponds],
+  )
+
+  const handleAddStock = (pond: PondWithFarm) => {
+    setSelectedPond(pond)
+    setIsModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setSelectedPond(null)
+  }
 
   return (
     <div className='space-y-6'>
-      <div className='flex items-center justify-between'>
+      <div className='flex items-start justify-between gap-6'>
         <div>
           <h1 className='text-3xl text-gray-800 mb-2'>{L.title}</h1>
           <p className='text-gray-600'>{L.subtitle}</p>
         </div>
-        <button className='flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all'>
-          <Plus size={20} />
-          <span>{L.addPond}</span>
-        </button>
+        <div className='grid grid-cols-2 gap-4 min-w-[280px]'>
+          <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-5'>
+            <p className='text-sm text-gray-600 mb-1'>{L.totalPonds}</p>
+            <p className='text-2xl font-semibold text-gray-900'>
+              {ponds.length}
+            </p>
+          </div>
+          <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-5'>
+            <p className='text-sm text-gray-600 mb-1'>{L.statusActive}</p>
+            <p className='text-2xl font-semibold text-green-600'>
+              {activeCount}
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className='bg-white rounded-xl shadow-md p-6'>
+      <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-6'>
         <div className='flex flex-col md:flex-row gap-4'>
           <div className='flex-1 relative'>
             <Search
@@ -44,13 +112,25 @@ export function PondsListPage() {
               placeholder={L.searchPlaceholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none'
+              className='w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
             />
           </div>
           <select
+            value={farmFilter}
+            onChange={(e) => setFarmFilter(e.target.value)}
+            className='px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white transition-all'
+          >
+            <option value='all'>{L.farm} (ทั้งหมด)</option>
+            {farms.map((farm) => (
+              <option key={farm.id} value={farm.id}>
+                {L.farmWithName(farm.name)}
+              </option>
+            ))}
+          </select>
+          <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className='px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none'
+            className='px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white transition-all'
           >
             <option value='all'>{L.allStatus}</option>
             <option value='active'>{L.statusActive}</option>
@@ -60,89 +140,178 @@ export function PondsListPage() {
         </div>
       </div>
 
-      <div className='bg-white rounded-xl shadow-md overflow-hidden'>
-        <div className='overflow-x-auto'>
-          <table className='w-full'>
-            <thead className='bg-gray-50 border-b border-gray-200'>
-              <tr>
-                <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  {L.code}
-                </th>
-                <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  {L.pondName}
-                </th>
-                <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  {L.farm}
-                </th>
-                <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  {L.areaHa}
-                </th>
-                <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  {L.depthM}
-                </th>
-                <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  {L.stock}
-                </th>
-                <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  {L.status}
-                </th>
-                <th className='px-6 py-4 text-left text-sm text-gray-600'>
-                  {L.actions}
-                </th>
-              </tr>
-            </thead>
-            <tbody className='divide-y divide-gray-200'>
-              {filteredPonds.map((pond) => (
-                <tr
-                  key={pond.id}
-                  className='hover:bg-gray-50 transition-colors'
-                >
-                  <td className='px-6 py-4 text-sm text-gray-900'>
-                    {pond.code}
-                  </td>
-                  <td className='px-6 py-4'>
-                    <Link
-                      to={`/ponds/${pond.id}`}
-                      className='text-green-600 hover:text-green-700'
-                    >
-                      {pond.name}
-                    </Link>
-                  </td>
-                  <td className='px-6 py-4 text-sm text-gray-600'>
-                    <div className='flex items-center gap-2'>
-                      <Building size={16} className='text-gray-400' />
-                      {pond.farmName}
-                    </div>
-                  </td>
-                  <td className='px-6 py-4 text-sm text-gray-900'>
-                    {pond.area}
-                  </td>
-                  <td className='px-6 py-4 text-sm text-gray-900'>
-                    {pond.depth}
-                  </td>
-                  <td className='px-6 py-4 text-sm text-gray-900'>
-                    <div className='flex items-center gap-2'>
-                      <Fish size={16} className='text-blue-600' />
-                      {pond.currentStock.toLocaleString()}
-                    </div>
-                  </td>
-                  <td className='px-6 py-4'>
-                    <StatusBadge status={pond.status} className='px-3 py-1' />
-                  </td>
-                  <td className='px-6 py-4'>
-                    <Link
-                      to={`/ponds/${pond.id}`}
-                      className='p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors inline-flex'
-                    >
-                      <Eye size={18} />
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {!selectedClientId && (
+        <div className='bg-amber-50 border border-amber-200 rounded-xl p-6'>
+          <p className='text-amber-800'>{th.layout.selectClientToView}</p>
         </div>
-      </div>
+      )}
+
+      {isLoading && (
+        <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center'>
+          <p className='text-gray-500'>{th.common.loading}</p>
+        </div>
+      )}
+
+      {error && (
+        <div className='bg-red-50 border border-red-200 rounded-xl p-6'>
+          <p className='text-red-800'>
+            {error instanceof Error ? error.message : 'เกิดข้อผิดพลาด'}
+          </p>
+        </div>
+      )}
+
+      {!isLoading && !error && selectedClientId && (
+        <>
+          <div className='bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden'>
+            <div className='overflow-x-auto'>
+              <table className='w-full'>
+                <thead>
+                  <tr className='bg-gray-50 border-b border-gray-200'>
+                    <th className='px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                      {L.pondName}
+                    </th>
+                    <th className='px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                      {L.farm}
+                    </th>
+                    <th className='px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                      {L.currentStock}
+                    </th>
+                    <th className='px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                      {L.status}
+                    </th>
+                    <th className='px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                      {L.species}
+                    </th>
+                    <th className='px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                      {L.ageDays}
+                    </th>
+                    <th className='px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                      {L.lastActivity}
+                    </th>
+                    <th className='px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider'>
+                      {L.actions}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className='divide-y divide-gray-100'>
+                  {filteredPonds.map((pond) => (
+                    <tr
+                      key={pond.id}
+                      className='hover:bg-gray-50/50 transition-colors group'
+                    >
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <Link
+                          to={`/ponds/${pond.id}`}
+                          className='text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors'
+                        >
+                          {L.pondWithPrefix(pond.name)}
+                        </Link>
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <div className='flex items-center gap-2'>
+                          <Building size={16} className='text-gray-400' />
+                          <span className='text-sm text-gray-900'>
+                            {L.farmWithName(pond.farmName)}
+                          </span>
+                        </div>
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <Link
+                          to={`/ponds/${pond.id}`}
+                          className='flex items-center gap-2 text-sm text-gray-900 hover:text-blue-600 transition-colors group/stock'
+                          title={L.viewStockHistory}
+                        >
+                          <Fish
+                            size={16}
+                            className='text-blue-600 group-hover/stock:text-blue-700'
+                          />
+                          <span className='font-medium'>—</span>
+                        </Link>
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <StatusBadge status={pond.status} />
+                      </td>
+                      <td className='px-6 py-4'>
+                        <span className='text-sm text-gray-500'>—</span>
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <span className='text-sm text-gray-500'>—</span>
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <div className='flex items-center gap-2 text-sm text-gray-600'>
+                          <Calendar size={14} className='text-gray-400' />
+                          <span className='text-gray-500'>—</span>
+                        </div>
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <div className='flex items-center gap-2'>
+                          <Link
+                            to={`/ponds/${pond.id}`}
+                            className='p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all inline-flex'
+                            title={th.farms.viewDetails}
+                          >
+                            <Eye size={18} />
+                          </Link>
+                          <button
+                            type='button'
+                            onClick={() => handleAddStock(pond)}
+                            className='p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all'
+                            title={L.addStock}
+                          >
+                            <Plus size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {filteredPonds.length === 0 && ponds.length > 0 && (
+              <div className='text-center py-12'>
+                <Fish size={48} className='mx-auto text-gray-300 mb-3' />
+                <p className='text-gray-500'>{L.noMatch}</p>
+              </div>
+            )}
+
+            {ponds.length === 0 && (
+              <div className='text-center py-12'>
+                <Fish size={48} className='mx-auto text-gray-300 mb-3' />
+                <p className='text-gray-500'>{L.noPonds}</p>
+              </div>
+            )}
+          </div>
+
+          <StockActionModal
+            pond={
+              selectedPond
+                ? {
+                    id: selectedPond.id,
+                    name: selectedPond.name,
+                    code: selectedPond.name,
+                    farmName: selectedPond.farmName,
+                    status: selectedPond.status,
+                    currentStock: 0,
+                    species: [],
+                  }
+                : null
+            }
+            isOpen={isModalOpen}
+            onClose={closeModal}
+            availablePonds={ponds
+              .filter((p) => p.id !== selectedPond?.id)
+              .map((p) => ({
+                id: p.id,
+                name: p.name,
+                code: p.name,
+                farmName: p.farmName,
+                status: p.status,
+                currentStock: 0,
+              }))}
+          />
+        </>
+      )}
     </div>
   )
 }
