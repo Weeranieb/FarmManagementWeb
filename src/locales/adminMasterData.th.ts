@@ -60,7 +60,7 @@ export const adminMasterDataTh = {
 
   // Status (display only; API values stay active/maintenance)
   statusActive: 'ใช้งาน',
-  statusMaintenance: 'ซ่อมบำรุง',
+  statusMaintenance: 'พักบ่อ',
 
   // Actions
   editClientName: 'แก้ไขชื่อลูกค้า',

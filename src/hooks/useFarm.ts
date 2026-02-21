@@ -24,13 +24,10 @@ export function useFarmQuery(id: number, enabled: boolean = true) {
   })
 }
 
-/**
- * Hook to get list of farms
- */
-export function useFarmsQuery() {
+export function useFarmListQuery(clientId?: number) {
   return useQuery({
-    queryKey: farmKeys.list(),
-    queryFn: () => farmApi.getFarms(),
-    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    queryKey: [...farmKeys.list(), clientId ?? 'default'] as const,
+    queryFn: () => farmApi.getFarmList(clientId),
+    staleTime: 5 * 60 * 1000,
   })
 }

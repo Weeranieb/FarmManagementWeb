@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, Plus, Eye, Fish, Building } from 'lucide-react'
 import { mockPonds } from '../data/mockData'
+import { StatusBadge } from '../components/StatusBadge'
 import { th } from '../locales/th'
 
 const L = th.ponds
@@ -126,21 +127,7 @@ export function PondsListPage() {
                     </div>
                   </td>
                   <td className='px-6 py-4'>
-                    <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs ${
-                        pond.status === 'active'
-                          ? 'bg-green-100 text-green-800'
-                          : pond.status === 'maintenance'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}
-                    >
-                      {pond.status === 'active'
-                        ? L.statusActive
-                        : pond.status === 'maintenance'
-                          ? L.statusMaintenance
-                          : pond.status}
-                    </span>
+                    <StatusBadge status={pond.status} className='px-3 py-1' />
                   </td>
                   <td className='px-6 py-4'>
                     <Link

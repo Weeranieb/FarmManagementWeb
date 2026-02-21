@@ -15,6 +15,7 @@ import { useClientListQuery, useInvalidateClientList } from '../hooks/useClient'
 import { farmApi, type FarmResponse } from '../api/farm'
 import { pondApi, type PondResponse } from '../api/pond'
 import { EditMasterDataModal } from '../components/EditMasterDataModal'
+import { StatusBadge } from '../components/StatusBadge'
 import {
   formatFarmDisplayNameTH,
   formatPondDisplayNameTH,
@@ -206,7 +207,10 @@ export function AdminMasterDataPage() {
         name,
       })
       setSuccessMessage(
-        t.successFarmCreated(formatFarmDisplayNameTH(name), selectedClient?.value ?? ''),
+        t.successFarmCreated(
+          formatFarmDisplayNameTH(name),
+          selectedClient?.value ?? '',
+        ),
       )
       setShowSuccessMessage(true)
       setTimeout(() => setShowSuccessMessage(false), 5000)
@@ -411,7 +415,9 @@ export function AdminMasterDataPage() {
                   </span>
                 </div>
                 <div className='bg-green-100 px-2 py-1 rounded'>
-                  <span className='text-green-800'>{totalPondCount} {t.pondsCount}</span>
+                  <span className='text-green-800'>
+                    {totalPondCount} {t.pondsCount}
+                  </span>
                 </div>
               </div>
             )}
@@ -473,7 +479,8 @@ export function AdminMasterDataPage() {
               <form onSubmit={handleClientSubmit} className='space-y-4'>
                 <div>
                   <label className='block text-sm text-gray-700 mb-1'>
-                    {t.clientName} <span className='text-red-500'>{t.required}</span>
+                    {t.clientName}{' '}
+                    <span className='text-red-500'>{t.required}</span>
                   </label>
                   <input
                     type='text'
@@ -487,7 +494,8 @@ export function AdminMasterDataPage() {
                 </div>
                 <div>
                   <label className='block text-sm text-gray-700 mb-1'>
-                    {t.contactPerson} <span className='text-red-500'>{t.required}</span>
+                    {t.contactPerson}{' '}
+                    <span className='text-red-500'>{t.required}</span>
                   </label>
                   <input
                     type='text'
@@ -568,7 +576,8 @@ export function AdminMasterDataPage() {
                   <form onSubmit={handleFarmSubmit} className='space-y-4'>
                     <div>
                       <label className='block text-sm text-gray-700 mb-1'>
-                        {t.farmName} <span className='text-red-500'>{t.required}</span>
+                        {t.farmName}{' '}
+                        <span className='text-red-500'>{t.required}</span>
                       </label>
                       <input
                         type='text'
@@ -611,7 +620,8 @@ export function AdminMasterDataPage() {
                   <form onSubmit={handlePondSubmit} className='space-y-4'>
                     <div>
                       <label className='block text-sm text-gray-700 mb-1'>
-                        {t.selectFarm} <span className='text-red-500'>{t.required}</span>
+                        {t.selectFarm}{' '}
+                        <span className='text-red-500'>{t.required}</span>
                       </label>
                       <select
                         value={selectedFarmId}
@@ -656,7 +666,8 @@ export function AdminMasterDataPage() {
                           </div>
                           <div>
                             <label className='block text-xs text-gray-700 mb-1'>
-                              {t.pondName} <span className='text-red-500'>{t.required}</span>
+                              {t.pondName}{' '}
+                              <span className='text-red-500'>{t.required}</span>
                             </label>
                             <input
                               type='text'
@@ -808,17 +819,7 @@ export function AdminMasterDataPage() {
                               </div>
                             </div>
                             <div className='flex items-center gap-2'>
-                              <span
-                                className={`text-xs px-2 py-1 rounded-full ${
-                                  farm.status === 'active'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-gray-100 text-gray-800'
-                                }`}
-                              >
-                                {farm.status === 'active'
-                                  ? t.statusActive
-                                  : t.statusMaintenance}
-                              </span>
+                              <StatusBadge status={farm.status} />
                               <div className='flex items-center gap-1 text-xs bg-blue-50 px-2 py-1 rounded-full'>
                                 <Fish size={14} className='text-blue-600' />
                                 <span>
@@ -879,21 +880,10 @@ export function AdminMasterDataPage() {
                                         >
                                           <Edit2 size={12} />
                                         </button>
-                                        <span
-                                          className={`text-xs px-2 py-0.5 rounded-full ${
-                                            pond.status === 'active'
-                                              ? 'bg-green-100 text-green-800'
-                                              : pond.status === 'maintenance'
-                                                ? 'bg-yellow-100 text-yellow-800'
-                                                : 'bg-gray-100 text-gray-800'
-                                          }`}
-                                        >
-                                          {pond.status === 'active'
-                                            ? t.statusActive
-                                            : pond.status === 'maintenance'
-                                              ? t.statusMaintenance
-                                              : pond.status}
-                                        </span>
+                                        <StatusBadge
+                                          status={pond.status}
+                                          className='py-0.5'
+                                        />
                                       </div>
                                     </div>
                                     <div className='text-xs text-gray-600 pl-5'>

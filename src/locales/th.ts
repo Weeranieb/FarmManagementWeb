@@ -13,6 +13,9 @@ export const th = {
   layout: {
     appName: 'BoonmaFarm',
     appTagline: 'ระบบจัดการฟาร์ม',
+    clientView: 'มุมมองลูกค้า',
+    selectClientPlaceholder: 'เลือกลูกค้า',
+    selectClientToView: 'กรุณาเลือกลูกค้าเพื่อดูข้อมูล',
     navDashboard: 'แดชบอร์ด',
     navFarms: 'ฟาร์ม',
     navPonds: 'บ่อ',
@@ -50,8 +53,7 @@ export const th = {
     title: 'BoonmaFarm',
     tagline: 'รีเซ็ตรหัสผ่าน',
     heading: 'ลืมรหัสผ่าน?',
-    description:
-      'กรอกอีเมลของคุณ เราจะส่งวิธีรีเซ็ตรหัสผ่านให้',
+    description: 'กรอกอีเมลของคุณ เราจะส่งวิธีรีเซ็ตรหัสผ่านให้',
     emailLabel: 'อีเมล',
     placeholderEmail: 'admin@boonmafarm.com',
     sendInstructions: 'ส่งคำแนะนำ',
@@ -87,7 +89,8 @@ export const th = {
     newPondCreated: 'สร้างบ่อใหม่',
     pondAddedToFarm: (pond: string, farm: string) => `${pond} เพิ่มใน ${farm}`,
     workerHired: 'จ้างพนักงาน',
-    workerJoinedFarm: (name: string, farm: string) => `${name} เข้าทำงานที่ ${farm}`,
+    workerJoinedFarm: (name: string, farm: string) =>
+      `${name} เข้าทำงานที่ ${farm}`,
     feedOrderPlaced: 'สั่งอาหาร',
     feedOrderDetail: (qty: string, name: string) => `สั่ง ${qty} ${name}`,
     farmStatusUpdated: 'อัปเดตสถานะฟาร์ม',
@@ -112,9 +115,9 @@ export const th = {
 
   farms: {
     title: 'ฟาร์ม',
-    subtitle: 'จัดการฟาร์มเพาะเลี้ยงสัตว์น้ำ',
+    subtitle: 'จัดการฟาร์มปลา',
     addFarm: 'เพิ่มฟาร์ม',
-    searchPlaceholder: 'ค้นหาฟาร์มตามชื่อหรือรหัส...',
+    searchPlaceholder: 'ค้นหาฟาร์มตามชื่อ...',
     totalFarms: 'ฟาร์มทั้งหมด',
     filteredResults: 'ผลลัพธ์ที่กรอง',
     loadingFarms: 'กำลังโหลดฟาร์ม...',
@@ -128,17 +131,31 @@ export const th = {
     editFarm: 'แก้ไขฟาร์ม',
     noMatchingSearch: 'ไม่พบฟาร์มที่ตรงกับคำค้น',
     noFarmsYet: 'ยังไม่มีฟาร์ม สร้างฟาร์มแรกเพื่อเริ่มต้น',
+    status: 'สถานะ',
+    pondCount: 'จำนวนบ่อ',
+    allStatus: 'ทุกสถานะ',
+    statusActive: 'ใช้งาน',
+    statusMaintenance: 'พักบ่อ',
   },
 
   farmDetail: {
     farmNotFound: 'ไม่พบฟาร์ม',
+    loading: 'กำลังโหลด...',
     location: 'ที่ตั้ง',
     area: 'พื้นที่',
     hectares: 'เฮกตาร์',
     created: 'สร้างเมื่อ',
     ponds: 'บ่อ',
     statusActive: 'ใช้งาน',
-    statusMaintenance: 'ซ่อมบำรุง',
+    statusMaintenance: 'พักบ่อ',
+    totalStock: 'ปลารวมทั้งสิ้น',
+    totalStockSuffix: 'ปลาทั้งหมดในทุกบ่อ',
+    activePonds: 'บ่อใช้งาน',
+    pondsCountSuffix: 'จากทั้งหมด',
+    pondsUnit: 'บ่อ',
+    maintenancePonds: 'พักบ่อ',
+    maintenancePondsSuffix: 'บ่อที่พัก',
+    createdSuffix: 'วันที่สร้างฟาร์ม',
   },
 
   ponds: {
@@ -149,7 +166,7 @@ export const th = {
     allStatus: 'ทุกสถานะ',
     statusActive: 'ใช้งาน',
     statusInactive: 'ไม่ใช้งาน',
-    statusMaintenance: 'ซ่อมบำรุง',
+    statusMaintenance: 'พักบ่อ',
     code: 'รหัส',
     pondName: 'ชื่อบ่อ',
     farm: 'ฟาร์ม',
@@ -204,14 +221,18 @@ export const th = {
     editFarmTitle: 'แก้ไขชื่อฟาร์ม',
     editPondTitle: 'แก้ไขชื่อบ่อ',
     statusActive: 'ใช้งาน',
-    statusMaintenance: 'ซ่อมบำรุง',
+    statusMaintenance: 'พักบ่อ',
     selectClientToStart: 'เลือกลูกค้าเพื่อเริ่มต้น',
-    chooseClientDescription: 'เลือกลูกค้าจากรายการด้านบนเพื่อดูและจัดการฟาร์มและบ่อ',
+    chooseClientDescription:
+      'เลือกลูกค้าจากรายการด้านบนเพื่อดูและจัดการฟาร์มและบ่อ',
     successFarmCreated: (name: string, client: string) =>
       `สร้างฟาร์ม "${name}" สำหรับ ${client} สำเร็จ`,
     successPondsCreated: (count: number, farm: string) =>
-      count > 1 ? `สร้าง ${count} บ่อ ใน ${farm} สำเร็จ` : `สร้างบ่อใน ${farm} สำเร็จ`,
-    successUpdated: (type: string, name: string) => `อัปเดต${type} "${name}" สำเร็จ`,
+      count > 1
+        ? `สร้าง ${count} บ่อ ใน ${farm} สำเร็จ`
+        : `สร้างบ่อใน ${farm} สำเร็จ`,
+    successUpdated: (type: string, name: string) =>
+      `อัปเดต${type} "${name}" สำเร็จ`,
     alertFillRequired: 'กรุณากรอกข้อมูลให้ครบ',
     alertSelectFarm: 'กรุณาเลือกฟาร์ม',
     alertAtLeastOnePondName: 'กรุณากรอกชื่อบ่ออย่างน้อย 1 บ่อ',

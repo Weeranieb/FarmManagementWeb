@@ -17,6 +17,9 @@ import {
   Database,
 } from 'lucide-react'
 import { useAuthQuery } from '../hooks/useAuth'
+import { useLogoutMutation } from '../hooks/useAuth'
+import { useClientListQuery } from '../hooks/useClient'
+import { useClient } from '../contexts/ClientContext'
 import { UserLevel } from '../constants/userLevel'
 import { th } from '../locales/th'
 
@@ -26,7 +29,17 @@ export function MainLayout() {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
   const { data: user } = useAuthQuery()
+  const logoutMutation = useLogoutMutation()
+  const { data: clientList = [] } = useClientListQuery()
+  const { selectedClientId, setSelectedClientId } = useClient()
+
   const isSuperAdmin = user?.userLevel === UserLevel.SuperAdmin
+  const isAdminUser =
+    user?.userLevel === UserLevel.SuperAdmin ||
+    user?.userLevel === UserLevel.ClientAdmin
+  const selectedClient = clientList.find(
+    (c) => String(c.key) === selectedClientId,
+  )
   const L = th.layout
 
   const navItems = [
@@ -38,13 +51,10 @@ export function MainLayout() {
     { path: '/feed-collections', label: L.navFeedCollections, icon: Package },
   ]
 
-  const isActive = (path: string) => {
-    return location.pathname.startsWith(path)
-  }
+  const isActive = (path: string) => location.pathname.startsWith(path)
 
   const handleLogout = () => {
-    // In a real app, this would clear auth tokens
-    window.location.reload()
+    logoutMutation.mutate()
   }
 
   useEffect(() => {
@@ -54,16 +64,27 @@ export function MainLayout() {
         setIsProfileDropdownOpen(false)
       }
     }
-
     document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  useEffect(() => {
+    if (
+      isAdminUser &&
+      clientList.length > 0 &&
+      !selectedClientId
+    ) {
+      setSelectedClientId(String(clientList[0].key))
+    }
+  }, [isAdminUser, clientList, selectedClientId, setSelectedClientId])
+
+  const displayName =
+    user?.firstName && user?.lastName
+      ? `${user.firstName} ${user.lastName}`.trim()
+      : user?.firstName || user?.username || L.profileUser
 
   return (
     <div className='min-h-screen bg-blue-50'>
-      {/* Top Header */}
       <header className='bg-gradient-to-r from-blue-800 to-blue-600 text-white shadow-lg sticky top-0 z-30'>
         <div className='flex items-center justify-between px-4 py-4'>
           <div className='flex items-center gap-4'>
@@ -85,9 +106,12 @@ export function MainLayout() {
           </div>
 
           <div className='flex items-center gap-4'>
-            <button className='p-2 hover:bg-white/10 rounded-lg transition-colors relative'>
+            <button
+              type='button'
+              className='p-2 hover:bg-white/10 rounded-lg transition-colors relative'
+            >
               <Bell size={20} />
-              <span className='absolute top-1 right-1 w-2 h-2 bg-blue-400 rounded-full'></span>
+              <span className='absolute top-1 right-1 w-2 h-2 bg-blue-400 rounded-full' />
             </button>
 
             <div className='relative' ref={dropdownRef}>
@@ -99,7 +123,7 @@ export function MainLayout() {
                   <User size={18} />
                 </div>
                 <div className='hidden md:block text-sm'>
-                  <p>{L.profileUser}</p>
+                  <p>{displayName}</p>
                   <p className='text-xs text-blue-100'>{L.profileRole}</p>
                 </div>
                 <ChevronDown
@@ -108,15 +132,14 @@ export function MainLayout() {
                 />
               </div>
 
-              {/* Dropdown Menu */}
               {isProfileDropdownOpen && (
                 <div className='absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50'>
                   <div className='px-4 py-3 border-b border-gray-200 bg-gray-50'>
                     <p className='text-sm font-medium text-gray-900'>
-                      {L.profileUser}
+                      {displayName}
                     </p>
                     <p className='text-xs text-gray-600'>
-                      {L.profileEmail}
+                      {user?.contactNumber || L.profileEmail}
                     </p>
                   </div>
                   <div className='py-2'>
@@ -139,6 +162,7 @@ export function MainLayout() {
                   </div>
                   <div className='border-t border-gray-200'>
                     <button
+                      type='button'
                       onClick={() => {
                         setIsProfileDropdownOpen(false)
                         handleLogout()
@@ -157,36 +181,67 @@ export function MainLayout() {
       </header>
 
       <div className='flex'>
-        {/* Sidebar */}
         <aside
           className={`${
             isSidebarOpen ? 'w-64' : 'w-0'
           } transition-all duration-300 overflow-hidden bg-white shadow-xl sticky top-[73px] h-[calc(100vh-73px)]`}
         >
-          <nav className='p-4 space-y-2'>
-            {navItems.map((item) => {
-              const Icon = item.icon
-              const active = isActive(item.path)
+          <nav className='p-4 space-y-2 h-full flex flex-col'>
+            {isAdminUser && (
+              <div className='pb-4 mb-4 border-b border-gray-200'>
+                <div className='mb-2'>
+                  <label className='text-xs text-gray-500 uppercase tracking-wider px-2 block mb-2'>
+                    {L.clientView}
+                  </label>
+                  <select
+                    value={selectedClientId}
+                    onChange={(e) => setSelectedClientId(e.target.value)}
+                    className='w-full px-3 py-2 text-sm border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-blue-50 text-gray-800'
+                  >
+                    <option value='' disabled>
+                      {L.selectClientPlaceholder}
+                    </option>
+                    {clientList.map((client) => (
+                      <option key={client.key} value={String(client.key)}>
+                        {client.value}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {selectedClient && (
+                  <div className='bg-gradient-to-r from-blue-100 to-blue-50 border border-blue-200 rounded-lg p-2 mt-2'>
+                    <p className='text-xs text-blue-800 flex items-center gap-2'>
+                      <Users size={14} />
+                      <span className='font-medium'>{selectedClient.value}</span>
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                    active
-                      ? 'bg-gradient-to-r from-blue-800 to-blue-600 text-white shadow-md'
-                      : 'text-gray-700 hover:bg-blue-50'
-                  }`}
-                >
-                  <Icon size={20} />
-                  <span>{item.label}</span>
-                </Link>
-              )
-            })}
+            <div className='flex-1 overflow-y-auto space-y-2'>
+              {navItems.map((item) => {
+                const Icon = item.icon
+                const active = isActive(item.path)
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                      active
+                        ? 'bg-gradient-to-r from-blue-800 to-blue-600 text-white shadow-md'
+                        : 'text-gray-700 hover:bg-blue-50'
+                    }`}
+                  >
+                    <Icon size={20} />
+                    <span>{item.label}</span>
+                  </Link>
+                )
+              })}
+            </div>
 
-            {/* Admin Section — only for super admin (level 3) */}
             {isSuperAdmin && (
-              <div className='pt-4 mt-4 border-t border-gray-200'>
+              <div className='pt-4 border-t border-gray-200'>
                 <div className='px-2 mb-2'>
                   <p className='text-xs text-gray-500 uppercase tracking-wider'>
                     {L.navAdmin}
@@ -206,7 +261,7 @@ export function MainLayout() {
               </div>
             )}
 
-            <div className='pt-4 mt-4 border-t border-gray-200 space-y-2'>
+            <div className='pt-4 border-t border-gray-200 space-y-2'>
               <Link
                 to='/profile'
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
@@ -218,8 +273,8 @@ export function MainLayout() {
                 <Settings size={20} />
                 <span>{L.settings}</span>
               </Link>
-
               <button
+                type='button'
                 onClick={handleLogout}
                 className='w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-all'
               >
@@ -230,9 +285,14 @@ export function MainLayout() {
           </nav>
         </aside>
 
-        {/* Main Content */}
-        <main className={`flex-1 p-6 transition-all duration-300`}>
-          <Outlet />
+        <main className='flex-1 p-6 transition-all duration-300'>
+          {isAdminUser && !selectedClientId ? (
+            <div className='flex items-center justify-center min-h-[50vh]'>
+              <p className='text-gray-500'>{L.selectClientToView}</p>
+            </div>
+          ) : (
+            <Outlet />
+          )}
         </main>
       </div>
     </div>
