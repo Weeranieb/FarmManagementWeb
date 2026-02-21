@@ -27,7 +27,7 @@ export const th = {
     navFarms: 'ฟาร์ม',
     navPonds: 'บ่อ',
     navWorkers: 'พนักงาน',
-    navMerchants: 'ร้านค้า',
+    navMerchants: 'คนขาย',
     navFeedCollections: 'รวบรวมอาหาร',
     navAdmin: 'ผู้ดูแล',
     navMasterData: 'ข้อมูลหลัก',
@@ -195,6 +195,22 @@ export const th = {
     actions: 'การดำเนินการ',
     noMatch: 'ไม่พบบ่อที่ตรงกับเงื่อนไข',
     noPonds: 'ยังไม่มีบ่อ',
+  },
+
+  merchants: {
+    title: 'คนขาย',
+    subtitle: 'จัดการคนขายปลา',
+    addMerchant: 'เพิ่มคนขาย',
+    searchPlaceholder: 'ค้นหาคนขายปลา...',
+    name: 'ชื่อ',
+    contact: 'ติดต่อ',
+    location: 'ที่อยู่',
+    placeholderName: 'กรอกชื่อ',
+    placeholderContact: 'กรอกเบอร์ติดต่อ',
+    placeholderLocation: 'กรอกที่อยู่',
+    modalTitle: 'เพิ่มคนขาย',
+    modalClose: 'ปิด',
+    submitAdd: 'เพิ่มคนขาย',
   },
 
   pondDetail: {
