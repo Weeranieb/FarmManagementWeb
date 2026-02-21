@@ -10,6 +10,13 @@ export const th = {
     copyright: '© 2026 Boonma Farm สงวนลิขสิทธิ์',
   },
 
+  fishType: {
+    nil: 'ปลานิล',
+    kaphong: 'ปลากะพง',
+    kang: 'ปลาคัง',
+    duk: 'ปลาดุก',
+  },
+
   layout: {
     appName: 'BoonmaFarm',
     appTagline: 'ระบบจัดการฟาร์ม',

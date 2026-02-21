@@ -14,9 +14,11 @@ import {
 import { useState, useMemo } from 'react'
 import { mockPonds } from '../data/mockData'
 import type { Pond } from '../data/mockData'
+import { FISH_TYPE_VALUES } from '../constants/fishType'
 import { th } from '../locales/th'
 
 const L = th.stockActionModal
+const fishTypeLabels = th.fishType
 
 type ActionType = 'add' | 'transfer' | 'sell'
 
@@ -64,6 +66,7 @@ export function StockActionModal({
   availablePonds,
   initialActionType = 'add',
 }: StockActionModalProps) {
+  // FIXME: Move (transfer) and sell mode should receive data from API (e.g. available ponds, sell options).
   const [actionType, setActionType] = useState<ActionType>(initialActionType)
   const [quantity, setQuantity] = useState<number>(0)
   const [avgWeight, setAvgWeight] = useState<number>(0)
@@ -262,8 +265,7 @@ export function StockActionModal({
   }
 
   const handleAddSpecies = () => {
-    if (!pond) return
-    const availableSpecies = pond.species.filter(
+    const availableSpecies = FISH_TYPE_VALUES.filter(
       (s) => !speciesSellData.some((data) => data.species === s),
     )
     if (availableSpecies.length === 0) return
@@ -566,20 +568,15 @@ export function StockActionModal({
                   value={selectedSpecies}
                   onChange={(e) => setSelectedSpecies(e.target.value)}
                   className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
-                  required={pond.species.length > 0}
+                  required
                 >
                   <option value=''>{L.selectSpecies}</option>
-                  {pond.species.map((species, index) => (
-                    <option key={index} value={species}>
-                      {species}
+                  {FISH_TYPE_VALUES.map((value) => (
+                    <option key={value} value={value}>
+                      {fishTypeLabels[value]}
                     </option>
                   ))}
                 </select>
-                {pond.species.length === 0 && (
-                  <p className='text-sm text-gray-500 mt-1'>
-                    {L.noSpeciesData}
-                  </p>
-                )}
               </div>
             )}
 
@@ -958,7 +955,9 @@ export function StockActionModal({
                     <button
                       type='button'
                       onClick={handleAddSpecies}
-                      disabled={pond.species.length === speciesSellData.length}
+                      disabled={
+                        speciesSellData.length === FISH_TYPE_VALUES.length
+                      }
                       className='flex items-center gap-1.5 px-3 py-1.5 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
                     >
                       <Plus size={16} />
@@ -971,7 +970,7 @@ export function StockActionModal({
                         const total = speciesTotal.find(
                           (st) => st.speciesId === speciesData.id,
                         )
-                        const availableSpeciesOptions = pond.species.filter(
+                        const availableSpeciesOptions = FISH_TYPE_VALUES.filter(
                           (s) =>
                             s === speciesData.species ||
                             !speciesSellData.some((data) => data.species === s),
@@ -993,13 +992,11 @@ export function StockActionModal({
                                   }
                                   className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white font-medium text-gray-900'
                                 >
-                                  {availableSpeciesOptions.map(
-                                    (species, index) => (
-                                      <option key={index} value={species}>
-                                        {species}
-                                      </option>
-                                    ),
-                                  )}
+                                  {availableSpeciesOptions.map((value) => (
+                                    <option key={value} value={value}>
+                                      {fishTypeLabels[value]}
+                                    </option>
+                                  ))}
                                 </select>
                               </div>
                               <button
@@ -1120,7 +1117,12 @@ export function StockActionModal({
                             {total && total.totalQuantity > 0 && (
                               <div className='mt-3 pt-3 border-t border-gray-300'>
                                 <p className='text-xs text-gray-600 font-medium mb-2'>
-                                  {speciesData.species} {L.summary}
+                                  {
+                                    fishTypeLabels[
+                                      speciesData.species as keyof typeof fishTypeLabels
+                                    ]
+                                  }{' '}
+                                  {L.summary}
                                 </p>
                                 <div className='grid grid-cols-3 gap-3 text-sm'>
                                   <div>
