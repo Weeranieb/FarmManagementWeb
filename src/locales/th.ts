@@ -143,7 +143,6 @@ export const th = {
     pondCountWithSuffix: (n: number) => `${n} บ่อ`,
     allStatus: 'ทุกสถานะ',
     statusActive: 'ใช้งาน',
-    statusInactive: 'ไม่ใช้งาน',
     statusMaintenance: 'พักบ่อ',
   },
 
@@ -175,7 +174,6 @@ export const th = {
     searchPlaceholder: 'ค้นหาบ่อ...',
     allStatus: 'ทุกสถานะ',
     statusActive: 'ใช้งาน',
-    statusInactive: 'ไม่ใช้งาน',
     statusMaintenance: 'พักบ่อ',
     code: 'รหัส',
     pondName: 'ชื่อบ่อ',

@@ -115,7 +115,6 @@ export function PondsListPage() {
           >
             <option value='all'>{L.allStatus}</option>
             <option value='active'>{L.statusActive}</option>
-            <option value='inactive'>{L.statusInactive}</option>
             <option value='maintenance'>{L.statusMaintenance}</option>
           </select>
         </div>
