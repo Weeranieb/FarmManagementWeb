@@ -1,56 +1,37 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, Eye, Plus, Fish, Building, Calendar } from 'lucide-react'
-import { useFarmHierarchyQuery } from '../hooks/useFarm'
+import { usePondListWithDetails, type PondWithFarmName } from '../hooks/usePond'
 import { useClient } from '../contexts/ClientContext'
 import { StatusBadge } from '../components/StatusBadge'
 import { StockActionModal } from '../components/StockActionModal'
 import { th } from '../locales/th'
 
 const L = th.ponds
-
-type PondWithFarm = {
-  id: number
-  name: string
-  status: string
-  farmId: number
-  farmName: string
-}
-
-function flattenPonds(
-  hierarchy: {
-    id: number
-    name: string
-    status: string
-    ponds: { id: number; name: string; status: string }[]
-  }[],
-): PondWithFarm[] {
-  return hierarchy.flatMap((farm) =>
-    farm.ponds.map((p) => ({
-      id: p.id,
-      name: p.name,
-      status: p.status,
-      farmId: farm.id,
-      farmName: farm.name,
-    })),
-  )
+const fishTypeLabels = th.fishType as Record<string, string>
+function fishTypeDisplayLabel(value: string): string {
+  return fishTypeLabels[value] ?? value
 }
 
 export function PondsListPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [farmFilter, setFarmFilter] = useState<string>('all')
-  const [selectedPond, setSelectedPond] = useState<PondWithFarm | null>(null)
+  const [selectedPond, setSelectedPond] = useState<PondWithFarmName | null>(
+    null,
+  )
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { selectedClientId } = useClient()
   const clientId = selectedClientId ? Number(selectedClientId) : undefined
-  const { data: hierarchy, isLoading, error } = useFarmHierarchyQuery(clientId)
+  const { ponds, isLoading, error, refetch } = usePondListWithDetails(clientId)
 
-  const ponds = useMemo(
-    () => (hierarchy ? flattenPonds(hierarchy) : []),
-    [hierarchy],
-  )
-  const farms = useMemo(() => hierarchy ?? [], [hierarchy])
+  const farms = useMemo(() => {
+    const seen = new Map<number, string>()
+    ponds.forEach((p) => {
+      if (!seen.has(p.farmId)) seen.set(p.farmId, p.farmName)
+    })
+    return Array.from(seen.entries()).map(([id, name]) => ({ id, name }))
+  }, [ponds])
 
   const filteredPonds = useMemo(() => {
     const term = searchTerm.toLowerCase().trim()
@@ -67,7 +48,7 @@ export function PondsListPage() {
     [ponds],
   )
 
-  const handleAddStock = (pond: PondWithFarm) => {
+  const handleAddStock = (pond: PondWithFarmName) => {
     setSelectedPond(pond)
     setIsModalOpen(true)
   }
@@ -122,7 +103,7 @@ export function PondsListPage() {
           >
             <option value='all'>{L.farm} (ทั้งหมด)</option>
             {farms.map((farm) => (
-              <option key={farm.id} value={farm.id}>
+              <option key={farm.id} value={String(farm.id)}>
                 {L.farmWithName(farm.name)}
               </option>
             ))}
@@ -225,22 +206,51 @@ export function PondsListPage() {
                             size={16}
                             className='text-blue-600 group-hover/stock:text-blue-700'
                           />
-                          <span className='font-medium'>—</span>
+                          <span className='font-medium'>
+                            {(pond.totalFish ?? 0).toLocaleString()}
+                          </span>
                         </Link>
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap'>
                         <StatusBadge status={pond.status} />
                       </td>
                       <td className='px-6 py-4'>
-                        <span className='text-sm text-gray-500'>—</span>
+                        <div className='flex flex-wrap gap-1.5'>
+                          {(pond.fishTypes ?? []).length > 0 ? (
+                            (pond.fishTypes ?? []).map((ft, idx) => (
+                              <span
+                                key={idx}
+                                className='inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg border border-blue-200 text-sm font-medium'
+                              >
+                                {fishTypeDisplayLabel(ft)}
+                              </span>
+                            ))
+                          ) : (
+                            <span className='text-sm text-gray-500'>—</span>
+                          )}
+                        </div>
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap'>
-                        <span className='text-sm text-gray-500'>—</span>
+                        <span className='text-sm text-gray-500'>
+                          {pond.ageDays != null && pond.ageDays > 0
+                            ? pond.ageDays
+                            : '—'}
+                        </span>
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap'>
                         <div className='flex items-center gap-2 text-sm text-gray-600'>
                           <Calendar size={14} className='text-gray-400' />
-                          <span className='text-gray-500'>—</span>
+                          <span className='text-gray-500'>
+                            {pond.latestActivityDate
+                              ? new Date(
+                                  pond.latestActivityDate,
+                                ).toLocaleDateString('th-TH', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                })
+                              : '—'}
+                          </span>
                         </div>
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap'>
@@ -292,13 +302,14 @@ export function PondsListPage() {
                     code: selectedPond.name,
                     farmName: selectedPond.farmName,
                     status: selectedPond.status,
-                    currentStock: 0,
-                    species: [],
+                    currentStock: selectedPond.totalFish ?? 0,
+                    species: selectedPond.fishTypes ?? [],
                   }
                 : null
             }
             isOpen={isModalOpen}
             onClose={closeModal}
+            onFillSuccess={() => refetch()}
             availablePonds={ponds
               .filter((p) => p.id !== selectedPond?.id)
               .map((p) => ({
@@ -307,7 +318,8 @@ export function PondsListPage() {
                 code: p.name,
                 farmName: p.farmName,
                 status: p.status,
-                currentStock: 0,
+                currentStock: p.totalFish ?? 0,
+                species: p.fishTypes ?? [],
               }))}
           />
         </>

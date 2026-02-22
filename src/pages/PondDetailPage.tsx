@@ -14,14 +14,21 @@ import {
   Plus,
   ArrowRight,
 } from 'lucide-react'
-import { mockPonds } from '../data/mockData'
+import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { DailyFeedTab } from '../components/DailyFeedTab'
+import { farmKeys } from '../hooks/useFarm'
+import { usePondQuery, pondKeys } from '../hooks/usePond'
+import { useFarmQuery } from '../hooks/useFarm'
 import { StockActionModal } from '../components/StockActionModal'
 import { th } from '../locales/th'
 
 const L = th.pondDetail
 const PondsL = th.ponds
+const fishTypeLabels = th.fishType as Record<string, string>
+function fishTypeDisplayLabel(value: string): string {
+  return fishTypeLabels[value] ?? value
+}
 
 interface PondCycle {
   cycleNumber: number
@@ -181,7 +188,14 @@ const mockTransactions: Record<string, Transaction[]> = {
 
 export function PondDetailPage() {
   const { id } = useParams()
-  const pond = mockPonds.find((p) => p.id === id)
+  const queryClient = useQueryClient()
+  const pondId = id != null ? Number(id) : undefined
+  const {
+    data: pond,
+    isLoading: pondLoading,
+    error: pondError,
+  } = usePondQuery(pondId)
+  const { data: farm } = useFarmQuery(pond?.farmId ?? 0, !!pond)
   const [activeTab, setActiveTab] = useState<
     'current' | 'history' | 'dailyfeed'
   >('current')
@@ -191,7 +205,17 @@ export function PondDetailPage() {
     'add' | 'transfer' | 'sell'
   >('add')
 
-  if (!pond) {
+  if (pondId != null && (pondLoading || (pond == null && !pondError))) {
+    return (
+      <div className='space-y-6'>
+        <div className='bg-white rounded-xl shadow-md p-12 text-center'>
+          <p className='text-gray-500'>{th.common.loading}</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (pondError || !pond) {
     return (
       <div className='space-y-6'>
         <div className='bg-white rounded-xl shadow-md p-12 text-center'>
@@ -207,9 +231,9 @@ export function PondDetailPage() {
     )
   }
 
-  const cycles = mockPondCycles[pond.id] || []
+  const cycles = mockPondCycles[String(pond.id)] || []
   const currentCycle = cycles.find((c) => c.status === 'active')
-  const transactions = mockTransactions[pond.id] || []
+  const transactions = mockTransactions[String(pond.id)] || []
   const completedCount = cycles.filter((c) => c.status === 'completed').length
 
   const costBreakdown = transactions
@@ -240,8 +264,14 @@ export function PondDetailPage() {
         : pond.status
 
   const pondForModal = {
-    ...pond,
-    species: pond.species ?? [],
+    id: pond.id,
+    name: pond.name,
+    code: pond.name,
+    farmId: String(pond.farmId),
+    farmName: farm?.name ?? '—',
+    status: pond.status,
+    currentStock: pond.totalFish ?? 0,
+    species: pond.fishTypes ?? [],
   }
 
   return (
@@ -271,7 +301,7 @@ export function PondDetailPage() {
               </span>
             </div>
             <p className='text-gray-600 mt-1'>
-              {L.farm}: {pond.farmName}
+              {L.farm}: {farm?.name ?? '—'}
             </p>
           </div>
         </div>
@@ -321,7 +351,7 @@ export function PondDetailPage() {
                 <p className='text-gray-600 text-xs'>{L.currentStockLabel}</p>
               </div>
               <p className='text-xl text-blue-600 font-semibold'>
-                {pond.currentStock.toLocaleString()}
+                {(pond.totalFish ?? 0).toLocaleString()}
               </p>
             </div>
             <div className='bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-lg p-4 border border-purple-200'>
@@ -330,7 +360,7 @@ export function PondDetailPage() {
                 <p className='text-gray-600 text-xs'>{L.ageDays}</p>
               </div>
               <p className='text-xl text-purple-600 font-semibold'>
-                {pond.ageInDays ?? '—'}
+                {pond.ageDays != null && pond.ageDays > 0 ? pond.ageDays : '—'}
               </p>
             </div>
             <div className='bg-gradient-to-br from-green-50 to-green-100/50 rounded-lg p-4 border border-green-200'>
@@ -339,7 +369,7 @@ export function PondDetailPage() {
                 <p className='text-gray-600 text-xs'>{L.beginDate}</p>
               </div>
               <p className='text-lg text-green-600 font-semibold'>
-                {currentCycle?.startDate ?? pond.createdAt}
+                {currentCycle?.startDate ?? pond.createdAt ?? '—'}
               </p>
             </div>
           </div>
@@ -792,7 +822,7 @@ export function PondDetailPage() {
 
               {activeTab === 'dailyfeed' && (
                 <div className='space-y-6'>
-                  <DailyFeedTab pondId={pond.id} />
+                  <DailyFeedTab pondId={String(pond.id)} />
                 </div>
               )}
             </div>
@@ -805,16 +835,20 @@ export function PondDetailPage() {
               {L.species}
             </h3>
             <div className='flex flex-wrap gap-2'>
-              {(pond.species ?? []).length > 0 ? (
-                (pond.species ?? []).map((species, index) => (
-                  <div
-                    key={index}
-                    className='flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg border border-blue-200 text-sm'
-                  >
-                    <Fish size={14} />
-                    <span className='font-medium'>{species}</span>
-                  </div>
-                ))
+              {(pond.fishTypes ?? []).length > 0 ? (
+                (pond.fishTypes ?? []).map(
+                  (fishType: string, index: number) => (
+                    <div
+                      key={index}
+                      className='flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg border border-blue-200 text-sm'
+                    >
+                      <Fish size={14} />
+                      <span className='font-medium'>
+                        {fishTypeDisplayLabel(fishType)}
+                      </span>
+                    </div>
+                  ),
+                )
               ) : (
                 <p className='text-sm text-gray-500'>—</p>
               )}
@@ -833,7 +867,16 @@ export function PondDetailPage() {
                 <div>
                   <p className='text-xs text-gray-600'>{L.date}</p>
                   <p className='text-sm text-gray-800 font-medium'>
-                    {pond.lastActivityDate ?? '—'}
+                    {pond.latestActivityDate
+                      ? new Date(pond.latestActivityDate).toLocaleDateString(
+                          'th-TH',
+                          {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          },
+                        )
+                      : '—'}
                   </p>
                 </div>
               </div>
@@ -844,7 +887,7 @@ export function PondDetailPage() {
                 <div>
                   <p className='text-xs text-gray-600'>{L.activityType}</p>
                   <p className='text-sm text-gray-800 font-medium capitalize'>
-                    {(pond.lastActivityType ?? '—').replace('_', ' ')}
+                    —
                   </p>
                 </div>
               </div>
@@ -865,7 +908,7 @@ export function PondDetailPage() {
               <div>
                 <p className='text-xs text-gray-600 mb-1'>{L.farmName}</p>
                 <p className='text-sm text-gray-800 font-medium'>
-                  {pond.farmName}
+                  {farm?.name ?? '—'}
                 </p>
               </div>
             </div>
@@ -879,6 +922,12 @@ export function PondDetailPage() {
         onClose={() => setIsStockModalOpen(false)}
         pond={pondForModal}
         initialActionType={stockActionType}
+        onFillSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: farmKeys.all })
+          if (pondId != null) {
+            queryClient.invalidateQueries({ queryKey: pondKeys.detail(pondId) })
+          }
+        }}
       />
     </div>
   )

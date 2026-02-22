@@ -65,7 +65,7 @@ export function FarmDetailPage() {
   const maintenancePonds = farmPonds.filter(
     (p) => p.status === 'maintenance',
   ).length
-  const totalStock = 0
+  const totalStock = farmPonds.reduce((sum, p) => sum + (p.totalFish ?? 0), 0)
 
   return (
     <div className='space-y-6'>
@@ -132,7 +132,13 @@ export function FarmDetailPage() {
               className='p-4 border border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition-all'
             >
               <p className='text-lg text-gray-900 mb-2'>{pond.name}</p>
-              <div className='flex items-center justify-end text-sm'>
+              <div className='flex items-center justify-between gap-2 text-sm'>
+                <span className='text-gray-600'>
+                  <Fish size={14} className='inline mr-1' />
+                  {(pond.totalFish ?? 0).toLocaleString()}
+                  {(pond.ageDays ?? 0) > 0 &&
+                    ` · ${th.pondDetail.days(pond.ageDays!)}`}
+                </span>
                 <StatusBadge status={pond.status} />
               </div>
             </Link>

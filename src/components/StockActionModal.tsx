@@ -3,19 +3,20 @@ import {
   Fish,
   Package,
   Weight,
-  DollarSign,
   ArrowRight,
   ShoppingCart,
   TrendingUp,
   AlertTriangle,
   Plus,
   Trash2,
+  Loader2,
 } from 'lucide-react'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { mockPonds } from '../data/mockData'
 import type { Pond } from '../data/mockData'
 import { FISH_TYPE_VALUES } from '../constants/fishType'
 import { th } from '../locales/th'
+import { pondApi } from '../api/pond'
 
 const L = th.stockActionModal
 const fishTypeLabels = th.fishType
@@ -57,6 +58,7 @@ interface StockActionModalProps {
   onClose: () => void
   availablePonds?: StockActionModalPond[]
   initialActionType?: ActionType
+  onFillSuccess?: () => void
 }
 
 export function StockActionModal({
@@ -65,18 +67,133 @@ export function StockActionModal({
   onClose,
   availablePonds,
   initialActionType = 'add',
+  onFillSuccess,
 }: StockActionModalProps) {
   // FIXME: Move (transfer) and sell mode should receive data from API (e.g. available ponds, sell options).
   const [actionType, setActionType] = useState<ActionType>(initialActionType)
   const [quantity, setQuantity] = useState<number>(0)
-  const [avgWeight, setAvgWeight] = useState<number>(0)
-  const [pricePerUnit, setPricePerUnit] = useState<number>(0)
+  const [avgWeight, setAvgWeight] = useState<string | null>(null)
+  const [pricePerUnit, setPricePerUnit] = useState<string | null>(null)
+
+  const avgWeightNum =
+    avgWeight === null || avgWeight === '' ? null : parseFloat(avgWeight)
+  const pricePerUnitNum =
+    pricePerUnit === null || pricePerUnit === ''
+      ? null
+      : parseFloat(pricePerUnit)
   const [selectedSpecies, setSelectedSpecies] = useState<string>('')
   const [destinationPondId, setDestinationPondId] = useState<string>('')
   const [additionalCosts, setAdditionalCosts] = useState<AdditionalCost[]>([])
   const [speciesSellData, setSpeciesSellData] = useState<SpeciesSellData[]>([])
   const [buyer, setBuyer] = useState<string>('')
   const [closePond, setClosePond] = useState<boolean>(false)
+  const [activityDate, setActivityDate] = useState<string>(
+    () => new Date().toISOString().split('T')[0],
+  )
+  const [notes, setNotes] = useState<string>('')
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+
+  const V = L.validation
+
+  useEffect(() => {
+    if (isOpen) {
+      setSubmitError(null)
+      setFieldErrors({})
+    }
+  }, [isOpen])
+
+  const clearFieldError = (field: string) => {
+    setFieldErrors((prev) => {
+      const next = { ...prev }
+      delete next[field]
+      return next
+    })
+  }
+
+  const validateAddForm = (): Record<string, string> => {
+    const err: Record<string, string> = {}
+    if (!selectedSpecies?.trim()) err.species = V.selectSpecies
+    const q = quantity
+    if (typeof q !== 'number' || Number.isNaN(q)) err.quantity = V.mustBeNumber
+    else if (!Number.isInteger(q) || q < 1) err.quantity = V.quantityMin
+    if (avgWeight != null && avgWeight !== '') {
+      const aw = parseFloat(avgWeight)
+      if (Number.isNaN(aw) || aw < 0) err.avgWeight = V.mustBeZeroOrMore
+    }
+    const p = pricePerUnitNum
+    if (p == null || Number.isNaN(p)) err.pricePerUnit = V.mustBeNumber
+    else if (p <= 0) err.pricePerUnit = V.invalidPrice
+    if (!activityDate?.trim()) err.activityDate = V.invalidDate
+    additionalCosts.forEach((c) => {
+      if (
+        c.category.trim() &&
+        (typeof c.cost !== 'number' || Number.isNaN(c.cost) || c.cost < 0)
+      )
+        err[`cost_${c.id}`] = V.additionalCostInvalid
+      if (c.cost > 0 && !c.category.trim())
+        err[`category_${c.id}`] = V.additionalCostCategoryRequired
+    })
+    return err
+  }
+
+  const validateTransferForm = (): Record<string, string> => {
+    const err: Record<string, string> = {}
+    if (!selectedSpecies?.trim()) err.species = V.selectSpecies
+    const q = quantity
+    if (typeof q !== 'number' || Number.isNaN(q)) err.quantity = V.mustBeNumber
+    else if (!Number.isInteger(q) || q < 1) err.quantity = V.quantityMin
+    else if (pond && q > pond.currentStock)
+      err.quantity = V.quantityExceedsStock(pond.currentStock)
+    if (avgWeight == null || avgWeight === '')
+      err.avgWeight = V.mustBeZeroOrMore
+    else {
+      const aw = parseFloat(avgWeight)
+      if (Number.isNaN(aw) || aw < 0) err.avgWeight = V.mustBeZeroOrMore
+    }
+    const p = pricePerUnitNum
+    if (p == null || Number.isNaN(p)) err.pricePerUnit = V.mustBeNumber
+    else if (p < 0) err.pricePerUnit = V.mustBeZeroOrMore
+    if (!destinationPondId) err.destinationPondId = V.selectDestinationPond
+    if (!activityDate?.trim()) err.activityDate = V.invalidDate
+    additionalCosts.forEach((c) => {
+      if (
+        c.category.trim() &&
+        (typeof c.cost !== 'number' || Number.isNaN(c.cost) || c.cost < 0)
+      )
+        err[`cost_${c.id}`] = V.additionalCostInvalid
+    })
+    return err
+  }
+
+  const validateSellForm = (): Record<string, string> => {
+    const err: Record<string, string> = {}
+    if (speciesSellData.length === 0) err.speciesSell = V.requiredSelect
+    speciesSellData.forEach((sd) => {
+      sd.rows.forEach((row) => {
+        if (
+          typeof row.quantity !== 'number' ||
+          Number.isNaN(row.quantity) ||
+          row.quantity < 0
+        )
+          err[`sell_q_${sd.id}_${row.id}`] = V.sellQuantityInvalid
+        if (
+          typeof row.avgWeight !== 'number' ||
+          Number.isNaN(row.avgWeight) ||
+          row.avgWeight < 0
+        )
+          err[`sell_w_${sd.id}_${row.id}`] = V.sellWeightInvalid
+        if (
+          typeof row.pricePerKg !== 'number' ||
+          Number.isNaN(row.pricePerKg) ||
+          row.pricePerKg < 0
+        )
+          err[`sell_p_${sd.id}_${row.id}`] = V.sellPriceInvalid
+      })
+    })
+    return err
+  }
 
   const pond = useMemo(():
     | (StockActionModalPond & {
@@ -129,8 +246,8 @@ export function StockActionModal({
     )
   }, [destinationPondId, availablePondsForTransfer])
 
-  const totalCost = quantity * pricePerUnit
-  const totalWeight = quantity * avgWeight
+  const totalCost = quantity * (pricePerUnitNum ?? 0) * (avgWeightNum ?? 0)
+  const totalWeight = quantity * (avgWeightNum ?? 0)
 
   const remainingStock = useMemo(() => {
     if (!pond) return 0
@@ -190,21 +307,80 @@ export function StockActionModal({
 
   if (!isOpen || !pond) return null
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setSubmitError(null)
+
+    if (actionType === 'add') {
+      const addErrors = validateAddForm()
+      if (Object.keys(addErrors).length > 0) {
+        setFieldErrors(addErrors)
+        return
+      }
+      setFieldErrors({})
+      setIsSubmitting(true)
+      try {
+        const body = {
+          fishType: selectedSpecies,
+          amount: quantity,
+          pricePerUnit: pricePerUnitNum!,
+          activityDate,
+          ...(avgWeightNum != null &&
+            avgWeightNum > 0 && { fishWeight: avgWeightNum }),
+          ...(additionalCosts.length > 0 && {
+            additionalCosts: additionalCosts
+              .filter((c) => c.category.trim() !== '' || c.cost > 0)
+              .map((c) => ({ title: c.category, cost: c.cost })),
+          }),
+          ...(notes.trim() && { remark: notes.trim() }),
+        }
+        await pondApi.fillPond(Number(pond.id), body)
+        resetForm()
+        onClose()
+        onFillSuccess?.()
+      } catch (err) {
+        setSubmitError(err instanceof Error ? err.message : 'Request failed')
+      } finally {
+        setIsSubmitting(false)
+      }
+      return
+    }
+
+    if (actionType === 'transfer') {
+      const transferErrors = validateTransferForm()
+      if (Object.keys(transferErrors).length > 0) {
+        setFieldErrors(transferErrors)
+        return
+      }
+      setFieldErrors({})
+    }
+
+    if (actionType === 'sell') {
+      const sellErrors = validateSellForm()
+      if (Object.keys(sellErrors).length > 0) {
+        setFieldErrors(sellErrors)
+        return
+      }
+      setFieldErrors({})
+    }
+
     onClose()
   }
 
   const resetForm = () => {
     setQuantity(0)
-    setAvgWeight(0)
-    setPricePerUnit(0)
+    setAvgWeight(null)
+    setPricePerUnit(null)
     setSelectedSpecies('')
     setDestinationPondId('')
     setAdditionalCosts([])
     setSpeciesSellData([])
     setBuyer('')
     setClosePond(false)
+    setActivityDate(new Date().toISOString().split('T')[0])
+    setNotes('')
+    setSubmitError(null)
+    setFieldErrors({})
   }
 
   const handleActionTypeChange = (type: ActionType) => {
@@ -566,8 +742,13 @@ export function StockActionModal({
                 </label>
                 <select
                   value={selectedSpecies}
-                  onChange={(e) => setSelectedSpecies(e.target.value)}
-                  className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
+                  onChange={(e) => {
+                    setSelectedSpecies(e.target.value)
+                    clearFieldError('species')
+                  }}
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                    fieldErrors.species ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   required
                 >
                   <option value=''>{L.selectSpecies}</option>
@@ -577,13 +758,18 @@ export function StockActionModal({
                     </option>
                   ))}
                 </select>
+                {fieldErrors.species && (
+                  <p className='text-sm text-red-600 mt-1' role='alert'>
+                    {fieldErrors.species}
+                  </p>
+                )}
               </div>
             )}
 
             {actionType !== 'sell' && (
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  {L.quantity} *
+                  {L.quantityAddUnit} *
                 </label>
                 <div className='relative'>
                   <Package
@@ -596,19 +782,41 @@ export function StockActionModal({
                     min='1'
                     max={actionType !== 'add' ? pond.currentStock : undefined}
                     value={quantity || ''}
-                    onChange={(e) =>
-                      setQuantity(parseInt(e.target.value, 10) || 0)
-                    }
-                    className='w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
+                    onChange={(e) => {
+                      const v = e.target.value
+                      const n = v === '' ? 0 : parseInt(v, 10)
+                      if (v !== '' && Number.isNaN(n)) {
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          quantity: V.mustBeNumber,
+                        }))
+                        setQuantity(0)
+                      } else {
+                        setQuantity(Number.isNaN(n) ? 0 : n)
+                        clearFieldError('quantity')
+                      }
+                    }}
+                    className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                      fieldErrors.quantity
+                        ? 'border-red-500'
+                        : 'border-gray-300'
+                    }`}
                     required
                   />
                 </div>
-                {actionType !== 'add' && quantity > pond.currentStock && (
-                  <p className='text-sm text-red-600 mt-1'>
-                    {L.quantityExceeds}
-                    {pond.currentStock.toLocaleString()})
+                {fieldErrors.quantity && (
+                  <p className='text-sm text-red-600 mt-1' role='alert'>
+                    {fieldErrors.quantity}
                   </p>
                 )}
+                {!fieldErrors.quantity &&
+                  actionType !== 'add' &&
+                  quantity > pond.currentStock && (
+                    <p className='text-sm text-red-600 mt-1'>
+                      {L.quantityExceeds}
+                      {pond.currentStock.toLocaleString()})
+                    </p>
+                  )}
               </div>
             )}
 
@@ -632,8 +840,15 @@ export function StockActionModal({
                     </label>
                     <select
                       value={destinationPondId}
-                      onChange={(e) => setDestinationPondId(e.target.value)}
-                      className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
+                      onChange={(e) => {
+                        setDestinationPondId(e.target.value)
+                        clearFieldError('destinationPondId')
+                      }}
+                      className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                        fieldErrors.destinationPondId
+                          ? 'border-red-500'
+                          : 'border-gray-300'
+                      }`}
                       required
                     >
                       <option value=''>{L.selectDestinationPondOption}</option>
@@ -643,6 +858,11 @@ export function StockActionModal({
                         </option>
                       ))}
                     </select>
+                    {fieldErrors.destinationPondId && (
+                      <p className='text-sm text-red-600 mt-1' role='alert'>
+                        {fieldErrors.destinationPondId}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div>
@@ -659,15 +879,27 @@ export function StockActionModal({
                       placeholder='0.00'
                       step='0.01'
                       min='0'
-                      value={avgWeight || ''}
-                      onChange={(e) =>
-                        setAvgWeight(parseFloat(e.target.value) || 0)
-                      }
-                      className='w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
+                      value={avgWeight ?? ''}
+                      onChange={(e) => {
+                        setAvgWeight(
+                          e.target.value === '' ? null : e.target.value,
+                        )
+                        clearFieldError('avgWeight')
+                      }}
+                      className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                        fieldErrors.avgWeight
+                          ? 'border-red-500'
+                          : 'border-gray-300'
+                      }`}
                       required
                     />
                   </div>
-                  {avgWeight > 0 && quantity > 0 && (
+                  {fieldErrors.avgWeight && (
+                    <p className='text-sm text-red-600 mt-1' role='alert'>
+                      {fieldErrors.avgWeight}
+                    </p>
+                  )}
+                  {(avgWeightNum ?? 0) > 0 && quantity > 0 && (
                     <p className='text-sm text-gray-600 mt-1'>
                       {L.totalWeight}:{' '}
                       <span className='font-medium'>
@@ -681,24 +913,38 @@ export function StockActionModal({
                     {L.costPerUnitThb} *
                   </label>
                   <div className='relative'>
-                    <DollarSign
-                      size={18}
-                      className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'
-                    />
+                    <span
+                      className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium'
+                      aria-hidden
+                    >
+                      {L.currencySymbol}
+                    </span>
                     <input
                       type='number'
                       placeholder='0.00'
                       step='0.01'
                       min='0'
-                      value={pricePerUnit || ''}
-                      onChange={(e) =>
-                        setPricePerUnit(parseFloat(e.target.value) || 0)
-                      }
-                      className='w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
+                      value={pricePerUnit ?? ''}
+                      onChange={(e) => {
+                        setPricePerUnit(
+                          e.target.value === '' ? null : e.target.value,
+                        )
+                        clearFieldError('pricePerUnit')
+                      }}
+                      className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                        fieldErrors.pricePerUnit
+                          ? 'border-red-500'
+                          : 'border-gray-300'
+                      }`}
                       required
                     />
                   </div>
-                  {pricePerUnit > 0 && quantity > 0 && (
+                  {fieldErrors.pricePerUnit && (
+                    <p className='text-sm text-red-600 mt-1' role='alert'>
+                      {fieldErrors.pricePerUnit}
+                    </p>
+                  )}
+                  {(pricePerUnitNum ?? 0) > 0 && quantity > 0 && (
                     <div className='mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200'>
                       <div className='flex items-center justify-between'>
                         <span className='text-sm text-gray-600'>
@@ -737,38 +983,66 @@ export function StockActionModal({
                               type='text'
                               placeholder={L.categoryPlaceholder}
                               value={cost.category}
-                              onChange={(e) =>
+                              onChange={(e) => {
                                 handleAdditionalCostChange(
                                   cost.id,
                                   'category',
                                   e.target.value,
                                 )
-                              }
-                              className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
+                                clearFieldError(`category_${cost.id}`)
+                              }}
+                              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                                fieldErrors[`category_${cost.id}`]
+                                  ? 'border-red-500'
+                                  : 'border-gray-300'
+                              }`}
                             />
+                            {fieldErrors[`category_${cost.id}`] && (
+                              <p
+                                className='text-sm text-red-600 mt-1'
+                                role='alert'
+                              >
+                                {fieldErrors[`category_${cost.id}`]}
+                              </p>
+                            )}
                           </div>
                           <div className='w-32'>
                             <div className='relative'>
-                              <DollarSign
-                                size={16}
-                                className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'
-                              />
+                              <span
+                                className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium'
+                                aria-hidden
+                              >
+                                {L.currencySymbol}
+                              </span>
                               <input
                                 type='number'
                                 placeholder='0.00'
                                 step='0.01'
                                 min='0'
                                 value={cost.cost || ''}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                   handleAdditionalCostChange(
                                     cost.id,
                                     'cost',
                                     e.target.value,
                                   )
-                                }
-                                className='w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
+                                  clearFieldError(`cost_${cost.id}`)
+                                }}
+                                className={`w-full pl-9 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                                  fieldErrors[`cost_${cost.id}`]
+                                    ? 'border-red-500'
+                                    : 'border-gray-300'
+                                }`}
                               />
                             </div>
+                            {fieldErrors[`cost_${cost.id}`] && (
+                              <p
+                                className='text-sm text-red-600 mt-1'
+                                role='alert'
+                              >
+                                {fieldErrors[`cost_${cost.id}`]}
+                              </p>
+                            )}
                           </div>
                           <button
                             type='button'
@@ -808,14 +1082,26 @@ export function StockActionModal({
                     placeholder='0.00'
                     step='0.01'
                     min='0'
-                    value={avgWeight || ''}
-                    onChange={(e) =>
-                      setAvgWeight(parseFloat(e.target.value) || 0)
-                    }
-                    className='w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
+                    value={avgWeight ?? ''}
+                    onChange={(e) => {
+                      setAvgWeight(
+                        e.target.value === '' ? null : e.target.value,
+                      )
+                      clearFieldError('avgWeight')
+                    }}
+                    className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                      fieldErrors.avgWeight
+                        ? 'border-red-500'
+                        : 'border-gray-300'
+                    }`}
                   />
                 </div>
-                {avgWeight > 0 && quantity > 0 && (
+                {fieldErrors.avgWeight && (
+                  <p className='text-sm text-red-600 mt-1' role='alert'>
+                    {fieldErrors.avgWeight}
+                  </p>
+                )}
+                {(avgWeightNum ?? 0) > 0 && quantity > 0 && (
                   <p className='text-sm text-gray-600 mt-1'>
                     {L.totalWeight}:{' '}
                     <span className='font-medium'>
@@ -833,24 +1119,38 @@ export function StockActionModal({
                     {L.costPerUnitThb} *
                   </label>
                   <div className='relative'>
-                    <DollarSign
-                      size={18}
-                      className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'
-                    />
+                    <span
+                      className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium'
+                      aria-hidden
+                    >
+                      {L.currencySymbol}
+                    </span>
                     <input
                       type='number'
                       placeholder='0.00'
                       step='0.01'
                       min='0'
-                      value={pricePerUnit || ''}
-                      onChange={(e) =>
-                        setPricePerUnit(parseFloat(e.target.value) || 0)
-                      }
-                      className='w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
+                      value={pricePerUnit ?? ''}
+                      onChange={(e) => {
+                        setPricePerUnit(
+                          e.target.value === '' ? null : e.target.value,
+                        )
+                        clearFieldError('pricePerUnit')
+                      }}
+                      className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                        fieldErrors.pricePerUnit
+                          ? 'border-red-500'
+                          : 'border-gray-300'
+                      }`}
                       required
                     />
                   </div>
-                  {pricePerUnit > 0 && quantity > 0 && (
+                  {fieldErrors.pricePerUnit && (
+                    <p className='text-sm text-red-600 mt-1' role='alert'>
+                      {fieldErrors.pricePerUnit}
+                    </p>
+                  )}
+                  {(pricePerUnitNum ?? 0) > 0 && quantity > 0 && (
                     <div className='mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200'>
                       <div className='flex items-center justify-between'>
                         <span className='text-sm text-gray-600'>
@@ -889,38 +1189,66 @@ export function StockActionModal({
                               type='text'
                               placeholder={L.categoryPlaceholder}
                               value={cost.category}
-                              onChange={(e) =>
+                              onChange={(e) => {
                                 handleAdditionalCostChange(
                                   cost.id,
                                   'category',
                                   e.target.value,
                                 )
-                              }
-                              className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
+                                clearFieldError(`category_${cost.id}`)
+                              }}
+                              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                                fieldErrors[`category_${cost.id}`]
+                                  ? 'border-red-500'
+                                  : 'border-gray-300'
+                              }`}
                             />
+                            {fieldErrors[`category_${cost.id}`] && (
+                              <p
+                                className='text-sm text-red-600 mt-1'
+                                role='alert'
+                              >
+                                {fieldErrors[`category_${cost.id}`]}
+                              </p>
+                            )}
                           </div>
                           <div className='w-32'>
                             <div className='relative'>
-                              <DollarSign
-                                size={16}
-                                className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'
-                              />
+                              <span
+                                className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium'
+                                aria-hidden
+                              >
+                                {L.currencySymbol}
+                              </span>
                               <input
                                 type='number'
                                 placeholder='0.00'
                                 step='0.01'
                                 min='0'
                                 value={cost.cost || ''}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                   handleAdditionalCostChange(
                                     cost.id,
                                     'cost',
                                     e.target.value,
                                   )
-                                }
-                                className='w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
+                                  clearFieldError(`cost_${cost.id}`)
+                                }}
+                                className={`w-full pl-9 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                                  fieldErrors[`cost_${cost.id}`]
+                                    ? 'border-red-500'
+                                    : 'border-gray-300'
+                                }`}
                               />
                             </div>
+                            {fieldErrors[`cost_${cost.id}`] && (
+                              <p
+                                className='text-sm text-red-600 mt-1'
+                                role='alert'
+                              >
+                                {fieldErrors[`cost_${cost.id}`]}
+                              </p>
+                            )}
                           </div>
                           <button
                             type='button'
@@ -947,6 +1275,11 @@ export function StockActionModal({
 
             {actionType === 'sell' && (
               <>
+                {fieldErrors.speciesSell && (
+                  <p className='text-sm text-red-600' role='alert'>
+                    {fieldErrors.speciesSell}
+                  </p>
+                )}
                 <div className='border-t border-gray-200 pt-4'>
                   <div className='flex items-center justify-between mb-4'>
                     <label className='block text-sm font-medium text-gray-700'>
@@ -1028,17 +1361,40 @@ export function StockActionModal({
                                         step='1'
                                         min='0'
                                         value={row.quantity || ''}
-                                        onChange={(e) =>
+                                        onChange={(e) => {
                                           handleSpeciesRowChange(
                                             speciesData.id,
                                             row.id,
                                             'quantity',
                                             e.target.value,
                                           )
-                                        }
-                                        className='w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white'
+                                          clearFieldError(
+                                            `sell_q_${speciesData.id}_${row.id}`,
+                                          )
+                                        }}
+                                        className={`w-full pl-9 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white ${
+                                          fieldErrors[
+                                            `sell_q_${speciesData.id}_${row.id}`
+                                          ]
+                                            ? 'border-red-500'
+                                            : 'border-gray-300'
+                                        }`}
                                       />
                                     </div>
+                                    {fieldErrors[
+                                      `sell_q_${speciesData.id}_${row.id}`
+                                    ] && (
+                                      <p
+                                        className='text-sm text-red-600 mt-1'
+                                        role='alert'
+                                      >
+                                        {
+                                          fieldErrors[
+                                            `sell_q_${speciesData.id}_${row.id}`
+                                          ]
+                                        }
+                                      </p>
+                                    )}
                                   </div>
                                   <div className='flex-1'>
                                     <div className='relative'>
@@ -1052,41 +1408,89 @@ export function StockActionModal({
                                         step='0.01'
                                         min='0'
                                         value={row.avgWeight || ''}
-                                        onChange={(e) =>
+                                        onChange={(e) => {
                                           handleSpeciesRowChange(
                                             speciesData.id,
                                             row.id,
                                             'avgWeight',
                                             e.target.value,
                                           )
-                                        }
-                                        className='w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white'
+                                          clearFieldError(
+                                            `sell_w_${speciesData.id}_${row.id}`,
+                                          )
+                                        }}
+                                        className={`w-full pl-9 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white ${
+                                          fieldErrors[
+                                            `sell_w_${speciesData.id}_${row.id}`
+                                          ]
+                                            ? 'border-red-500'
+                                            : 'border-gray-300'
+                                        }`}
                                       />
                                     </div>
+                                    {fieldErrors[
+                                      `sell_w_${speciesData.id}_${row.id}`
+                                    ] && (
+                                      <p
+                                        className='text-sm text-red-600 mt-1'
+                                        role='alert'
+                                      >
+                                        {
+                                          fieldErrors[
+                                            `sell_w_${speciesData.id}_${row.id}`
+                                          ]
+                                        }
+                                      </p>
+                                    )}
                                   </div>
                                   <div className='flex-1'>
                                     <div className='relative'>
-                                      <DollarSign
-                                        size={16}
-                                        className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'
-                                      />
+                                      <span
+                                        className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium'
+                                        aria-hidden
+                                      >
+                                        {L.currencySymbol}
+                                      </span>
                                       <input
                                         type='number'
                                         placeholder={L.pricePerKgThb}
                                         step='0.01'
                                         min='0'
                                         value={row.pricePerKg || ''}
-                                        onChange={(e) =>
+                                        onChange={(e) => {
                                           handleSpeciesRowChange(
                                             speciesData.id,
                                             row.id,
                                             'pricePerKg',
                                             e.target.value,
                                           )
-                                        }
-                                        className='w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white'
+                                          clearFieldError(
+                                            `sell_p_${speciesData.id}_${row.id}`,
+                                          )
+                                        }}
+                                        className={`w-full pl-9 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white ${
+                                          fieldErrors[
+                                            `sell_p_${speciesData.id}_${row.id}`
+                                          ]
+                                            ? 'border-red-500'
+                                            : 'border-gray-300'
+                                        }`}
                                       />
                                     </div>
+                                    {fieldErrors[
+                                      `sell_p_${speciesData.id}_${row.id}`
+                                    ] && (
+                                      <p
+                                        className='text-sm text-red-600 mt-1'
+                                        role='alert'
+                                      >
+                                        {
+                                          fieldErrors[
+                                            `sell_p_${speciesData.id}_${row.id}`
+                                          ]
+                                        }
+                                      </p>
+                                    )}
                                   </div>
                                   <button
                                     type='button'
@@ -1285,10 +1689,23 @@ export function StockActionModal({
               </label>
               <input
                 type='date'
-                className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
-                defaultValue={new Date().toISOString().split('T')[0]}
+                value={activityDate}
+                onChange={(e) => {
+                  setActivityDate(e.target.value)
+                  clearFieldError('activityDate')
+                }}
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                  fieldErrors.activityDate
+                    ? 'border-red-500'
+                    : 'border-gray-300'
+                }`}
                 required
               />
+              {fieldErrors.activityDate && (
+                <p className='text-sm text-red-600 mt-1' role='alert'>
+                  {fieldErrors.activityDate}
+                </p>
+              )}
             </div>
 
             {quantity > 0 &&
@@ -1378,10 +1795,18 @@ export function StockActionModal({
               </label>
               <textarea
                 rows={3}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
                 placeholder={L.notesPlaceholder}
                 className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none'
               />
             </div>
+
+            {submitError && (
+              <div className='rounded-lg p-3 bg-red-50 border border-red-200 text-sm text-red-700'>
+                {submitError}
+              </div>
+            )}
 
             <div className='flex items-center justify-end gap-3 pt-4 border-t border-gray-200'>
               <button
@@ -1394,11 +1819,15 @@ export function StockActionModal({
               <button
                 type='submit'
                 disabled={
+                  isSubmitting ||
                   (actionType !== 'add' && quantity > pond.currentStock) ||
                   (actionType === 'sell' && speciesSellData.length === 0)
                 }
-                className={`px-5 py-2.5 bg-gradient-to-r ${getButtonColor()} text-white rounded-lg font-medium hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
+                className={`flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r ${getButtonColor()} text-white rounded-lg font-medium hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
               >
+                {isSubmitting && (
+                  <Loader2 size={18} className='animate-spin' aria-hidden />
+                )}
                 {getButtonLabel()}
               </button>
             </div>
