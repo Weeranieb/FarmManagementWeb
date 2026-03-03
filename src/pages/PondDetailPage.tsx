@@ -22,6 +22,8 @@ import { usePondQuery, pondKeys } from '../hooks/usePond'
 import { useFarmQuery } from '../hooks/useFarm'
 import { StockActionModal } from '../components/StockActionModal'
 import { th } from '../locales/th'
+import { formatFarmDisplayNameTH } from '../utils/masterDataName'
+import { formatDateThai } from '../utils/thaiTime'
 
 const L = th.pondDetail
 const PondsL = th.ponds
@@ -308,7 +310,7 @@ export function PondDetailPage() {
         <div className='flex items-center gap-3'>
           <button
             type='button'
-            className='flex items-center gap-2 px-3 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium shadow-sm text-sm'
+            className='flex items-center gap-2 px-3 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all hover:bg-green-50 hover:border-green-300 hover:shadow-md'
             onClick={() => {
               setStockActionType('add')
               setIsStockModalOpen(true)
@@ -319,7 +321,7 @@ export function PondDetailPage() {
           </button>
           <button
             type='button'
-            className='flex items-center gap-2 px-3 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium shadow-sm text-sm'
+            className='flex items-center gap-2 px-3 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all hover:bg-blue-50 hover:border-blue-300 hover:shadow-md'
             onClick={() => {
               setStockActionType('transfer')
               setIsStockModalOpen(true)
@@ -330,7 +332,7 @@ export function PondDetailPage() {
           </button>
           <button
             type='button'
-            className='flex items-center gap-2 px-3 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium shadow-sm text-sm'
+            className='flex items-center gap-2 px-3 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all hover:bg-amber-50 hover:border-amber-300 hover:shadow-md'
             onClick={() => {
               setStockActionType('sell')
               setIsStockModalOpen(true)
@@ -369,7 +371,9 @@ export function PondDetailPage() {
                 <p className='text-gray-600 text-xs'>{L.beginDate}</p>
               </div>
               <p className='text-lg text-green-600 font-semibold'>
-                {currentCycle?.startDate ?? pond.createdAt ?? '—'}
+                {formatDateThai(
+                  currentCycle?.startDate ?? pond.createdAt ?? undefined,
+                )}
               </p>
             </div>
           </div>
@@ -648,7 +652,8 @@ export function PondDetailPage() {
                                     {L.cycle(cycle.cycleNumber)}
                                   </h3>
                                   <p className='text-sm text-gray-600'>
-                                    {cycle.startDate} → {cycle.endDate} (
+                                    {formatDateThai(cycle.startDate)} →{' '}
+                                    {formatDateThai(cycle.endDate)} (
                                     {L.days(cycle.durationDays)})
                                   </p>
                                 </div>
@@ -867,16 +872,7 @@ export function PondDetailPage() {
                 <div>
                   <p className='text-xs text-gray-600'>{L.date}</p>
                   <p className='text-sm text-gray-800 font-medium'>
-                    {pond.latestActivityDate
-                      ? new Date(pond.latestActivityDate).toLocaleDateString(
-                          'th-TH',
-                          {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                          },
-                        )
-                      : '—'}
+                    {formatDateThai(pond.latestActivityDate)}
                   </p>
                 </div>
               </div>
@@ -886,8 +882,11 @@ export function PondDetailPage() {
                 </div>
                 <div>
                   <p className='text-xs text-gray-600'>{L.activityType}</p>
-                  <p className='text-sm text-gray-800 font-medium capitalize'>
-                    —
+                  <p className='text-sm text-gray-800 font-medium'>
+                    {pond.latestActivityType
+                      ? (L.activityTypeLabels?.[pond.latestActivityType] ??
+                        pond.latestActivityType)
+                      : '—'}
                   </p>
                 </div>
               </div>
@@ -902,13 +901,13 @@ export function PondDetailPage() {
               <div>
                 <p className='text-xs text-gray-600 mb-1'>{L.createdDate}</p>
                 <p className='text-sm text-gray-800 font-medium'>
-                  {pond.createdAt}
+                  {formatDateThai(pond.createdAt)}
                 </p>
               </div>
               <div>
                 <p className='text-xs text-gray-600 mb-1'>{L.farmName}</p>
                 <p className='text-sm text-gray-800 font-medium'>
-                  {farm?.name ?? '—'}
+                  {farm != null ? formatFarmDisplayNameTH(farm.name) : '—'}
                 </p>
               </div>
             </div>

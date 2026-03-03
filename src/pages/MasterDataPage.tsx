@@ -18,6 +18,7 @@ import {
 } from '../api/farm'
 import { pondApi } from '../api/pond'
 import { EditMasterDataModal } from '../components/EditMasterDataModal'
+import { normalizeFarmNameForStore } from '../utils/masterDataName'
 import { th } from '../locales/th'
 
 const L = th.masterData
@@ -113,7 +114,7 @@ export function MasterDataPage() {
       return
     }
     if (!selectedClientId) return
-    const name = farmForm.name.trim()
+    const name = normalizeFarmNameForStore(farmForm.name.trim())
     try {
       await farmApi.createFarm({ clientId: Number(selectedClientId), name })
       setSuccessMessage(L.successFarmCreated(name, selectedClient?.value ?? ''))
@@ -143,7 +144,9 @@ export function MasterDataPage() {
     try {
       await pondApi.createPonds({ farmId: Number(selectedFarmId), names })
       const pondCount = names.length
-      setSuccessMessage(L.successPondsCreated(pondCount, selectedFarm?.name ?? ''))
+      setSuccessMessage(
+        L.successPondsCreated(pondCount, selectedFarm?.name ?? ''),
+      )
       setShowSuccessMessage(true)
       setTimeout(() => setShowSuccessMessage(false), 5000)
       setPondForms([{ name: '' }])
@@ -202,17 +205,23 @@ export function MasterDataPage() {
 
   const handleSaveEdit = async (newName: string) => {
     if (!editingItem) return
-    const name = newName.trim()
-    if (!name) return
+    const raw = newName.trim()
+    if (!raw) return
     try {
       if (editingItem.type === 'farm') {
+        const name = normalizeFarmNameForStore(raw)
         await farmApi.updateFarm(Number(editingItem.id), { name })
       } else {
-        await pondApi.updatePond(Number(editingItem.id), { name })
+        await pondApi.updatePond(Number(editingItem.id), { name: raw })
       }
       await refetchHierarchy()
+      const displayName =
+        editingItem.type === 'farm' ? normalizeFarmNameForStore(raw) : raw
       setSuccessMessage(
-        L.successUpdated(editingItem.type === 'farm' ? 'ฟาร์ม' : 'บ่อ', name),
+        L.successUpdated(
+          editingItem.type === 'farm' ? 'ฟาร์ม' : 'บ่อ',
+          displayName,
+        ),
       )
       setShowSuccessMessage(true)
       setTimeout(() => setShowSuccessMessage(false), 5000)
@@ -290,10 +299,10 @@ export function MasterDataPage() {
           <div className='bg-white rounded-lg shadow-md flex flex-col overflow-hidden'>
             <div className='border-b border-gray-200'>
               <div className='p-4 bg-gradient-to-r from-blue-800 to-blue-600 text-white'>
-              <h2 className='text-lg flex items-center gap-2'>
-                <Plus size={20} />
-                {L.createNew}
-              </h2>
+                <h2 className='text-lg flex items-center gap-2'>
+                  <Plus size={20} />
+                  {L.createNew}
+                </h2>
               </div>
               <div className='flex'>
                 <button
@@ -326,7 +335,8 @@ export function MasterDataPage() {
                 <form onSubmit={handleFarmSubmit} className='space-y-4'>
                   <div>
                     <label className='block text-sm text-gray-700 mb-1'>
-                      {L.farmName} <span className='text-red-500'>{L.required}</span>
+                      {L.farmName}{' '}
+                      <span className='text-red-500'>{L.required}</span>
                     </label>
                     <input
                       type='text'
@@ -361,7 +371,8 @@ export function MasterDataPage() {
                 <form onSubmit={handlePondSubmit} className='space-y-4'>
                   <div>
                     <label className='block text-sm text-gray-700 mb-1'>
-                      {L.selectFarm} <span className='text-red-500'>{L.required}</span>
+                      {L.selectFarm}{' '}
+                      <span className='text-red-500'>{L.required}</span>
                     </label>
                     <select
                       value={selectedFarmId}
@@ -406,7 +417,8 @@ export function MasterDataPage() {
                         </div>
                         <div>
                           <label className='block text-xs text-gray-700 mb-1'>
-                            {L.pondName} <span className='text-red-500'>{L.required}</span>
+                            {L.pondName}{' '}
+                            <span className='text-red-500'>{L.required}</span>
                           </label>
                           <input
                             type='text'
@@ -580,9 +592,7 @@ export function MasterDataPage() {
             <h3 className='text-xl text-blue-900 mb-2'>
               {L.selectClientToStart}
             </h3>
-            <p className='text-blue-800 text-sm'>
-              {L.chooseClientDescription}
-            </p>
+            <p className='text-blue-800 text-sm'>{L.chooseClientDescription}</p>
           </div>
         </div>
       )}

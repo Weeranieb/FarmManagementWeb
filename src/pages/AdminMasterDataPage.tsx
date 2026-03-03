@@ -19,7 +19,8 @@ import { StatusBadge } from '../components/StatusBadge'
 import {
   formatFarmDisplayNameTH,
   formatPondDisplayNameTH,
-} from '../constants/masterDataFormatters'
+} from '../utils/masterDataName'
+import { normalizeFarmNameForStore } from '../utils/masterDataName'
 import { adminMasterDataTh } from '../locales/adminMasterData.th'
 
 const t = adminMasterDataTh
@@ -200,7 +201,7 @@ export function AdminMasterDataPage() {
       return
     }
     if (!selectedClientId) return
-    const name = farmForm.name.trim()
+    const name = normalizeFarmNameForStore(farmForm.name.trim())
     try {
       await farmApi.createFarm({
         clientId: Number(selectedClientId),
@@ -320,24 +321,25 @@ export function AdminMasterDataPage() {
 
   const handleSaveEdit = async (newName: string) => {
     if (!editingItem) return
-    const name = newName.trim()
-    if (!name) return
+    const raw = newName.trim()
+    if (!raw) return
     try {
       if (editingItem.type === 'client') {
         const client = await clientApi.getClient(Number(editingItem.id))
         await clientApi.updateClient({
           id: client.id,
-          name,
+          name: raw,
           ownerName: client.ownerName,
           contactNumber: client.contactNumber,
           isActive: client.isActive,
         })
         invalidateClientList()
       } else if (editingItem.type === 'farm') {
+        const name = normalizeFarmNameForStore(raw)
         await farmApi.updateFarm(Number(editingItem.id), { name })
         refetchHierarchy()
       } else {
-        await pondApi.updatePond(Number(editingItem.id), { name })
+        await pondApi.updatePond(Number(editingItem.id), { name: raw })
         refetchHierarchy()
       }
       const typeLabel =
@@ -346,7 +348,9 @@ export function AdminMasterDataPage() {
           : editingItem.type === 'farm'
             ? 'ฟาร์ม'
             : 'บ่อ'
-      setSuccessMessage(t.successUpdated(typeLabel, name))
+      const displayName =
+        editingItem.type === 'farm' ? normalizeFarmNameForStore(raw) : raw
+      setSuccessMessage(t.successUpdated(typeLabel, displayName))
       setShowSuccessMessage(true)
       setTimeout(() => setShowSuccessMessage(false), 5000)
       setIsEditModalOpen(false)

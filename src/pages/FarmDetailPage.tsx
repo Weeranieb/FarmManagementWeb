@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, Grid, Fish, Activity } from 'lucide-react'
 import { useFarmQuery } from '../hooks/useFarm'
 import { pondApi } from '../api/pond'
-import { formatFarmDisplayNameTH } from '../constants/masterDataFormatters'
+import { formatFarmDisplayNameTH } from '../utils/masterDataName'
 import { StatusBadge } from '../components/StatusBadge'
 import { th } from '../locales/th'
 

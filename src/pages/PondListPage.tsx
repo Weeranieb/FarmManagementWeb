@@ -6,6 +6,7 @@ import { useClient } from '../contexts/ClientContext'
 import { StatusBadge } from '../components/StatusBadge'
 import { StockActionModal } from '../components/StockActionModal'
 import { th } from '../locales/th'
+import { formatDateThai } from '../utils/thaiTime'
 
 const L = th.ponds
 const fishTypeLabels = th.fishType as Record<string, string>
@@ -240,15 +241,7 @@ export function PondsListPage() {
                         <div className='flex items-center gap-2 text-sm text-gray-600'>
                           <Calendar size={14} className='text-gray-400' />
                           <span className='text-gray-500'>
-                            {pond.latestActivityDate
-                              ? new Date(
-                                  pond.latestActivityDate,
-                                ).toLocaleDateString('th-TH', {
-                                  year: 'numeric',
-                                  month: 'short',
-                                  day: 'numeric',
-                                })
-                              : '—'}
+                            {formatDateThai(pond.latestActivityDate)}
                           </span>
                         </div>
                       </td>
