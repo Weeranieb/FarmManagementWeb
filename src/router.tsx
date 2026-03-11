@@ -10,20 +10,33 @@ import { PondDetailPage } from './pages/PondDetailPage'
 import { MerchantsListPage } from './pages/MerchantsListPage'
 import { AdminMasterDataPage } from './pages/AdminMasterDataPage'
 import { ProtectedRoute } from './components/guards/ProtectedRoute'
+import { GuestRoute } from './components/guards/GuestRoute'
 import { SuperAdminRoute } from './components/guards/SuperAdminRoute'
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <LoginPage />,
+    element: (
+      <GuestRoute>
+        <LoginPage />
+      </GuestRoute>
+    ),
   },
   {
     path: '/login',
-    element: <LoginPage />,
+    element: (
+      <GuestRoute>
+        <LoginPage />
+      </GuestRoute>
+    ),
   },
   {
     path: '/forgot-password',
-    element: <ForgotPasswordPage />,
+    element: (
+      <GuestRoute>
+        <ForgotPasswordPage />
+      </GuestRoute>
+    ),
   },
 
   // Protected routes with MainLayout

@@ -209,6 +209,14 @@ export const th = {
     modalTitle: 'เพิ่มคนขาย',
     modalClose: 'ปิด',
     submitAdd: 'เพิ่มคนขาย',
+    editMerchant: 'แก้ไขคนขาย',
+    deleteMerchant: 'ลบคนขาย',
+    editModalTitle: 'แก้ไขคนขาย',
+    submitEdit: 'บันทึก',
+    deleteConfirmTitle: 'ยืนยันการลบ',
+    deleteConfirmMessage: 'คุณต้องการลบคนขายนี้หรือไม่?',
+    deleteConfirmYes: 'ลบ',
+    deleteConfirmNo: 'ยกเลิก',
   },
 
   pondDetail: {
@@ -356,6 +364,7 @@ export const th = {
     destinationPond: 'บ่อปลายทาง',
     species: 'พันธุ์ปลา',
     selectSpecies: 'เลือกพันธุ์ปลา',
+    noSpeciesInSource: 'ไม่มีพันธุ์ปลาในบ่อต้นทาง',
     noSpeciesData: 'ยังไม่มีข้อมูลพันธุ์ปลา — เพิ่มปลาเพื่อบันทึกพันธุ์ปลา',
     quantity: 'จำนวน',
     quantityAddUnit: 'จำนวน (ตัว)',

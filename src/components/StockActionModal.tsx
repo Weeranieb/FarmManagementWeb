@@ -12,11 +12,15 @@ import {
   Loader2,
 } from 'lucide-react'
 import { useState, useMemo, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { mockPonds } from '../data/mockData'
 import type { Pond } from '../data/mockData'
 import { FISH_TYPE_VALUES } from '../constants/fishType'
 import { th } from '../locales/th'
 import { pondApi } from '../api/pond'
+import { merchantApi } from '../api/merchant'
+import { pondKeys } from '../hooks/usePond'
+import { formatPondDisplayNameTH } from '../utils/masterDataName'
 
 const L = th.stockActionModal
 const fishTypeLabels = th.fishType
@@ -27,6 +31,7 @@ export interface StockActionModalPond {
   id: string | number
   name: string
   code?: string
+  farmId?: number | string
   farmName?: string
   status?: string
   currentStock?: number
@@ -170,6 +175,7 @@ export function StockActionModal({
   const validateSellForm = (): Record<string, string> => {
     const err: Record<string, string> = {}
     if (speciesSellData.length === 0) err.speciesSell = V.requiredSelect
+    if (!buyer || buyer.trim() === '') err.buyer = V.requiredSelect
     speciesSellData.forEach((sd) => {
       sd.rows.forEach((row) => {
         if (
@@ -192,6 +198,15 @@ export function StockActionModal({
           err[`sell_p_${sd.id}_${row.id}`] = V.sellPriceInvalid
       })
     })
+    additionalCosts.forEach((c) => {
+      if (
+        c.category.trim() &&
+        (typeof c.cost !== 'number' || Number.isNaN(c.cost) || c.cost < 0)
+      )
+        err[`cost_${c.id}`] = V.additionalCostInvalid
+      if (c.cost > 0 && !c.category.trim())
+        err[`category_${c.id}`] = V.additionalCostCategoryRequired
+    })
     return err
   }
 
@@ -211,7 +226,35 @@ export function StockActionModal({
     }
   }, [pondProp])
 
-  const buyerOptions = L.buyerOptions
+  const sourcePondId = pond ? Number(pond.id) : 0
+  const farmId = pond ? Number(pond.farmId ?? 0) : 0
+  const { data: sourcePondFromApi } = useQuery({
+    queryKey: pondKeys.detail(sourcePondId),
+    queryFn: () => pondApi.getPond(sourcePondId),
+    enabled: isOpen && actionType === 'transfer' && sourcePondId > 0,
+    staleTime: 2 * 60 * 1000,
+  })
+
+  const { data: pondListByFarmId } = useQuery({
+    queryKey: pondKeys.list(farmId),
+    queryFn: () => pondApi.getPondList(farmId),
+    enabled: isOpen && actionType === 'transfer' && farmId > 0,
+    staleTime: 2 * 60 * 1000,
+  })
+
+  const speciesOptions = useMemo(() => {
+    if (actionType === 'transfer') {
+      return sourcePondFromApi?.fishTypes ?? []
+    }
+    return FISH_TYPE_VALUES
+  }, [actionType, sourcePondFromApi?.fishTypes])
+
+  const { data: merchants = [] } = useQuery({
+    queryKey: ['merchants'],
+    queryFn: () => merchantApi.getMerchantList(),
+    enabled: isOpen && actionType === 'sell',
+    staleTime: 2 * 60 * 1000,
+  })
 
   const mockPondsNormalized = useMemo(
     (): StockActionModalPond[] =>
@@ -228,6 +271,19 @@ export function StockActionModal({
   )
 
   const availablePondsForTransfer = useMemo(() => {
+    if (actionType === 'transfer' && pondListByFarmId?.length != null && pond) {
+      return pondListByFarmId
+        .filter((p) => String(p.id) !== String(pond.id))
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          code: p.name,
+          farmName: pond.farmName,
+          status: p.status,
+          currentStock: p.totalFish ?? 0,
+          species: p.fishTypes ?? [],
+        }))
+    }
     const list = availablePonds ?? mockPondsNormalized
     if (!pond) return list
     return list.filter(
@@ -235,7 +291,7 @@ export function StockActionModal({
         String(p.id) !== String(pond.id) &&
         (p.status === 'active' || p.status === undefined),
     )
-  }, [pond, availablePonds, mockPondsNormalized])
+  }, [actionType, pond, pondListByFarmId, availablePonds, mockPondsNormalized])
 
   const destinationPond = useMemo(() => {
     if (!destinationPondId) return null
@@ -353,6 +409,34 @@ export function StockActionModal({
         return
       }
       setFieldErrors({})
+      setIsSubmitting(true)
+      try {
+        const body = {
+          toPondId: Number(destinationPondId),
+          fishType: selectedSpecies,
+          amount: quantity,
+          pricePerUnit: pricePerUnitNum!,
+          activityDate,
+          isClose: closePond,
+          ...(avgWeightNum != null &&
+            avgWeightNum >= 0 && { fishWeight: avgWeightNum }),
+          ...(additionalCosts.length > 0 && {
+            additionalCosts: additionalCosts
+              .filter((c) => c.category.trim() !== '' || c.cost > 0)
+              .map((c) => ({ title: c.category, cost: c.cost })),
+          }),
+          ...(notes.trim() && { remark: notes.trim() }),
+        }
+        await pondApi.movePond(Number(pond.id), body)
+        resetForm()
+        onClose()
+        onFillSuccess?.()
+      } catch (err) {
+        setSubmitError(err instanceof Error ? err.message : 'Request failed')
+      } finally {
+        setIsSubmitting(false)
+      }
+      return
     }
 
     if (actionType === 'sell') {
@@ -362,6 +446,46 @@ export function StockActionModal({
         return
       }
       setFieldErrors({})
+      setIsSubmitting(true)
+      try {
+        const details = speciesSellData.flatMap((sd) =>
+          sd.rows
+            .map((row) => ({
+              fishType: sd.species,
+              size: 'medium',
+              amount: row.quantity * row.avgWeight,
+              fishUnit: 'kg',
+              pricePerUnit: row.pricePerKg,
+            }))
+            .filter((d) => d.amount > 0),
+        )
+        if (details.length === 0) {
+          setFieldErrors({
+            speciesSell: V.sellQuantityInvalid,
+          })
+          return
+        }
+        const body = {
+          activityDate,
+          details,
+          markToClose: closePond,
+          ...(buyer ? { merchantId: Number(buyer) } : {}),
+          ...(additionalCosts.length > 0 && {
+            additionalCosts: additionalCosts
+              .filter((c) => c.category.trim() !== '' || c.cost > 0)
+              .map((c) => ({ title: c.category, cost: c.cost })),
+          }),
+        }
+        await pondApi.sellPond(Number(pond.id), body)
+        resetForm()
+        onClose()
+        onFillSuccess?.()
+      } catch (err) {
+        setSubmitError(err instanceof Error ? err.message : 'Request failed')
+      } finally {
+        setIsSubmitting(false)
+      }
+      return
     }
 
     onClose()
@@ -751,10 +875,15 @@ export function StockActionModal({
                   }`}
                   required
                 >
-                  <option value=''>{L.selectSpecies}</option>
-                  {FISH_TYPE_VALUES.map((value) => (
+                  <option value=''>
+                    {actionType === 'transfer' && speciesOptions.length === 0
+                      ? L.noSpeciesInSource
+                      : L.selectSpecies}
+                  </option>
+                  {speciesOptions.map((value) => (
                     <option key={value} value={value}>
-                      {fishTypeLabels[value]}
+                      {fishTypeLabels[value as keyof typeof fishTypeLabels] ??
+                        value}
                     </option>
                   ))}
                 </select>
@@ -831,6 +960,7 @@ export function StockActionModal({
                       type='text'
                       value={pond.name}
                       readOnly
+                      disabled
                       className='w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-gray-600'
                     />
                   </div>
@@ -854,7 +984,7 @@ export function StockActionModal({
                       <option value=''>{L.selectDestinationPondOption}</option>
                       {availablePondsForTransfer.map((p) => (
                         <option key={String(p.id)} value={String(p.id)}>
-                          {p.name} ({p.farmName ?? ''})
+                          {formatPondDisplayNameTH(p.name)}
                         </option>
                       ))}
                     </select>
@@ -1327,7 +1457,9 @@ export function StockActionModal({
                                 >
                                   {availableSpeciesOptions.map((value) => (
                                     <option key={value} value={value}>
-                                      {fishTypeLabels[value]}
+                                      {fishTypeLabels[
+                                        value as keyof typeof fishTypeLabels
+                                      ] ?? value}
                                     </option>
                                   ))}
                                 </select>
@@ -1661,21 +1793,151 @@ export function StockActionModal({
                 <div>
                   <label className='block text-sm font-medium text-gray-700 mb-2'>
                     {L.buyerMarket}
+                    <span className='text-red-500 ml-0.5' aria-hidden>
+                      *
+                    </span>
                   </label>
                   <select
                     value={buyer}
-                    onChange={(e) => setBuyer(e.target.value)}
-                    className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all'
+                    onChange={(e) => {
+                      setBuyer(e.target.value)
+                      clearFieldError('buyer')
+                    }}
+                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
+                      fieldErrors.buyer ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    required
+                    aria-invalid={!!fieldErrors.buyer}
+                    aria-describedby={
+                      fieldErrors.buyer ? 'buyer-error' : undefined
+                    }
                   >
-                    <option value=''>{L.selectBuyerMarket}</option>
-                    {buyerOptions.map((option, index) => (
-                      <option key={index} value={option}>
-                        {option}
+                    <option value='' disabled>
+                      {L.selectBuyerMarket}
+                    </option>
+                    {merchants.map((m) => (
+                      <option key={m.id} value={String(m.id)}>
+                        {m.name}
                       </option>
                     ))}
                   </select>
+                  {fieldErrors.buyer && (
+                    <p
+                      id='buyer-error'
+                      className='text-sm text-red-600 mt-1'
+                      role='alert'
+                    >
+                      {fieldErrors.buyer}
+                    </p>
+                  )}
                 </div>
               </>
+            )}
+
+            {actionType === 'sell' && (
+              <div className='border-t border-gray-200 pt-4'>
+                <div className='flex items-center justify-between mb-3'>
+                  <label className='block text-sm font-medium text-gray-700'>
+                    {L.additionalCosts}
+                  </label>
+                  <button
+                    type='button'
+                    onClick={handleAddAdditionalCost}
+                    className='flex items-center gap-1.5 px-3 py-1.5 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors'
+                  >
+                    <Plus size={16} />
+                    {L.addCost}
+                  </button>
+                </div>
+                {additionalCosts.length > 0 ? (
+                  <div className='space-y-3'>
+                    {additionalCosts.map((cost) => (
+                      <div key={cost.id} className='flex gap-3 items-start'>
+                        <div className='flex-1'>
+                          <input
+                            type='text'
+                            placeholder={L.categoryPlaceholder}
+                            value={cost.category}
+                            onChange={(e) => {
+                              handleAdditionalCostChange(
+                                cost.id,
+                                'category',
+                                e.target.value,
+                              )
+                              clearFieldError(`category_${cost.id}`)
+                            }}
+                            className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all ${
+                              fieldErrors[`category_${cost.id}`]
+                                ? 'border-red-500'
+                                : 'border-gray-300'
+                            }`}
+                          />
+                          {fieldErrors[`category_${cost.id}`] && (
+                            <p
+                              className='text-sm text-red-600 mt-1'
+                              role='alert'
+                            >
+                              {fieldErrors[`category_${cost.id}`]}
+                            </p>
+                          )}
+                        </div>
+                        <div className='w-32'>
+                          <div className='relative'>
+                            <span
+                              className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium'
+                              aria-hidden
+                            >
+                              {L.currencySymbol}
+                            </span>
+                            <input
+                              type='number'
+                              placeholder='0.00'
+                              step='0.01'
+                              min='0'
+                              value={cost.cost || ''}
+                              onChange={(e) => {
+                                handleAdditionalCostChange(
+                                  cost.id,
+                                  'cost',
+                                  e.target.value,
+                                )
+                                clearFieldError(`cost_${cost.id}`)
+                              }}
+                              className={`w-full pl-9 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all ${
+                                fieldErrors[`cost_${cost.id}`]
+                                  ? 'border-red-500'
+                                  : 'border-gray-300'
+                              }`}
+                            />
+                          </div>
+                          {fieldErrors[`cost_${cost.id}`] && (
+                            <p
+                              className='text-sm text-red-600 mt-1'
+                              role='alert'
+                            >
+                              {fieldErrors[`cost_${cost.id}`]}
+                            </p>
+                          )}
+                        </div>
+                        <button
+                          type='button'
+                          onClick={() => handleRemoveAdditionalCost(cost.id)}
+                          className='p-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors'
+                          title={L.removeCost}
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className='text-center py-4 bg-gray-50 rounded-lg border border-dashed border-gray-300'>
+                    <p className='text-sm text-gray-500'>
+                      {L.noAdditionalCosts}
+                    </p>
+                  </div>
+                )}
+              </div>
             )}
 
             <div>

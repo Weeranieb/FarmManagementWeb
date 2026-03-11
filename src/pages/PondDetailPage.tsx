@@ -14,10 +14,11 @@ import {
   Plus,
   ArrowRight,
 } from 'lucide-react'
-import { useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMemo, useState } from 'react'
 import { DailyFeedTab } from '../components/DailyFeedTab'
 import { farmKeys } from '../hooks/useFarm'
+import { pondApi } from '../api/pond'
 import { usePondQuery, pondKeys } from '../hooks/usePond'
 import { useFarmQuery } from '../hooks/useFarm'
 import { StockActionModal } from '../components/StockActionModal'
@@ -198,6 +199,28 @@ export function PondDetailPage() {
     error: pondError,
   } = usePondQuery(pondId)
   const { data: farm } = useFarmQuery(pond?.farmId ?? 0, !!pond)
+  const { data: pondListInFarm } = useQuery({
+    queryKey: pondKeys.list(pond?.farmId ?? 0),
+    queryFn: () => pondApi.getPondList(pond!.farmId),
+    enabled: !!pond?.farmId,
+    staleTime: 2 * 60 * 1000,
+  })
+
+  const availablePonds = useMemo(() => {
+    if (!pondListInFarm || !pond) return undefined
+    return pondListInFarm
+      .filter((p) => p.id !== pond.id)
+      .map((p) => ({
+        id: p.id,
+        name: p.name,
+        code: p.name,
+        farmName: farm?.name ?? '—',
+        status: p.status,
+        currentStock: p.totalFish ?? 0,
+        species: p.fishTypes ?? [],
+      }))
+  }, [pondListInFarm, pond, farm?.name])
+
   const [activeTab, setActiveTab] = useState<
     'current' | 'history' | 'dailyfeed'
   >('current')
@@ -278,20 +301,22 @@ export function PondDetailPage() {
 
   return (
     <div className='space-y-6'>
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-4'>
+      <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+        <div className='flex items-center gap-4 min-w-0'>
           <Link
             to='/ponds'
-            className='p-2 hover:bg-gray-100 rounded-lg transition-colors'
+            className='p-2 hover:bg-gray-100 rounded-lg transition-colors shrink-0'
             aria-label={L.backToPonds}
           >
             <ArrowLeft size={24} className='text-gray-600' />
           </Link>
-          <div>
-            <div className='flex items-center gap-3'>
-              <h1 className='text-3xl text-gray-800'>{pond.name}</h1>
+          <div className='min-w-0'>
+            <div className='flex items-center gap-3 flex-wrap'>
+              <h1 className='text-2xl sm:text-3xl text-gray-800 truncate'>
+                {pond.name}
+              </h1>
               <span
-                className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium ${
+                className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium shrink-0 ${
                   pond.status === 'active'
                     ? 'bg-green-100 text-green-800'
                     : pond.status === 'maintenance'
@@ -307,39 +332,39 @@ export function PondDetailPage() {
             </p>
           </div>
         </div>
-        <div className='flex items-center gap-3'>
+        <div className='flex flex-wrap items-center gap-2 sm:gap-3 shrink-0'>
           <button
             type='button'
-            className='flex items-center gap-2 px-3 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all hover:bg-green-50 hover:border-green-300 hover:shadow-md'
+            className='inline-flex items-center justify-center gap-2 w-28 px-4 py-2.5 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all hover:bg-green-50 hover:border-green-300 hover:shadow-md whitespace-nowrap'
             onClick={() => {
               setStockActionType('add')
               setIsStockModalOpen(true)
             }}
           >
-            <Plus size={16} />
-            {L.addStock}
+            <Plus size={16} className='shrink-0' />
+            <span>{L.addStock}</span>
           </button>
           <button
             type='button'
-            className='flex items-center gap-2 px-3 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all hover:bg-blue-50 hover:border-blue-300 hover:shadow-md'
+            className='inline-flex items-center justify-center gap-2 w-28 px-4 py-2.5 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all hover:bg-blue-50 hover:border-blue-300 hover:shadow-md whitespace-nowrap'
             onClick={() => {
               setStockActionType('transfer')
               setIsStockModalOpen(true)
             }}
           >
-            <ArrowRight size={16} />
-            {L.transfer}
+            <ArrowRight size={16} className='shrink-0' />
+            <span>{L.transfer}</span>
           </button>
           <button
             type='button'
-            className='flex items-center gap-2 px-3 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all hover:bg-amber-50 hover:border-amber-300 hover:shadow-md'
+            className='inline-flex items-center justify-center gap-2 w-28 px-4 py-2.5 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all hover:bg-amber-50 hover:border-amber-300 hover:shadow-md whitespace-nowrap'
             onClick={() => {
               setStockActionType('sell')
               setIsStockModalOpen(true)
             }}
           >
-            <ShoppingCart size={16} />
-            {L.sell}
+            <ShoppingCart size={16} className='shrink-0' />
+            <span>{L.sell}</span>
           </button>
         </div>
       </div>
@@ -920,9 +945,11 @@ export function PondDetailPage() {
         isOpen={isStockModalOpen}
         onClose={() => setIsStockModalOpen(false)}
         pond={pondForModal}
+        availablePonds={availablePonds}
         initialActionType={stockActionType}
         onFillSuccess={() => {
           queryClient.invalidateQueries({ queryKey: farmKeys.all })
+          queryClient.invalidateQueries({ queryKey: pondKeys.lists() })
           if (pondId != null) {
             queryClient.invalidateQueries({ queryKey: pondKeys.detail(pondId) })
           }
