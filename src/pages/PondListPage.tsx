@@ -292,6 +292,7 @@ export function PondsListPage() {
                     id: selectedPond.id,
                     name: selectedPond.name,
                     code: selectedPond.name,
+                    farmId: selectedPond.farmId,
                     farmName: selectedPond.farmName,
                     status: selectedPond.status,
                     currentStock: selectedPond.totalFish ?? 0,

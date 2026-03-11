@@ -42,6 +42,45 @@ export interface PondFillResponse {
   activePondId: number
 }
 
+export interface PondMoveRequest {
+  toPondId: number
+  fishType: string
+  amount: number
+  fishWeight?: number
+  pricePerUnit: number
+  additionalCosts?: { title: string; cost: number }[]
+  activityDate: string
+  remark?: string
+  isClose: boolean
+}
+
+export interface PondMoveResponse {
+  activityId: number
+  activePondId: number
+  toActivePondId: number
+}
+
+export interface PondSellDetailItem {
+  fishType: string
+  size: string
+  amount: number
+  fishUnit: string
+  pricePerUnit: number
+}
+
+export interface PondSellRequest {
+  activityDate: string
+  details: PondSellDetailItem[]
+  merchantId?: number
+  markToClose: boolean
+  additionalCosts?: { title: string; cost: number }[]
+}
+
+export interface PondSellResponse {
+  activityId: number
+  activePondId: number
+}
+
 export const pondApi = {
   getPond: async (id: number): Promise<PondResponse> => {
     return apiClient.get<PondResponse>(`/pond/${id}`)
@@ -64,5 +103,25 @@ export const pondApi = {
     body: PondFillRequest,
   ): Promise<PondFillResponse> => {
     return apiClient.post<PondFillResponse>(`/pond/${pondId}/fill`, body)
+  },
+
+  /**
+   * Move (transfer) fish from source pond to destination pond.
+   */
+  movePond: async (
+    sourcePondId: number,
+    body: PondMoveRequest,
+  ): Promise<PondMoveResponse> => {
+    return apiClient.post<PondMoveResponse>(`/pond/${sourcePondId}/move`, body)
+  },
+
+  /**
+   * Record a sell transaction from a pond. Optionally close the active cycle.
+   */
+  sellPond: async (
+    pondId: number,
+    body: PondSellRequest,
+  ): Promise<PondSellResponse> => {
+    return apiClient.post<PondSellResponse>(`/pond/${pondId}/sell`, body)
   },
 }

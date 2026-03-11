@@ -69,11 +69,7 @@ export function MainLayout() {
   }, [])
 
   useEffect(() => {
-    if (
-      isAdminUser &&
-      clientList.length > 0 &&
-      !selectedClientId
-    ) {
+    if (isAdminUser && clientList.length > 0 && !selectedClientId) {
       setSelectedClientId(String(clientList[0].key))
     }
   }, [isAdminUser, clientList, selectedClientId, setSelectedClientId])
@@ -212,7 +208,9 @@ export function MainLayout() {
                   <div className='bg-gradient-to-r from-blue-100 to-blue-50 border border-blue-200 rounded-lg p-2 mt-2'>
                     <p className='text-xs text-blue-800 flex items-center gap-2'>
                       <Users size={14} />
-                      <span className='font-medium'>{selectedClient.value}</span>
+                      <span className='font-medium'>
+                        {selectedClient.value}
+                      </span>
                     </p>
                   </div>
                 )}

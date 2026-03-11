@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Search, Eye, Grid } from 'lucide-react'
 import { useFarmListQuery } from '../hooks/useFarm'
 import { useClient } from '../contexts/ClientContext'
-import { formatFarmDisplayNameTH } from '../constants/masterDataFormatters'
+import { formatFarmDisplayNameTH } from '../utils/masterDataName'
 import { StatusBadge } from '../components/StatusBadge'
 import { th } from '../locales/th'
 
