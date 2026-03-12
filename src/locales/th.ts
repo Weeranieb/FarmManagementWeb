@@ -231,6 +231,7 @@ export const th = {
     addStock: 'เพิ่มปลา',
     transfer: 'ย้ายปลา',
     sell: 'ขาย',
+    cannotMoveOrSellMaintenance: 'บ่อพักอยู่ ไม่สามารถย้ายหรือขายได้',
     currentStockLabel: 'จำนวนปลาปัจจุบัน',
     ageDays: 'อายุ (วัน)',
     beginDate: 'วันที่เริ่ม',
@@ -396,6 +397,7 @@ export const th = {
     closePondAfterSale: 'ปิด/จบบ่อหลังขาย',
     closePondAfterTransfer: 'ปิด/จบบ่อหลังโอน',
     maintenance: 'พักบ่อ',
+    cannotMoveOrSellMaintenance: 'บ่อพักอยู่ ไม่สามารถย้ายหรือขายได้',
     closePondDescription:
       'จะเปลี่ยนสถานะบ่อเป็นพักบ่อหลังดำเนินการนี้เสร็จ แสดงว่าจบรอบแล้ว',
     notes: 'หมายเหตุ',

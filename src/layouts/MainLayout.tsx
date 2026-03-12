@@ -176,11 +176,11 @@ export function MainLayout() {
         </div>
       </header>
 
-      <div className='flex'>
+      <div className='flex min-h-0'>
         <aside
-          className={`${
+          className={`shrink-0 ${
             isSidebarOpen ? 'w-64' : 'w-0'
-          } transition-all duration-300 overflow-hidden bg-white shadow-xl sticky top-[73px] h-[calc(100vh-73px)]`}
+          } transition-all duration-300 overflow-hidden bg-white shadow-xl sticky top-[73px] h-[calc(100vh-73px)] z-20`}
         >
           <nav className='p-4 space-y-2 h-full flex flex-col'>
             {isAdminUser && (
@@ -283,7 +283,7 @@ export function MainLayout() {
           </nav>
         </aside>
 
-        <main className='flex-1 p-6 transition-all duration-300'>
+        <main className='flex-1 min-w-0 p-6 transition-all duration-300'>
           {isAdminUser && !selectedClientId ? (
             <div className='flex items-center justify-center min-h-[50vh]'>
               <p className='text-gray-500'>{L.selectClientToView}</p>

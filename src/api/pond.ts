@@ -8,6 +8,7 @@ export interface PondResponse {
   status: string
   fishTypes: string[]
   ageDays: number | null
+  startDate: string | null
   latestActivityDate: string | null
   latestActivityType: string | null
   createdAt?: string

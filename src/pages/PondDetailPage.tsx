@@ -257,7 +257,6 @@ export function PondDetailPage() {
   }
 
   const cycles = mockPondCycles[String(pond.id)] || []
-  const currentCycle = cycles.find((c) => c.status === 'active')
   const transactions = mockTransactions[String(pond.id)] || []
   const completedCount = cycles.filter((c) => c.status === 'completed').length
 
@@ -287,6 +286,8 @@ export function PondDetailPage() {
       : pond.status === 'maintenance'
         ? PondsL.statusMaintenance
         : pond.status
+
+  const canMoveOrSell = pond.status !== 'maintenance'
 
   const pondForModal = {
     id: pond.id,
@@ -346,7 +347,9 @@ export function PondDetailPage() {
           </button>
           <button
             type='button'
-            className='inline-flex items-center justify-center gap-2 w-28 px-4 py-2.5 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all hover:bg-blue-50 hover:border-blue-300 hover:shadow-md whitespace-nowrap'
+            disabled={!canMoveOrSell}
+            title={!canMoveOrSell ? L.cannotMoveOrSellMaintenance : undefined}
+            className='inline-flex items-center justify-center gap-2 w-28 px-4 py-2.5 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none hover:bg-blue-50 hover:border-blue-300 hover:shadow-md'
             onClick={() => {
               setStockActionType('transfer')
               setIsStockModalOpen(true)
@@ -357,7 +360,9 @@ export function PondDetailPage() {
           </button>
           <button
             type='button'
-            className='inline-flex items-center justify-center gap-2 w-28 px-4 py-2.5 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all hover:bg-amber-50 hover:border-amber-300 hover:shadow-md whitespace-nowrap'
+            disabled={!canMoveOrSell}
+            title={!canMoveOrSell ? L.cannotMoveOrSellMaintenance : undefined}
+            className='inline-flex items-center justify-center gap-2 w-28 px-4 py-2.5 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none hover:bg-amber-50 hover:border-amber-300 hover:shadow-md'
             onClick={() => {
               setStockActionType('sell')
               setIsStockModalOpen(true)
@@ -396,9 +401,7 @@ export function PondDetailPage() {
                 <p className='text-gray-600 text-xs'>{L.beginDate}</p>
               </div>
               <p className='text-lg text-green-600 font-semibold'>
-                {formatDateThai(
-                  currentCycle?.startDate ?? pond.createdAt ?? undefined,
-                )}
+                {formatDateThai(pond.startDate ?? undefined)}
               </p>
             </div>
           </div>
