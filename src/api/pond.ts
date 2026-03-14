@@ -82,6 +82,66 @@ export interface PondSellResponse {
   activePondId: number
 }
 
+// --- Preview (Review & Confirm) response types ---
+
+export interface AdditionalCostLine {
+  title: string
+  cost: number
+}
+
+export interface PondFillPreviewResponse {
+  valid: boolean
+  species: string
+  quantity: number
+  avgWeightKg: number
+  totalWeight: number
+  costPerUnit: number
+  baseStockCost: number
+  additionalCosts: AdditionalCostLine[]
+  totalCost: number
+  stockBefore: number
+  stockAfter: number
+  stockDelta: number
+  validationError?: string
+}
+
+export interface PondMovePreviewResponse {
+  valid: boolean
+  species: string
+  quantity: number
+  avgWeightKg: number
+  totalWeight: number
+  costPerUnit: number
+  baseTransferCost: number
+  additionalCosts: AdditionalCostLine[]
+  totalCost: number
+  stockBefore: number
+  stockAfter: number
+  stockDelta: number
+  validationError?: string
+}
+
+export interface PondSellPreviewItem {
+  fishType: string
+  quantity: number
+  avgWeightKg: number
+  pricePerKg: number
+  subtotal: number
+  totalWeight: number
+}
+
+export interface PondSellPreviewResponse {
+  valid: boolean
+  items: PondSellPreviewItem[]
+  totalRevenue: number
+  totalQuantity: number
+  totalWeight: number
+  stockBefore: number
+  stockAfter: number
+  stockDelta: number
+  validationError?: string
+}
+
 export const pondApi = {
   getPond: async (id: number): Promise<PondResponse> => {
     return apiClient.get<PondResponse>(`/pond/${id}`)
@@ -124,5 +184,35 @@ export const pondApi = {
     body: PondSellRequest,
   ): Promise<PondSellResponse> => {
     return apiClient.post<PondSellResponse>(`/pond/${pondId}/sell`, body)
+  },
+
+  fillPondPreview: async (
+    pondId: number,
+    body: PondFillRequest,
+  ): Promise<PondFillPreviewResponse> => {
+    return apiClient.post<PondFillPreviewResponse>(
+      `/pond/${pondId}/fill/preview`,
+      body,
+    )
+  },
+
+  movePondPreview: async (
+    sourcePondId: number,
+    body: PondMoveRequest,
+  ): Promise<PondMovePreviewResponse> => {
+    return apiClient.post<PondMovePreviewResponse>(
+      `/pond/${sourcePondId}/move/preview`,
+      body,
+    )
+  },
+
+  sellPondPreview: async (
+    pondId: number,
+    body: PondSellRequest,
+  ): Promise<PondSellPreviewResponse> => {
+    return apiClient.post<PondSellPreviewResponse>(
+      `/pond/${pondId}/sell/preview`,
+      body,
+    )
   },
 }
