@@ -302,8 +302,8 @@ export function PondDetailPage() {
 
   return (
     <div className='space-y-6'>
-      <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
-        <div className='flex items-center gap-4 min-w-0'>
+      <div className='flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6'>
+        <div className='flex min-w-0 flex-1 items-center gap-4'>
           <Link
             to='/ponds'
             className='p-2 hover:bg-gray-100 rounded-lg transition-colors shrink-0'
@@ -333,10 +333,10 @@ export function PondDetailPage() {
             </p>
           </div>
         </div>
-        <div className='flex flex-wrap items-center gap-2 sm:gap-3 shrink-0'>
+        <div className='flex w-full flex-wrap items-center justify-start gap-2 sm:gap-3 lg:w-auto lg:shrink-0 lg:justify-end'>
           <button
             type='button'
-            className='inline-flex items-center justify-center gap-2 w-28 px-4 py-2.5 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all hover:bg-green-50 hover:border-green-300 hover:shadow-md whitespace-nowrap'
+            className='inline-flex min-h-[44px] min-w-[7rem] flex-1 items-center justify-center gap-2 px-4 py-2.5 sm:flex-initial sm:w-28 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all hover:bg-green-50 hover:border-green-300 hover:shadow-md whitespace-nowrap'
             onClick={() => {
               setStockActionType('add')
               setIsStockModalOpen(true)
@@ -349,7 +349,7 @@ export function PondDetailPage() {
             type='button'
             disabled={!canMoveOrSell}
             title={!canMoveOrSell ? L.cannotMoveOrSellMaintenance : undefined}
-            className='inline-flex items-center justify-center gap-2 w-28 px-4 py-2.5 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none hover:bg-blue-50 hover:border-blue-300 hover:shadow-md'
+            className='inline-flex min-h-[44px] min-w-[7rem] flex-1 items-center justify-center gap-2 px-4 py-2.5 sm:flex-initial sm:w-28 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none hover:bg-blue-50 hover:border-blue-300 hover:shadow-md'
             onClick={() => {
               setStockActionType('transfer')
               setIsStockModalOpen(true)
@@ -362,7 +362,7 @@ export function PondDetailPage() {
             type='button'
             disabled={!canMoveOrSell}
             title={!canMoveOrSell ? L.cannotMoveOrSellMaintenance : undefined}
-            className='inline-flex items-center justify-center gap-2 w-28 px-4 py-2.5 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none hover:bg-amber-50 hover:border-amber-300 hover:shadow-md'
+            className='inline-flex min-h-[44px] min-w-[7rem] flex-1 items-center justify-center gap-2 px-4 py-2.5 sm:flex-initial sm:w-28 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none hover:bg-amber-50 hover:border-amber-300 hover:shadow-md'
             onClick={() => {
               setStockActionType('sell')
               setIsStockModalOpen(true)

@@ -26,6 +26,8 @@ import type {
   PondSellPreviewResponse,
 } from '../api/pond'
 import { merchantApi } from '../api/merchant'
+import { fishSizeGradeApi } from '../api/fishSizeGrade'
+import type { DropdownItem } from '../api/fishSizeGrade'
 import { pondKeys } from '../hooks/usePond'
 import { formatPondDisplayNameTH } from '../utils/masterDataName'
 import { DatePicker } from './DatePicker'
@@ -52,17 +54,12 @@ interface AdditionalCost {
   cost: number
 }
 
-interface SellRow {
+interface SellGradeRow {
   id: string
-  quantity: number
-  avgWeight: number
+  gradeId: number
+  weight: number
   pricePerKg: number
-}
-
-interface SpeciesSellData {
-  id: string
-  species: string
-  rows: SellRow[]
+  fishCount?: number
 }
 
 interface StockActionModalProps {
@@ -97,7 +94,7 @@ export function StockActionModal({
   const [selectedSpecies, setSelectedSpecies] = useState<string>('')
   const [destinationPondId, setDestinationPondId] = useState<string>('')
   const [additionalCosts, setAdditionalCosts] = useState<AdditionalCost[]>([])
-  const [speciesSellData, setSpeciesSellData] = useState<SpeciesSellData[]>([])
+  const [sellGradeRows, setSellGradeRows] = useState<SellGradeRow[]>([])
   const [buyer, setBuyer] = useState<string>('')
   const [closePond, setClosePond] = useState<boolean>(false)
   const [activityDate, setActivityDate] = useState<string>(
@@ -223,29 +220,22 @@ export function StockActionModal({
 
   const validateSellForm = useCallback((): Record<string, string> => {
     const err: Record<string, string> = {}
-    if (speciesSellData.length === 0) err.speciesSell = V.requiredSelect
+    if (sellGradeRows.length === 0) err.sellGradeRows = V.requiredSelect
     if (!buyer || buyer.trim() === '') err.buyer = V.requiredSelect
-    speciesSellData.forEach((sd) => {
-      sd.rows.forEach((row) => {
-        if (
-          typeof row.quantity !== 'number' ||
-          Number.isNaN(row.quantity) ||
-          row.quantity < 0
-        )
-          err[`sell_q_${sd.id}_${row.id}`] = V.sellQuantityInvalid
-        if (
-          typeof row.avgWeight !== 'number' ||
-          Number.isNaN(row.avgWeight) ||
-          row.avgWeight < 0
-        )
-          err[`sell_w_${sd.id}_${row.id}`] = V.sellWeightInvalid
-        if (
-          typeof row.pricePerKg !== 'number' ||
-          Number.isNaN(row.pricePerKg) ||
-          row.pricePerKg < 0
-        )
-          err[`sell_p_${sd.id}_${row.id}`] = V.sellPriceInvalid
-      })
+    sellGradeRows.forEach((row) => {
+      if (!row.gradeId) err[`sell_g_${row.id}`] = V.requiredSelect
+      if (
+        typeof row.weight !== 'number' ||
+        Number.isNaN(row.weight) ||
+        row.weight <= 0
+      )
+        err[`sell_w_${row.id}`] = V.sellWeightInvalid
+      if (
+        typeof row.pricePerKg !== 'number' ||
+        Number.isNaN(row.pricePerKg) ||
+        row.pricePerKg <= 0
+      )
+        err[`sell_p_${row.id}`] = V.sellPriceInvalid
     })
     additionalCosts.forEach((c) => {
       if (
@@ -257,7 +247,7 @@ export function StockActionModal({
         err[`category_${c.id}`] = V.additionalCostCategoryRequired
     })
     return err
-  }, [V, buyer, speciesSellData, additionalCosts])
+  }, [V, buyer, sellGradeRows, additionalCosts])
 
   const isMaintenanceBlocked =
     (actionType === 'transfer' || actionType === 'sell') &&
@@ -291,6 +281,13 @@ export function StockActionModal({
     queryFn: () => merchantApi.getMerchantList(),
     enabled: isOpen && actionType === 'sell',
     staleTime: 2 * 60 * 1000,
+  })
+
+  const { data: fishSizeGrades = [] } = useQuery<DropdownItem[]>({
+    queryKey: ['fishSizeGrades'],
+    queryFn: () => fishSizeGradeApi.getDropdown(),
+    enabled: isOpen && actionType === 'sell',
+    staleTime: 5 * 60 * 1000,
   })
 
   useEffect(() => {
@@ -361,45 +358,17 @@ export function StockActionModal({
     return (quantity / pond.currentStock) * 100
   }, [quantity, pond])
 
-  const speciesTotal = useMemo(() => {
-    return speciesSellData.map((speciesData) => {
-      const totalQuantity = speciesData.rows.reduce(
-        (sum, row) => sum + row.quantity,
-        0,
-      )
-      const totalWeight = speciesData.rows.reduce(
-        (sum, row) => sum + row.quantity * row.avgWeight,
-        0,
-      )
-      const totalRevenue = speciesData.rows.reduce(
-        (sum, row) => sum + row.quantity * row.avgWeight * row.pricePerKg,
-        0,
-      )
-      return {
-        speciesId: speciesData.id,
-        species: speciesData.species,
-        totalQuantity,
-        totalWeight,
-        totalRevenue,
-      }
-    })
-  }, [speciesSellData])
-
-  const grandTotals = useMemo(() => {
-    const totalQuantity = speciesTotal.reduce(
-      (sum, st) => sum + st.totalQuantity,
+  const sellTotals = useMemo(() => {
+    const totalWeight = sellGradeRows.reduce(
+      (sum, row) => sum + (row.weight || 0),
       0,
     )
-    const totalWeight = speciesTotal.reduce(
-      (sum, st) => sum + st.totalWeight,
+    const totalRevenue = sellGradeRows.reduce(
+      (sum, row) => sum + (row.weight || 0) * (row.pricePerKg || 0),
       0,
     )
-    const totalRevenue = speciesTotal.reduce(
-      (sum, st) => sum + st.totalRevenue,
-      0,
-    )
-    return { totalQuantity, totalWeight, totalRevenue }
-  }, [speciesTotal])
+    return { totalWeight, totalRevenue }
+  }, [sellGradeRows])
 
   const showWarning =
     (actionType === 'transfer' || actionType === 'sell') && stockPercentage > 50
@@ -449,17 +418,16 @@ export function StockActionModal({
   })
 
   const buildSellBody = () => {
-    const details = speciesSellData.flatMap((sd) =>
-      sd.rows
-        .map((row) => ({
-          fishType: sd.species,
-          size: 'medium',
-          amount: row.quantity * row.avgWeight,
-          fishUnit: 'kg',
-          pricePerUnit: row.pricePerKg,
-        }))
-        .filter((d) => d.amount > 0),
-    )
+    const details = sellGradeRows
+      .filter((row) => row.gradeId > 0 && row.weight > 0)
+      .map((row) => ({
+        fishSizeGradeId: row.gradeId,
+        weight: row.weight,
+        pricePerUnit: row.pricePerKg,
+        ...(row.fishCount != null &&
+          Number.isInteger(row.fishCount) &&
+          row.fishCount > 0 && { fishCount: row.fishCount }),
+      }))
     return {
       activityDate,
       details,
@@ -528,7 +496,7 @@ export function StockActionModal({
       setFieldErrors({})
       const sellBody = buildSellBody()
       if (sellBody.details.length === 0) {
-        setFieldErrors({ speciesSell: V.sellQuantityInvalid })
+        setFieldErrors({ sellGradeRows: V.sellWeightInvalid })
         return
       }
       setIsSubmitting(true)
@@ -573,7 +541,7 @@ export function StockActionModal({
     setSelectedSpecies('')
     setDestinationPondId('')
     setAdditionalCosts([])
-    setSpeciesSellData([])
+    setSellGradeRows([])
     setBuyer('')
     setClosePond(false)
     setActivityDate(new Date().toISOString().split('T')[0])
@@ -652,84 +620,46 @@ export function StockActionModal({
     )
   }
 
-  const handleAddSpecies = () => {
-    // In sell mode, only allow species that exist in the active pond
-    const pool =
-      actionType === 'sell' && pond ? (pond.species ?? []) : FISH_TYPE_VALUES
-    const availableSpecies = pool.filter(
-      (s) => !speciesSellData.some((data) => data.species === s),
-    )
-    if (availableSpecies.length === 0) return
-    const newSpeciesData: SpeciesSellData = {
-      id: `species-${speciesSellData.length + 1}`,
-      species: availableSpecies[0],
-      rows: [{ id: 'row-1', quantity: 0, avgWeight: 0, pricePerKg: 0 }],
+  const handleAddSellGradeRow = () => {
+    const usedGradeIds = new Set(sellGradeRows.map((r) => r.gradeId))
+    const nextGrade = fishSizeGrades.find((g) => !usedGradeIds.has(g.key))
+    if (!nextGrade && fishSizeGrades.length > 0) return
+    const newRow: SellGradeRow = {
+      id: `grade-${Date.now()}`,
+      gradeId: nextGrade?.key ?? 0,
+      weight: 0,
+      pricePerKg: 0,
     }
-    setSpeciesSellData([...speciesSellData, newSpeciesData])
+    setSellGradeRows([...sellGradeRows, newRow])
   }
 
-  const handleRemoveSpecies = (speciesId: string) => {
-    setSpeciesSellData(speciesSellData.filter((data) => data.id !== speciesId))
+  const handleRemoveSellGradeRow = (rowId: string) => {
+    setSellGradeRows(sellGradeRows.filter((r) => r.id !== rowId))
   }
 
-  const handleSpeciesChange = (speciesId: string, newSpecies: string) => {
-    setSpeciesSellData(
-      speciesSellData.map((data) =>
-        data.id === speciesId ? { ...data, species: newSpecies } : data,
-      ),
-    )
-  }
-
-  const handleAddSpeciesRow = (speciesId: string) => {
-    setSpeciesSellData(
-      speciesSellData.map((data) => {
-        if (data.id === speciesId) {
-          const newRow: SellRow = {
-            id: `row-${data.rows.length + 1}`,
-            quantity: 0,
-            avgWeight: 0,
-            pricePerKg: 0,
-          }
-          return { ...data, rows: [...data.rows, newRow] }
-        }
-        return data
-      }),
-    )
-  }
-
-  const handleRemoveSpeciesRow = (speciesId: string, rowId: string) => {
-    setSpeciesSellData(
-      speciesSellData.map((data) => {
-        if (data.id === speciesId) {
-          return {
-            ...data,
-            rows: data.rows.filter((row) => row.id !== rowId),
-          }
-        }
-        return data
-      }),
-    )
-  }
-
-  const handleSpeciesRowChange = (
-    speciesId: string,
+  const handleSellGradeRowChange = (
     rowId: string,
-    field: 'quantity' | 'avgWeight' | 'pricePerKg',
+    field: 'gradeId' | 'weight' | 'pricePerKg' | 'fishCount',
     value: string,
   ) => {
-    setSpeciesSellData(
-      speciesSellData.map((data) => {
-        if (data.id === speciesId) {
+    setSellGradeRows(
+      sellGradeRows.map((row) => {
+        if (row.id !== rowId) return row
+        if (field === 'fishCount') {
+          const n = value === '' ? undefined : parseInt(value, 10)
           return {
-            ...data,
-            rows: data.rows.map((row) =>
-              row.id === rowId
-                ? { ...row, [field]: parseFloat(value) || 0 }
-                : row,
-            ),
+            ...row,
+            fishCount:
+              n !== undefined && !Number.isNaN(n) && n >= 0 ? n : undefined,
           }
         }
-        return data
+        return {
+          ...row,
+          [field]:
+            field === 'gradeId'
+              ? parseInt(value, 10) || 0
+              : parseFloat(value) || 0,
+        }
       }),
     )
   }
@@ -1551,9 +1481,9 @@ export function StockActionModal({
 
                   {actionType === 'sell' && (
                     <>
-                      {fieldErrors.speciesSell && (
+                      {fieldErrors.sellGradeRows && (
                         <p className='text-sm text-red-600' role='alert'>
-                          {fieldErrors.speciesSell}
+                          {fieldErrors.sellGradeRows}
                         </p>
                       )}
                       <div className='border-t border-gray-200 pt-4'>
@@ -1561,313 +1491,192 @@ export function StockActionModal({
                           <label className='block text-sm font-medium text-gray-700'>
                             {L.speciesToSell}
                           </label>
-                          <button
-                            type='button'
-                            onClick={handleAddSpecies}
-                            disabled={(() => {
-                              const pool =
-                                actionType === 'sell' && pond
-                                  ? (pond.species ?? [])
-                                  : FISH_TYPE_VALUES
-                              const availableToAdd = pool.filter(
-                                (s) =>
-                                  !speciesSellData.some(
-                                    (data) => data.species === s,
-                                  ),
-                              )
-                              return availableToAdd.length === 0
-                            })()}
-                            className='flex items-center gap-1.5 px-3 py-1.5 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
-                          >
-                            <Plus size={16} />
-                            {L.addSpecies}
-                          </button>
+                          {sellGradeRows.length > 0 && (
+                            <button
+                              type='button'
+                              onClick={handleAddSellGradeRow}
+                              disabled={
+                                fishSizeGrades.length > 0 &&
+                                sellGradeRows.length >= fishSizeGrades.length
+                              }
+                              className='flex items-center gap-1.5 px-3 py-1.5 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                            >
+                              <Plus size={16} />
+                              {L.addSizeRow}
+                            </button>
+                          )}
                         </div>
-                        {speciesSellData.length > 0 && (
-                          <div className='space-y-6'>
-                            {speciesSellData.map((speciesData) => {
-                              const total = speciesTotal.find(
-                                (st) => st.speciesId === speciesData.id,
-                              )
-                              const speciesPool =
-                                actionType === 'sell' && pond
-                                  ? (pond.species ?? [])
-                                  : FISH_TYPE_VALUES
-                              const availableSpeciesOptions =
-                                speciesPool.filter(
-                                  (s) =>
-                                    s === speciesData.species ||
-                                    !speciesSellData.some(
-                                      (data) => data.species === s,
-                                    ),
+                        {sellGradeRows.length > 0 && (
+                          <div className='border border-gray-200 rounded-xl overflow-hidden'>
+                            <div className='grid grid-cols-[5.5rem_1fr_1fr_5rem_5.5rem_2rem] gap-x-2 pl-4 pr-3 py-2 bg-gray-100 border-b border-gray-200 text-[11px] font-semibold text-gray-500 uppercase tracking-wide'>
+                              <div className='pl-3'>
+                                ไซส์ <span className='text-red-400'>*</span>
+                              </div>
+                              <div className='pl-3'>
+                                กก. <span className='text-red-400'>*</span>
+                              </div>
+                              <div className='pl-3'>
+                                บาท/กก. <span className='text-red-400'>*</span>
+                              </div>
+                              <div className='pl-3'>ตัว</div>
+                              <div className='text-right pr-3'>รวม</div>
+                              <div />
+                            </div>
+                            <div className='divide-y divide-gray-100'>
+                              {sellGradeRows.map((row) => {
+                                const usedGradeIds = new Set(
+                                  sellGradeRows
+                                    .filter((r) => r.id !== row.id)
+                                    .map((r) => r.gradeId),
                                 )
-                              return (
-                                <div
-                                  key={speciesData.id}
-                                  className='bg-gray-50 rounded-lg p-4 border border-gray-300'
-                                >
-                                  <div className='flex items-center gap-3 mb-4'>
-                                    <div className='flex-1'>
+                                const availableGrades = fishSizeGrades.filter(
+                                  (g) =>
+                                    g.key === row.gradeId ||
+                                    !usedGradeIds.has(g.key),
+                                )
+                                const subtotal =
+                                  (row.weight || 0) * (row.pricePerKg || 0)
+                                return (
+                                  <div
+                                    key={row.id}
+                                    className='grid grid-cols-[5.5rem_1fr_1fr_5rem_5.5rem_2rem] gap-x-2 px-3 py-2 items-center bg-white hover:bg-gray-50 transition-colors'
+                                  >
+                                    <div className='min-w-0'>
                                       <select
-                                        value={speciesData.species}
+                                        value={row.gradeId || ''}
+                                        onChange={(e) => {
+                                          handleSellGradeRowChange(
+                                            row.id,
+                                            'gradeId',
+                                            e.target.value,
+                                          )
+                                          clearFieldError(`sell_g_${row.id}`)
+                                        }}
+                                        className={`w-full h-9 px-2 text-sm border rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white ${
+                                          fieldErrors[`sell_g_${row.id}`]
+                                            ? 'border-red-500'
+                                            : 'border-gray-300'
+                                        }`}
+                                      >
+                                        <option value='' disabled>
+                                          —
+                                        </option>
+                                        {availableGrades.map((g) => (
+                                          <option key={g.key} value={g.key}>
+                                            {g.value}
+                                          </option>
+                                        ))}
+                                      </select>
+                                      {fieldErrors[`sell_g_${row.id}`] && (
+                                        <p className='text-[10px] text-red-600 mt-0.5'>
+                                          {fieldErrors[`sell_g_${row.id}`]}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <div className='min-w-0'>
+                                      <div className='relative'>
+                                        <input
+                                          type='number'
+                                          placeholder='0.0'
+                                          step='0.1'
+                                          min='0'
+                                          value={row.weight || ''}
+                                          onChange={(e) => {
+                                            handleSellGradeRowChange(
+                                              row.id,
+                                              'weight',
+                                              e.target.value,
+                                            )
+                                            clearFieldError(`sell_w_${row.id}`)
+                                          }}
+                                          className={`w-full h-9 pl-3 pr-8 text-sm border rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white ${
+                                            fieldErrors[`sell_w_${row.id}`]
+                                              ? 'border-red-500'
+                                              : 'border-gray-300'
+                                          }`}
+                                        />
+                                        <span className='absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400'>
+                                          {L.unitKg}
+                                        </span>
+                                      </div>
+                                      {fieldErrors[`sell_w_${row.id}`] && (
+                                        <p className='text-[10px] text-red-600 mt-0.5'>
+                                          {fieldErrors[`sell_w_${row.id}`]}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <div className='min-w-0'>
+                                      <div className='relative'>
+                                        <span className='absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400'>
+                                          บาท
+                                        </span>
+                                        <input
+                                          type='number'
+                                          placeholder='0'
+                                          step='1'
+                                          min='0'
+                                          value={row.pricePerKg || ''}
+                                          onChange={(e) => {
+                                            handleSellGradeRowChange(
+                                              row.id,
+                                              'pricePerKg',
+                                              e.target.value,
+                                            )
+                                            clearFieldError(`sell_p_${row.id}`)
+                                          }}
+                                          className={`w-full h-9 pl-3 pr-9 text-sm border rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white ${
+                                            fieldErrors[`sell_p_${row.id}`]
+                                              ? 'border-red-500'
+                                              : 'border-gray-300'
+                                          }`}
+                                        />
+                                      </div>
+                                      {fieldErrors[`sell_p_${row.id}`] && (
+                                        <p className='text-[10px] text-red-600 mt-0.5'>
+                                          {fieldErrors[`sell_p_${row.id}`]}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <div className='min-w-0'>
+                                      <input
+                                        type='number'
+                                        placeholder=''
+                                        step='1'
+                                        min='0'
+                                        value={row.fishCount ?? ''}
                                         onChange={(e) =>
-                                          handleSpeciesChange(
-                                            speciesData.id,
+                                          handleSellGradeRowChange(
+                                            row.id,
+                                            'fishCount',
                                             e.target.value,
                                           )
                                         }
-                                        className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white font-medium text-gray-900'
-                                      >
-                                        {availableSpeciesOptions.map(
-                                          (value) => (
-                                            <option key={value} value={value}>
-                                              {fishTypeLabels[
-                                                value as keyof typeof fishTypeLabels
-                                              ] ?? value}
-                                            </option>
-                                          ),
-                                        )}
-                                      </select>
+                                        className='w-full h-9 px-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white text-center'
+                                        title={L.fishCountOptional}
+                                      />
+                                    </div>
+                                    <div className='text-right text-sm font-semibold text-gray-900 tabular-nums'>
+                                      {subtotal > 0
+                                        ? `${L.currencySymbol}${subtotal.toLocaleString(undefined, { minimumFractionDigits: 0 })}`
+                                        : `${L.currencySymbol}0`}
                                     </div>
                                     <button
                                       type='button'
                                       onClick={() =>
-                                        handleRemoveSpecies(speciesData.id)
+                                        handleRemoveSellGradeRow(row.id)
                                       }
-                                      className='p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors'
-                                      title={L.removeSpecies}
+                                      className='w-7 h-7 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors'
+                                      title={L.removeRow}
                                     >
-                                      <Trash2 size={18} />
+                                      <Trash2 size={14} />
                                     </button>
                                   </div>
-                                  <div className='space-y-3 mb-3'>
-                                    {speciesData.rows.map((row) => (
-                                      <div
-                                        key={row.id}
-                                        className='flex gap-3 items-start'
-                                      >
-                                        <div className='flex-1'>
-                                          <div className='relative'>
-                                            <Package
-                                              size={16}
-                                              className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'
-                                            />
-                                            <input
-                                              type='number'
-                                              placeholder={
-                                                L.quantityPlaceholder
-                                              }
-                                              step='1'
-                                              min='0'
-                                              value={row.quantity || ''}
-                                              onChange={(e) => {
-                                                handleSpeciesRowChange(
-                                                  speciesData.id,
-                                                  row.id,
-                                                  'quantity',
-                                                  e.target.value,
-                                                )
-                                                clearFieldError(
-                                                  `sell_q_${speciesData.id}_${row.id}`,
-                                                )
-                                              }}
-                                              className={`w-full pl-9 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white ${
-                                                fieldErrors[
-                                                  `sell_q_${speciesData.id}_${row.id}`
-                                                ]
-                                                  ? 'border-red-500'
-                                                  : 'border-gray-300'
-                                              }`}
-                                            />
-                                          </div>
-                                          {fieldErrors[
-                                            `sell_q_${speciesData.id}_${row.id}`
-                                          ] && (
-                                            <p
-                                              className='text-sm text-red-600 mt-1'
-                                              role='alert'
-                                            >
-                                              {
-                                                fieldErrors[
-                                                  `sell_q_${speciesData.id}_${row.id}`
-                                                ]
-                                              }
-                                            </p>
-                                          )}
-                                        </div>
-                                        <div className='flex-1'>
-                                          <div className='relative'>
-                                            <Weight
-                                              size={16}
-                                              className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400'
-                                            />
-                                            <input
-                                              type='number'
-                                              placeholder={L.avgWeightKg}
-                                              step='0.01'
-                                              min='0'
-                                              value={row.avgWeight || ''}
-                                              onChange={(e) => {
-                                                handleSpeciesRowChange(
-                                                  speciesData.id,
-                                                  row.id,
-                                                  'avgWeight',
-                                                  e.target.value,
-                                                )
-                                                clearFieldError(
-                                                  `sell_w_${speciesData.id}_${row.id}`,
-                                                )
-                                              }}
-                                              className={`w-full pl-9 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white ${
-                                                fieldErrors[
-                                                  `sell_w_${speciesData.id}_${row.id}`
-                                                ]
-                                                  ? 'border-red-500'
-                                                  : 'border-gray-300'
-                                              }`}
-                                            />
-                                          </div>
-                                          {fieldErrors[
-                                            `sell_w_${speciesData.id}_${row.id}`
-                                          ] && (
-                                            <p
-                                              className='text-sm text-red-600 mt-1'
-                                              role='alert'
-                                            >
-                                              {
-                                                fieldErrors[
-                                                  `sell_w_${speciesData.id}_${row.id}`
-                                                ]
-                                              }
-                                            </p>
-                                          )}
-                                        </div>
-                                        <div className='flex-1'>
-                                          <div className='relative'>
-                                            <span
-                                              className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium'
-                                              aria-hidden
-                                            >
-                                              {L.currencySymbol}
-                                            </span>
-                                            <input
-                                              type='number'
-                                              placeholder={L.pricePerKgThb}
-                                              step='0.01'
-                                              min='0'
-                                              value={row.pricePerKg || ''}
-                                              onChange={(e) => {
-                                                handleSpeciesRowChange(
-                                                  speciesData.id,
-                                                  row.id,
-                                                  'pricePerKg',
-                                                  e.target.value,
-                                                )
-                                                clearFieldError(
-                                                  `sell_p_${speciesData.id}_${row.id}`,
-                                                )
-                                              }}
-                                              className={`w-full pl-9 pr-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all bg-white ${
-                                                fieldErrors[
-                                                  `sell_p_${speciesData.id}_${row.id}`
-                                                ]
-                                                  ? 'border-red-500'
-                                                  : 'border-gray-300'
-                                              }`}
-                                            />
-                                          </div>
-                                          {fieldErrors[
-                                            `sell_p_${speciesData.id}_${row.id}`
-                                          ] && (
-                                            <p
-                                              className='text-sm text-red-600 mt-1'
-                                              role='alert'
-                                            >
-                                              {
-                                                fieldErrors[
-                                                  `sell_p_${speciesData.id}_${row.id}`
-                                                ]
-                                              }
-                                            </p>
-                                          )}
-                                        </div>
-                                        <button
-                                          type='button'
-                                          onClick={() =>
-                                            handleRemoveSpeciesRow(
-                                              speciesData.id,
-                                              row.id,
-                                            )
-                                          }
-                                          disabled={
-                                            speciesData.rows.length === 1
-                                          }
-                                          className='p-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0 disabled:opacity-30 disabled:cursor-not-allowed'
-                                          title={L.removeRow}
-                                        >
-                                          <Trash2 size={18} />
-                                        </button>
-                                      </div>
-                                    ))}
-                                  </div>
-                                  <button
-                                    type='button'
-                                    onClick={() =>
-                                      handleAddSpeciesRow(speciesData.id)
-                                    }
-                                    className='w-full py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors border border-dashed border-purple-300'
-                                  >
-                                    {L.addSizeRow}
-                                  </button>
-                                  {total && total.totalQuantity > 0 && (
-                                    <div className='mt-3 pt-3 border-t border-gray-300'>
-                                      <p className='text-xs text-gray-600 font-medium mb-2'>
-                                        {
-                                          fishTypeLabels[
-                                            speciesData.species as keyof typeof fishTypeLabels
-                                          ]
-                                        }{' '}
-                                        {L.summary}
-                                      </p>
-                                      <div className='grid grid-cols-3 gap-3 text-sm'>
-                                        <div>
-                                          <p className='text-xs text-gray-500'>
-                                            {L.quantity}
-                                          </p>
-                                          <p className='font-semibold text-gray-900'>
-                                            {total.totalQuantity.toLocaleString()}
-                                          </p>
-                                        </div>
-                                        <div>
-                                          <p className='text-xs text-gray-500'>
-                                            {L.totalWeightLabel}
-                                          </p>
-                                          <p className='font-semibold text-gray-900'>
-                                            {total.totalWeight.toFixed(2)}{' '}
-                                            {L.unitKg}
-                                          </p>
-                                        </div>
-                                        <div>
-                                          <p className='text-xs text-gray-500'>
-                                            {L.totalRevenueLabel}
-                                          </p>
-                                          <p className='font-semibold text-gray-900'>
-                                            {L.currencySymbol}
-                                            {total.totalRevenue.toLocaleString(
-                                              undefined,
-                                              { minimumFractionDigits: 2 },
-                                            )}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              )
-                            })}
+                                )
+                              })}
+                            </div>
                           </div>
                         )}
-                        {speciesSellData.length === 0 && (
+                        {sellGradeRows.length === 0 && (
                           <div className='text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300'>
                             <Fish
                               size={40}
@@ -1878,75 +1687,31 @@ export function StockActionModal({
                             </p>
                             <button
                               type='button'
-                              onClick={handleAddSpecies}
+                              onClick={handleAddSellGradeRow}
                               className='px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 rounded-lg transition-colors border border-purple-300'
                             >
                               <Plus size={16} className='inline mr-1' />
-                              {L.addSpeciesToSell}
+                              {L.addSizeRow}
                             </button>
                           </div>
                         )}
                       </div>
-                      {speciesSellData.length > 1 &&
-                        grandTotals.totalQuantity > 0 && (
-                          <div className='bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-lg p-4 border border-purple-200'>
-                            <p className='text-xs text-purple-700 font-medium mb-3'>
-                              {L.grandTotalAllSpecies}
-                            </p>
-                            <div className='grid grid-cols-3 gap-4'>
-                              <div>
-                                <p className='text-xs text-purple-700 font-medium mb-1'>
-                                  {L.totalQuantity}
-                                </p>
-                                <p className='text-xl font-bold text-purple-900'>
-                                  {grandTotals.totalQuantity.toLocaleString()}
-                                </p>
-                              </div>
-                              <div>
-                                <p className='text-xs text-purple-700 font-medium mb-1'>
-                                  {L.totalWeightLabel}
-                                </p>
-                                <p className='text-xl font-bold text-purple-900'>
-                                  {grandTotals.totalWeight.toFixed(2)}{' '}
-                                  {L.unitKg}
-                                </p>
-                              </div>
-                              <div>
-                                <p className='text-xs text-purple-700 font-medium mb-1'>
-                                  {L.totalRevenueLabel}
-                                </p>
-                                <p className='text-xl font-bold text-purple-900'>
-                                  {L.currencySymbol}
-                                  {grandTotals.totalRevenue.toLocaleString(
-                                    undefined,
-                                    { minimumFractionDigits: 2 },
-                                  )}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      {speciesSellData.length === 1 &&
-                        grandTotals.totalQuantity > 0 && (
+                      {sellGradeRows.length > 0 &&
+                        sellTotals.totalWeight > 0 && (
                           <div className='bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-lg p-4 border border-purple-200'>
                             <p className='text-xs text-purple-700 font-medium mb-3'>
                               {L.saleSummary}
                             </p>
-                            <div className='grid grid-cols-3 gap-4'>
-                              <div>
-                                <p className='text-xs text-purple-700 font-medium mb-1'>
-                                  {L.totalQuantity}
-                                </p>
-                                <p className='text-xl font-bold text-purple-900'>
-                                  {grandTotals.totalQuantity.toLocaleString()}
-                                </p>
-                              </div>
+                            <div className='grid grid-cols-2 gap-4'>
                               <div>
                                 <p className='text-xs text-purple-700 font-medium mb-1'>
                                   {L.totalWeightLabel}
                                 </p>
                                 <p className='text-xl font-bold text-purple-900'>
-                                  {grandTotals.totalWeight.toFixed(2)}{' '}
+                                  {sellTotals.totalWeight.toLocaleString(
+                                    undefined,
+                                    { minimumFractionDigits: 1 },
+                                  )}{' '}
                                   {L.unitKg}
                                 </p>
                               </div>
@@ -1956,9 +1721,9 @@ export function StockActionModal({
                                 </p>
                                 <p className='text-xl font-bold text-purple-900'>
                                   {L.currencySymbol}
-                                  {grandTotals.totalRevenue.toLocaleString(
+                                  {sellTotals.totalRevenue.toLocaleString(
                                     undefined,
-                                    { minimumFractionDigits: 2 },
+                                    { minimumFractionDigits: 1 },
                                   )}
                                 </p>
                               </div>
@@ -2280,7 +2045,7 @@ export function StockActionModal({
                         !isFormValid ||
                         (actionType !== 'add' &&
                           quantity > pond.currentStock) ||
-                        (actionType === 'sell' && speciesSellData.length === 0)
+                        (actionType === 'sell' && sellGradeRows.length === 0)
                       }
                       className={`flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r ${getButtonColor()} text-white rounded-lg font-medium hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
@@ -2387,9 +2152,21 @@ function ConfirmationView({
     }
   }
 
-  const stockBefore = previewResult.stockBefore
-  const stockAfter = previewResult.stockAfter
-  const stockDelta = previewResult.stockDelta
+  const stockBefore =
+    'stockBefore' in previewResult
+      ? (previewResult as PondFillPreviewResponse | PondMovePreviewResponse)
+          .stockBefore
+      : null
+  const stockAfter =
+    'stockAfter' in previewResult
+      ? (previewResult as PondFillPreviewResponse | PondMovePreviewResponse)
+          .stockAfter
+      : null
+  const stockDelta =
+    'stockDelta' in previewResult
+      ? (previewResult as PondFillPreviewResponse | PondMovePreviewResponse)
+          .stockDelta
+      : null
 
   return (
     <div className='p-6 space-y-5'>
@@ -2506,41 +2283,42 @@ function ConfirmationView({
         />
       )}
 
-      {/* Stock impact */}
-      <div className={`rounded-lg p-4 ${accent.bg} border ${accent.border}`}>
-        <p className={`text-sm font-semibold ${accent.text} mb-3`}>
-          {L.stockImpact}
-        </p>
-        <div className='grid grid-cols-3 gap-4 text-center'>
-          <div>
-            <p className='text-xs text-gray-500'>{L.before}</p>
-            <p className='text-xl font-bold text-gray-900'>
-              {stockBefore.toLocaleString()}
-            </p>
-          </div>
-          <div>
-            <p className='text-xs text-gray-500'>{L.after}</p>
-            <p className='text-xl font-bold text-gray-900'>
-              {stockAfter.toLocaleString()}
-            </p>
-          </div>
-          <div>
-            <p className='text-xs text-gray-500'>
-              {actionType === 'add'
-                ? L.added
-                : actionType === 'transfer'
-                  ? L.transferred
-                  : L.sold}
-            </p>
-            <p
-              className={`text-xl font-bold ${stockDelta >= 0 ? 'text-green-600' : 'text-red-600'}`}
-            >
-              {stockDelta >= 0 ? '+' : ''}
-              {stockDelta.toLocaleString()}
-            </p>
+      {stockBefore != null && stockAfter != null && stockDelta != null && (
+        <div className={`rounded-lg p-4 ${accent.bg} border ${accent.border}`}>
+          <p className={`text-sm font-semibold ${accent.text} mb-3`}>
+            {L.stockImpact}
+          </p>
+          <div className='grid grid-cols-3 gap-4 text-center'>
+            <div>
+              <p className='text-xs text-gray-500'>{L.before}</p>
+              <p className='text-xl font-bold text-gray-900'>
+                {stockBefore.toLocaleString()}
+              </p>
+            </div>
+            <div>
+              <p className='text-xs text-gray-500'>{L.after}</p>
+              <p className='text-xl font-bold text-gray-900'>
+                {stockAfter.toLocaleString()}
+              </p>
+            </div>
+            <div>
+              <p className='text-xs text-gray-500'>
+                {actionType === 'add'
+                  ? L.added
+                  : actionType === 'transfer'
+                    ? L.transferred
+                    : L.sold}
+              </p>
+              <p
+                className={`text-xl font-bold ${stockDelta >= 0 ? 'text-green-600' : 'text-red-600'}`}
+              >
+                {stockDelta >= 0 ? '+' : ''}
+                {stockDelta.toLocaleString()}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {submitError && (
         <div className='rounded-lg p-3 bg-red-50 border border-red-200 text-sm text-red-700'>
@@ -2736,59 +2514,57 @@ function SellPreviewDetails({
   accent: { bg: string; border: string; text: string }
 }) {
   const L = th.stockActionModal
-  const fishTypeLabels = th.fishType
   return (
     <div
       className={`rounded-lg p-4 ${accent.bg} border ${accent.border} space-y-3 text-sm`}
     >
       <p className={`text-sm font-semibold ${accent.text}`}>{L.saleDetails}</p>
-      {preview.items.map((item, i) => (
-        <div key={i} className='bg-white/60 rounded-lg p-3 space-y-1.5'>
-          <p className='font-medium text-gray-900'>
-            {fishTypeLabels[item.fishType as keyof typeof fishTypeLabels] ??
-              item.fishType}
-          </p>
-          <div className='grid grid-cols-3 gap-2 text-xs'>
-            <div>
-              <span className='text-gray-500'>{L.quantity}</span>
-              <p className='font-semibold text-gray-900'>
-                {item.quantity.toLocaleString()}
-              </p>
-            </div>
-            <div>
-              <span className='text-gray-500'>{L.pricePerKgThb}</span>
-              <p className='font-semibold text-gray-900'>
-                {fmtCurrency(item.pricePerKg)}
-              </p>
-            </div>
-            <div>
-              <span className='text-gray-500'>{L.totalRevenueLabel}</span>
-              <p className='font-semibold text-gray-900'>
-                {fmtCurrency(item.subtotal)}
-              </p>
-            </div>
-          </div>
+      <div className='rounded-md overflow-hidden border border-gray-200 bg-white/50'>
+        <div className='grid grid-cols-[1.2fr_1fr_1fr_1.1fr] gap-2 px-3 py-2 bg-gray-50 text-[11px] font-semibold text-gray-500 uppercase tracking-wide'>
+          <div className='pl-1'>ไซส์</div>
+          <div className='text-right pr-1'>{L.totalWeightLabel}</div>
+          <div className='text-right pr-1'>{L.pricePerKgThb}</div>
+          <div className='text-right pr-1'>{L.totalRevenueLabel}</div>
         </div>
-      ))}
-      <div className='border-t border-gray-300 pt-2 mt-2'>
-        <div className='grid grid-cols-3 gap-4'>
-          <div>
-            <p className='text-xs text-gray-500'>{L.totalQuantity}</p>
-            <p className='font-bold text-gray-900'>
-              {preview.totalQuantity.toLocaleString()}
-            </p>
+        <div className='divide-y divide-gray-100'>
+          {preview.items.map((item, i) => (
+            <div
+              key={i}
+              className='grid grid-cols-[1.2fr_1fr_1fr_1.1fr] gap-2 px-3 py-2 items-center'
+            >
+              <div className='font-medium text-gray-900'>
+                {item.fishSizeGradeName}
+              </div>
+              <div className='text-right tabular-nums font-semibold text-gray-900'>
+                {item.weight.toLocaleString(undefined, {
+                  minimumFractionDigits: 1,
+                })}{' '}
+                {L.unitKg}
+              </div>
+              <div className='text-right tabular-nums font-semibold text-gray-900'>
+                {fmtCurrency(item.pricePerKg)}
+              </div>
+              <div className='text-right tabular-nums font-semibold text-gray-900'>
+                {fmtCurrency(item.subtotal)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className='mt-3 rounded-lg border border-gray-200/90 bg-white/80 px-3 py-2.5 shadow-sm'>
+        <div className='grid grid-cols-[1.2fr_1fr_1fr_1.1fr] gap-2 items-center'>
+          <div className='pl-1 text-sm font-semibold text-gray-700'>สรุป</div>
+          <div className='text-right text-sm font-bold tabular-nums text-gray-900'>
+            {preview.totalWeight.toLocaleString(undefined, {
+              minimumFractionDigits: 1,
+            })}{' '}
+            {L.unitKg}
           </div>
-          <div>
-            <p className='text-xs text-gray-500'>{L.totalWeightLabel}</p>
-            <p className='font-bold text-gray-900'>
-              {preview.totalWeight.toFixed(2)} {L.unitKg}
-            </p>
-          </div>
-          <div>
-            <p className='text-xs text-gray-500'>{L.totalRevenueLabel}</p>
-            <p className={`font-bold ${accent.text}`}>
-              {fmtCurrency(preview.totalRevenue)}
-            </p>
+          <div className='min-w-0' aria-hidden />
+          <div
+            className={`text-right text-sm font-bold tabular-nums ${accent.text}`}
+          >
+            {fmtCurrency(preview.totalRevenue)}
           </div>
         </div>
       </div>

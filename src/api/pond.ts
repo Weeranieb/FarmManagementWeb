@@ -62,11 +62,10 @@ export interface PondMoveResponse {
 }
 
 export interface PondSellDetailItem {
-  fishType: string
-  size: string
-  amount: number
-  fishUnit: string
+  fishSizeGradeId: number
+  weight: number
   pricePerUnit: number
+  fishCount?: number
 }
 
 export interface PondSellRequest {
@@ -122,23 +121,19 @@ export interface PondMovePreviewResponse {
 }
 
 export interface PondSellPreviewItem {
-  fishType: string
-  quantity: number
-  avgWeightKg: number
+  fishSizeGradeId: number
+  fishSizeGradeName: string
+  weight: number
   pricePerKg: number
   subtotal: number
-  totalWeight: number
+  fishCount?: number
 }
 
 export interface PondSellPreviewResponse {
   valid: boolean
   items: PondSellPreviewItem[]
   totalRevenue: number
-  totalQuantity: number
   totalWeight: number
-  stockBefore: number
-  stockAfter: number
-  stockDelta: number
   validationError?: string
 }
 
