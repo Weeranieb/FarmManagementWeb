@@ -15,6 +15,7 @@ import {
   Bell,
   ChevronDown,
   Database,
+  Layers,
 } from 'lucide-react'
 import { useAuthQuery } from '../hooks/useAuth'
 import { useLogoutMutation } from '../hooks/useAuth'
@@ -46,6 +47,7 @@ export function MainLayout() {
     { path: '/dashboard', label: L.navDashboard, icon: LayoutDashboard },
     { path: '/farms', label: L.navFarms, icon: Building },
     { path: '/ponds', label: L.navPonds, icon: Fish },
+    { path: '/farm-groups', label: L.navFarmGroups, icon: Layers },
     { path: '/workers', label: L.navWorkers, icon: Users },
     { path: '/merchants', label: L.navMerchants, icon: Store },
     { path: '/feed-collections', label: L.navFeedCollections, icon: Package },

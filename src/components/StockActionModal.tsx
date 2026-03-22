@@ -1508,7 +1508,7 @@ export function StockActionModal({
                         </div>
                         {sellGradeRows.length > 0 && (
                           <div className='border border-gray-200 rounded-xl overflow-hidden'>
-                            <div className='grid grid-cols-[5.5rem_1fr_1fr_5rem_5.5rem_2rem] gap-x-2 pl-4 pr-3 py-2 bg-gray-100 border-b border-gray-200 text-[11px] font-semibold text-gray-500 uppercase tracking-wide'>
+                            <div className='grid grid-cols-[5.5rem_1fr_1fr_1fr_5.5rem_2rem] gap-x-2 pl-4 pr-3 py-2 bg-gray-100 border-b border-gray-200 text-[11px] font-semibold text-gray-500 uppercase tracking-wide'>
                               <div className='pl-3'>
                                 ไซส์ <span className='text-red-400'>*</span>
                               </div>
@@ -1539,7 +1539,7 @@ export function StockActionModal({
                                 return (
                                   <div
                                     key={row.id}
-                                    className='grid grid-cols-[5.5rem_1fr_1fr_5rem_5.5rem_2rem] gap-x-2 px-3 py-2 items-center bg-white hover:bg-gray-50 transition-colors'
+                                    className='grid grid-cols-[5.5rem_1fr_1fr_1fr_5.5rem_2rem] gap-x-2 px-3 py-2 items-center bg-white hover:bg-gray-50 transition-colors'
                                   >
                                     <div className='min-w-0'>
                                       <select

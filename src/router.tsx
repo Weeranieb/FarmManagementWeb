@@ -9,6 +9,10 @@ import { PondsListPage } from './pages/PondListPage'
 import { PondDetailPage } from './pages/PondDetailPage'
 import { MerchantsListPage } from './pages/MerchantsListPage'
 import { AdminMasterDataPage } from './pages/AdminMasterDataPage'
+import { FarmGroupsListPage } from './pages/FarmGroupsListPage'
+import { FarmGroupFormPage } from './pages/FarmGroupFormPage'
+import { WorkersListPage } from './pages/WorkersListPage.tsx'
+import { WorkerFormPage } from './pages/WorkerFormPage.tsx'
 import { ProtectedRoute } from './components/guards/ProtectedRoute'
 import { GuestRoute } from './components/guards/GuestRoute'
 import { SuperAdminRoute } from './components/guards/SuperAdminRoute'
@@ -66,6 +70,30 @@ export const router = createBrowserRouter([
       {
         path: '/ponds/:id',
         element: <PondDetailPage />,
+      },
+      {
+        path: '/farm-groups',
+        element: <FarmGroupsListPage />,
+      },
+      {
+        path: '/farm-groups/new',
+        element: <FarmGroupFormPage />,
+      },
+      {
+        path: '/farm-groups/:id/edit',
+        element: <FarmGroupFormPage />,
+      },
+      {
+        path: '/workers',
+        element: <WorkersListPage />,
+      },
+      {
+        path: '/workers/new',
+        element: <WorkerFormPage />,
+      },
+      {
+        path: '/workers/:id/edit',
+        element: <WorkerFormPage />,
       },
       {
         path: '/merchants',
