@@ -13,6 +13,8 @@ import { FarmGroupsListPage } from './pages/FarmGroupsListPage'
 import { FarmGroupFormPage } from './pages/FarmGroupFormPage'
 import { WorkersListPage } from './pages/WorkersListPage.tsx'
 import { WorkerFormPage } from './pages/WorkerFormPage.tsx'
+import { FeedCollectionsPage } from './pages/FeedCollectionsPage'
+import { FeedPriceHistoryPage } from './pages/FeedPriceHistoryPage'
 import { ProtectedRoute } from './components/guards/ProtectedRoute'
 import { GuestRoute } from './components/guards/GuestRoute'
 import { SuperAdminRoute } from './components/guards/SuperAdminRoute'
@@ -98,6 +100,14 @@ export const router = createBrowserRouter([
       {
         path: '/merchants',
         element: <MerchantsListPage />,
+      },
+      {
+        path: '/feed-collections',
+        element: <FeedCollectionsPage />,
+      },
+      {
+        path: '/feed-collections/:id/history',
+        element: <FeedPriceHistoryPage />,
       },
       {
         path: '/admin/master-data',

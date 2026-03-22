@@ -91,13 +91,14 @@ export function FarmGroupsListPage() {
               <div className='mt-4'>
                 <div className='flex flex-wrap gap-2'>
                   {fg.farms.map((f) => (
-                    <span
+                    <Link
                       key={f.id}
-                      className='inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md shadow-blue-600/30 ring-1 ring-blue-500/40'
+                      to={`/farms/${f.id}`}
+                      className='inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md shadow-blue-600/30 ring-1 ring-blue-500/40 hover:from-blue-500 hover:to-blue-600 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all'
                     >
                       {L.farmNamePrefix}
                       {f.name}
-                    </span>
+                    </Link>
                   ))}
                   {fg.farms.length === 0 && (
                     <span className='text-sm text-gray-400 italic'>-</span>
