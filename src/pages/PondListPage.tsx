@@ -4,7 +4,7 @@ import { Search, Eye, Plus, Fish, Building, Calendar } from 'lucide-react'
 import { usePondListWithDetails, type PondWithFarmName } from '../hooks/usePond'
 import { useClient } from '../contexts/ClientContext'
 import { StatusBadge } from '../components/StatusBadge'
-import { StockActionModal } from '../components/StockActionModal'
+import { StockActionModal } from '../components/stock-action-modal'
 import { th } from '../locales/th'
 import { formatDateThai } from '../utils/thaiTime'
 

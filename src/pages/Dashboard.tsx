@@ -21,7 +21,6 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { Link } from 'react-router-dom'
-import { mockFarms, mockPonds, mockWorkers } from '../data/mockData'
 import { th } from '../locales/th'
 
 const D = th.dashboard
@@ -30,21 +29,21 @@ export function DashboardPage() {
   const stats = [
     {
       label: D.totalFarms,
-      value: mockFarms.length,
+      value: 0,
       change: '+2',
       icon: Building,
       color: 'from-blue-600 to-blue-700',
     },
     {
       label: D.activePonds,
-      value: mockPonds.filter((p) => p.status === 'active').length,
+      value: 0,
       change: '+3',
       icon: Fish,
       color: 'from-blue-500 to-blue-600',
     },
     {
       label: D.workers,
-      value: mockWorkers.filter((w) => w.status === 'active').length,
+      value: 0,
       change: '+1',
       icon: Users,
       color: 'from-slate-700 to-slate-800',
@@ -112,9 +111,7 @@ export function DashboardPage() {
       {/* Page Header */}
       <div>
         <h1 className='text-3xl text-gray-800 mb-2'>{D.title}</h1>
-        <p className='text-gray-600'>
-          {D.subtitle}
-        </p>
+        <p className='text-gray-600'>{D.subtitle}</p>
       </div>
 
       {/* Stats Cards */}
