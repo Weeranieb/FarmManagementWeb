@@ -7,15 +7,18 @@ import {
   ChevronLeft,
   ChevronRight,
   Edit,
+  Upload,
 } from 'lucide-react'
 import { th } from '../locales/th'
 import {
   useDailyFeedQuery,
   useDailyFeedBulkMutation,
   useDailyFeedDeleteMutation,
+  useDailyFeedUploadMutation,
 } from '../hooks/useDailyFeed'
 import { useFeedCollectionListQuery } from '../hooks/useFeedCollection'
 import type { DailyFeedEntry, DailyFeedTable } from '../api/dailyFeed'
+import { ExcelUploadModal } from './ExcelUploadModal'
 
 const L = th.dailyFeed
 
@@ -79,16 +82,26 @@ export function DailyFeedTab({ pondId }: DailyFeedTabProps) {
     currentMonth,
   )
   const { data: feedCollections } = useFeedCollectionListQuery()
-  const feedList = feedCollections?.items ?? []
+  const feedList = useMemo(
+    () => feedCollections?.items ?? [],
+    [feedCollections],
+  )
+
+  const excelFeedOptions = useMemo(
+    () => feedList.map((f) => ({ id: f.id, name: f.name, unit: f.unit })),
+    [feedList],
+  )
 
   const bulkMutation = useDailyFeedBulkMutation(numPondId)
   const deleteMutation = useDailyFeedDeleteMutation(numPondId)
+  const uploadMutation = useDailyFeedUploadMutation(numPondId)
 
   const [editingTableId, setEditingTableId] = useState<number | null>(null)
   const [localEdits, setLocalEdits] = useState<LocalData>({})
 
   // "Add feed type" state
   const [showAddPicker, setShowAddPicker] = useState(false)
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
 
   const existingFcIds = useMemo(
     () => new Set(tables.map((t) => t.feedCollectionId)),
@@ -229,32 +242,47 @@ export function DailyFeedTab({ pondId }: DailyFeedTabProps) {
             <ChevronRight size={20} className='text-gray-600' />
           </button>
         </div>
-        <div className='relative'>
+        <div className='flex items-center gap-3'>
           <button
-            onClick={() => setShowAddPicker(!showAddPicker)}
-            className='flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
+            type='button'
+            onClick={() => setIsUploadModalOpen(true)}
+            disabled={
+              excelFeedOptions.length === 0 ||
+              bulkMutation.isPending ||
+              uploadMutation.isPending
+            }
+            className='flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50'
           >
-            <Plus size={18} />
-            {L.addFeedType}
+            <Upload size={18} />
+            {L.uploadExcel}
           </button>
-          {showAddPicker && availableFeeds.length > 0 && (
-            <div className='absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-10 min-w-[220px]'>
-              {availableFeeds.map((f) => (
-                <button
-                  key={f.id}
-                  onClick={() => handleAddFeedType(f.id)}
-                  className='block w-full text-left px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 first:rounded-t-lg last:rounded-b-lg'
-                >
-                  {f.name} <span className='text-gray-400'>({f.unit})</span>
-                </button>
-              ))}
-            </div>
-          )}
-          {showAddPicker && availableFeeds.length === 0 && (
-            <div className='absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-10 min-w-[220px] p-4 text-sm text-gray-500'>
-              {L.noFeedAvailable}
-            </div>
-          )}
+          <div className='relative'>
+            <button
+              onClick={() => setShowAddPicker(!showAddPicker)}
+              className='flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
+            >
+              <Plus size={18} />
+              {L.addFeedType}
+            </button>
+            {showAddPicker && availableFeeds.length > 0 && (
+              <div className='absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-10 min-w-[220px]'>
+                {availableFeeds.map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => handleAddFeedType(f.id)}
+                    className='block w-full text-left px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 first:rounded-t-lg last:rounded-b-lg'
+                  >
+                    {f.name} <span className='text-gray-400'>({f.unit})</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {showAddPicker && availableFeeds.length === 0 && (
+              <div className='absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-10 min-w-[220px] p-4 text-sm text-gray-500'>
+                {L.noFeedAvailable}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -480,6 +508,23 @@ export function DailyFeedTab({ pondId }: DailyFeedTabProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {isUploadModalOpen && (
+        <ExcelUploadModal
+          key={`${currentMonth}-${excelFeedOptions.map((f) => f.id).join(',')}`}
+          onClose={() => setIsUploadModalOpen(false)}
+          currentMonth={currentMonth}
+          feeds={excelFeedOptions}
+          isSubmitting={uploadMutation.isPending}
+          onUpload={(file, feedCollectionId) =>
+            uploadMutation.mutateAsync({
+              file,
+              month: currentMonth,
+              feedCollectionId,
+            })
+          }
+        />
       )}
     </div>
   )

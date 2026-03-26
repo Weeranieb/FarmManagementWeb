@@ -37,3 +37,17 @@ export function useDailyFeedDeleteMutation(pondId: number) {
     },
   })
 }
+
+export function useDailyFeedUploadMutation(pondId: number) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (params: {
+      file: File
+      month: string
+      feedCollectionId: number
+    }) => dailyFeedApi.uploadExcel(pondId, params),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: dailyFeedKeys.all })
+    },
+  })
+}

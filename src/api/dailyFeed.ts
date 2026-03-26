@@ -27,6 +27,11 @@ export interface DailyFeedBulkUpsertRequest {
   entries: DailyFeedBulkUpsertEntry[]
 }
 
+export interface DailyFeedExcelUploadResponse {
+  rowsImported: number
+  savedPath: string
+}
+
 export const dailyFeedApi = {
   getMonth: async (
     pondId: number,
@@ -50,6 +55,20 @@ export const dailyFeedApi = {
   ): Promise<void> => {
     return apiClient.delete<void>(
       `/pond/${pondId}/daily-feed/${feedCollectionId}`,
+    )
+  },
+
+  uploadExcel: async (
+    pondId: number,
+    params: { file: File; month: string; feedCollectionId: number },
+  ): Promise<DailyFeedExcelUploadResponse> => {
+    const form = new FormData()
+    form.append('file', params.file)
+    form.append('month', params.month)
+    form.append('feedCollectionId', String(params.feedCollectionId))
+    return apiClient.postForm<DailyFeedExcelUploadResponse>(
+      `/pond/${pondId}/daily-feed/upload`,
+      form,
     )
   },
 }
