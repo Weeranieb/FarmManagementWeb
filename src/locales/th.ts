@@ -364,6 +364,7 @@ export const th = {
     noFarmsCreateFirst: 'ยังไม่มีฟาร์ม — สร้างฟาร์มก่อน',
     selectFarmOption: '-- เลือกฟาร์ม --',
     pond: 'บ่อ',
+    pondFormRowAriaLabel: (n: number) => `รายการที่ ${n} — กรอกชื่อบ่อ`,
     pondName: 'ชื่อบ่อ',
     placeholderPondName: 'เช่น บ่อ D1',
     remove: 'ลบ',

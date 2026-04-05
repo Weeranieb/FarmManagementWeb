@@ -379,11 +379,13 @@ export function MasterDataPage() {
                     {pondForms.map((pondForm, index) => (
                       <div
                         key={index}
+                        role='group'
+                        aria-label={L.pondFormRowAriaLabel(index + 1)}
                         className='p-3 border border-gray-200 rounded-lg space-y-3'
                       >
                         <div className='flex items-center justify-between'>
-                          <span className='text-sm text-gray-800'>
-                            {L.pond} {index + 1}
+                          <span className='text-sm font-medium text-gray-800 tabular-nums'>
+                            {index + 1}.
                           </span>
                           {pondForms.length > 1 && (
                             <button
@@ -586,7 +588,6 @@ export function MasterDataPage() {
           title={
             editingItem.type === 'farm' ? L.editFarmTitle : L.editPondTitle
           }
-          type={editingItem.type}
           onSave={handleSaveEdit}
           locale={{
             labelName: L.modalLabelName,

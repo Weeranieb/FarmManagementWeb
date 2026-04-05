@@ -8,6 +8,7 @@ export const adminMasterDataTh = {
 
   // Client selector (Farms/Ponds tabs)
   selectClient: 'เลือกลูกค้า',
+  clientSelectorCaption: 'เลือกลูกค้า (ฟาร์ม / บ่อ)',
   loadingClients: 'กำลังโหลดรายชื่อลูกค้า...',
   farmsCount: 'ฟาร์ม',
   pondsCount: 'บ่อ',
@@ -43,6 +44,7 @@ export const adminMasterDataTh = {
   noFarmsYet: 'ยังไม่มีฟาร์ม สร้างได้ในแท็บฟาร์ม',
   selectFarmOption: '-- เลือกฟาร์ม --',
   pond: 'บ่อ',
+  pondFormRowAriaLabel: (n: number) => `รายการที่ ${n} — กรอกชื่อบ่อ`,
   pondName: 'ชื่อบ่อ',
   placeholderPondName: 'เช่น บ่อ D1',
   remove: 'ลบ',
@@ -62,18 +64,25 @@ export const adminMasterDataTh = {
   statusActive: 'ใช้งาน',
   statusMaintenance: 'พักบ่อ',
 
-  // Actions
-  editClientName: 'แก้ไขชื่อลูกค้า',
+  // Actions (edit buttons use pencil icon; strings used for title / aria-label)
+  editClientName: 'แก้ไขข้อมูลลูกค้า',
   editFarmName: 'แก้ไขชื่อฟาร์ม',
   editPondName: 'แก้ไขชื่อบ่อ',
+  expandFarmPonds: 'แสดงรายการบ่อ',
+  collapseFarmPonds: 'ซ่อนรายการบ่อ',
+  pondCountLabel: (n: number) => `${n} บ่อ`,
 
   // Edit modal (used when opened from this page)
-  editClientTitle: 'แก้ไขชื่อลูกค้า',
+  editClientTitle: 'แก้ไขข้อมูลลูกค้า',
+  clientTouristFishingEnabled: 'เปิดบ่อตกปลา',
   editFarmTitle: 'แก้ไขชื่อฟาร์ม',
   editPondTitle: 'แก้ไขชื่อบ่อ',
   modalLabelName: 'ชื่อ',
   modalPlaceholderName: 'กรอกชื่อ',
   modalErrorNameRequired: 'กรุณากรอกชื่อ',
+  modalErrorClientNameRequired: 'กรุณากรอกชื่อลูกค้า',
+  modalErrorOwnerRequired: 'กรุณากรอกชื่อผู้ติดต่อ',
+  modalErrorContactRequired: 'กรุณากรอกเบอร์โทรศัพท์',
   modalSave: 'บันทึก',
   modalCancel: 'ยกเลิก',
   modalClose: 'ปิด',
@@ -97,6 +106,7 @@ export const adminMasterDataTh = {
   alertCreateFarmFailed: 'สร้างฟาร์มไม่สำเร็จ',
   alertCreatePondsFailed: 'สร้างบ่อไม่สำเร็จ',
   alertUpdateFailed: 'อัปเดตไม่สำเร็จ',
+  alertLoadClientFailed: 'โหลดข้อมูลลูกค้าไม่สำเร็จ',
 } as const
 
 export type AdminMasterDataLocale = typeof adminMasterDataTh

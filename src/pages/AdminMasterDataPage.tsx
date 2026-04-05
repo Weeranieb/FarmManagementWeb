@@ -1,16 +1,10 @@
 import { useState, useCallback, useMemo } from 'react'
+import { Edit2 } from 'lucide-react'
 import {
-  Building,
-  Fish,
-  Plus,
-  Database,
-  CheckCircle,
-  Users,
-  ChevronRight,
-  ChevronDown,
-  Edit2,
-} from 'lucide-react'
-import { clientApi, type DropdownItem } from '../api/client'
+  clientApi,
+  type ClientResponse,
+  type DropdownItem,
+} from '../api/client'
 import { useQueries, useQueryClient } from '@tanstack/react-query'
 import { useClientListQuery, useInvalidateClientList } from '../hooks/useClient'
 import { farmApi, type FarmResponse } from '../api/farm'
@@ -53,6 +47,8 @@ export function AdminMasterDataPage() {
   const [successMessage, setSuccessMessage] = useState('')
   const [expandedFarms, setExpandedFarms] = useState<string[]>([])
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [editingClientSnapshot, setEditingClientSnapshot] =
+    useState<ClientResponse | null>(null)
   const [editingItem, setEditingItem] = useState<{
     id: string
     name: string
@@ -250,14 +246,26 @@ export function AdminMasterDataPage() {
     )
   }
 
-  const handleEditClient = (client: DropdownItem, e: React.MouseEvent) => {
+  const handleEditClient = async (
+    client: DropdownItem,
+    e: React.MouseEvent,
+  ) => {
     e.stopPropagation()
-    setEditingItem({
-      id: String(client.key),
-      name: client.value,
-      type: 'client',
-    })
-    setIsEditModalOpen(true)
+    try {
+      const full = await clientApi.getClient(Number(client.key))
+      setEditingClientSnapshot(full)
+      setEditingItem({
+        id: String(client.key),
+        name: full.name,
+        type: 'client',
+      })
+      setIsEditModalOpen(true)
+    } catch (err) {
+      showToast(
+        'error',
+        err instanceof Error ? err.message : t.alertLoadClientFailed,
+      )
+    }
   }
 
   const handleEditFarm = (farm: FarmResponse, e: React.MouseEvent) => {
@@ -286,13 +294,18 @@ export function AdminMasterDataPage() {
     if (!raw) return
     try {
       if (editingItem.type === 'client') {
-        const client = await clientApi.getClient(Number(editingItem.id))
+        const snap = editingClientSnapshot
+        if (!snap) {
+          showToast('error', t.alertLoadClientFailed)
+          return
+        }
         await clientApi.updateClient({
-          id: client.id,
+          id: snap.id,
           name: raw,
-          ownerName: client.ownerName,
-          contactNumber: client.contactNumber,
-          isActive: client.isActive,
+          ownerName: snap.ownerName.trim(),
+          contactNumber: snap.contactNumber.trim(),
+          isActive: snap.isActive,
+          isTouristFishingEnabled: snap.isTouristFishingEnabled,
         })
         invalidateClientList()
       } else if (editingItem.type === 'farm') {
@@ -316,6 +329,7 @@ export function AdminMasterDataPage() {
       setTimeout(() => setShowSuccessMessage(false), 5000)
       setIsEditModalOpen(false)
       setEditingItem(null)
+      setEditingClientSnapshot(null)
     } catch (err) {
       showToast(
         'error',
@@ -331,25 +345,20 @@ export function AdminMasterDataPage() {
 
   return (
     <div className='flex min-h-0 flex-col space-y-3'>
-      <PageHeader
-        title={t.pageTitle}
-        subtitle={t.pageSubtitle}
-        icon={Database}
-      />
+      <PageHeader title={t.pageTitle} subtitle={t.pageSubtitle} />
 
       {showSuccessMessage && (
         <div className='bg-green-50 border-l-4 border-green-500 p-3 rounded-lg shadow-md animate-fade-in'>
-          <div className='flex items-center gap-2'>
-            <CheckCircle size={20} className='text-green-600' />
-            <p className='text-sm text-green-800'>{successMessage}</p>
-          </div>
+          <p className='text-sm text-green-800'>{successMessage}</p>
         </div>
       )}
 
       {activeTab !== 'clients' && (
         <div className='bg-white rounded-lg shadow-md p-3'>
-          <div className='flex items-center gap-3'>
-            <Users size={18} className='text-blue-600 flex-shrink-0' />
+          <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3'>
+            <span className='text-xs font-medium text-gray-600 shrink-0 sm:w-40'>
+              {t.clientSelectorCaption}
+            </span>
             <select
               value={selectedClientId}
               onChange={(e) => {
@@ -391,10 +400,7 @@ export function AdminMasterDataPage() {
         <div className='bg-white rounded-lg shadow-md flex flex-col overflow-hidden'>
           <div className='border-b border-gray-200'>
             <div className='p-4 bg-gradient-to-r from-blue-800 to-blue-600 text-white'>
-              <h2 className='text-lg flex items-center gap-2'>
-                <Plus size={20} />
-                {t.createNew}
-              </h2>
+              <h2 className='text-lg font-semibold'>{t.createNew}</h2>
             </div>
             <div className='flex'>
               <button
@@ -402,36 +408,33 @@ export function AdminMasterDataPage() {
                   setActiveTab('clients')
                   setSelectedClientId('')
                 }}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 transition-colors text-sm ${
+                className={`flex-1 flex items-center justify-center px-4 py-3 transition-colors text-sm ${
                   activeTab === 'clients'
                     ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                <Users size={16} />
-                <span>{t.tabClient}</span>
+                {t.tabClient}
               </button>
               <button
                 onClick={() => setActiveTab('farms')}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 transition-colors text-sm ${
+                className={`flex-1 flex items-center justify-center px-4 py-3 transition-colors text-sm ${
                   activeTab === 'farms'
                     ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                <Building size={16} />
-                <span>{t.tabFarm}</span>
+                {t.tabFarm}
               </button>
               <button
                 onClick={() => setActiveTab('ponds')}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 transition-colors text-sm ${
+                className={`flex-1 flex items-center justify-center px-4 py-3 transition-colors text-sm ${
                   activeTab === 'ponds'
                     ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600'
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
-                <Fish size={16} />
-                <span>{t.tabPond}</span>
+                {t.tabPond}
               </button>
             </div>
           </div>
@@ -504,10 +507,9 @@ export function AdminMasterDataPage() {
                   <button
                     type='submit'
                     disabled={!isClientFormValid}
-                    className='flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:from-transparent disabled:to-transparent'
+                    className='flex-1 flex items-center justify-center px-4 py-2 text-sm bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:from-transparent disabled:to-transparent'
                   >
-                    <Plus size={16} />
-                    <span>{t.createClient}</span>
+                    {t.createClient}
                   </button>
                   <button
                     type='button'
@@ -530,8 +532,7 @@ export function AdminMasterDataPage() {
             {activeTab === 'farms' && (
               <>
                 {!selectedClientId ? (
-                  <div className='text-center py-12 text-gray-500'>
-                    <Users size={48} className='mx-auto mb-3 text-gray-400' />
+                  <div className='rounded-lg border border-dashed border-gray-200 bg-gray-50 px-4 py-10 text-center text-gray-600'>
                     <p className='text-sm'>{t.pleaseSelectClientFirst}</p>
                   </div>
                 ) : (
@@ -553,10 +554,9 @@ export function AdminMasterDataPage() {
                       <button
                         type='submit'
                         disabled={!farmForm.name.trim()}
-                        className='flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:from-transparent disabled:to-transparent'
+                        className='flex-1 flex items-center justify-center px-4 py-2 text-sm bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:from-transparent disabled:to-transparent'
                       >
-                        <Plus size={16} />
-                        <span>{t.createFarm}</span>
+                        {t.createFarm}
                       </button>
                       <button
                         type='button'
@@ -574,8 +574,7 @@ export function AdminMasterDataPage() {
             {activeTab === 'ponds' && (
               <>
                 {!selectedClientId ? (
-                  <div className='text-center py-12 text-gray-500'>
-                    <Users size={48} className='mx-auto mb-3 text-gray-400' />
+                  <div className='rounded-lg border border-dashed border-gray-200 bg-gray-50 px-4 py-10 text-center text-gray-600'>
                     <p className='text-sm'>{t.pleaseSelectClientFirst}</p>
                   </div>
                 ) : (
@@ -610,11 +609,13 @@ export function AdminMasterDataPage() {
                       {pondForms.map((pondForm, index) => (
                         <div
                           key={index}
+                          role='group'
+                          aria-label={t.pondFormRowAriaLabel(index + 1)}
                           className='p-3 border border-gray-200 rounded-lg space-y-3'
                         >
                           <div className='flex items-center justify-between'>
-                            <span className='text-sm text-gray-800'>
-                              {t.pond} {index + 1}
+                            <span className='text-sm font-medium text-gray-800 tabular-nums'>
+                              {index + 1}.
                             </span>
                             {pondForms.length > 1 && (
                               <button
@@ -647,10 +648,9 @@ export function AdminMasterDataPage() {
                     <button
                       type='button'
                       onClick={addPondForm}
-                      className='w-full flex items-center justify-center gap-2 px-4 py-2 text-sm border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-all'
+                      className='w-full flex items-center justify-center px-4 py-2 text-sm border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-all'
                     >
-                      <Plus size={16} />
-                      <span>{t.addAnotherPond}</span>
+                      {t.addAnotherPond}
                     </button>
                     <div className='flex items-center gap-3 pt-4 border-t border-gray-200'>
                       <button
@@ -659,12 +659,9 @@ export function AdminMasterDataPage() {
                           !selectedFarmId ||
                           pondForms.some((f) => !f.name.trim())
                         }
-                        className='flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:from-transparent disabled:to-transparent'
+                        className='flex-1 flex items-center justify-center px-4 py-2 text-sm bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:from-transparent disabled:to-transparent'
                       >
-                        <Plus size={16} />
-                        <span>
-                          {t.createPonds} {pondForms.length} {t.pond}
-                        </span>
+                        {t.createPonds} {pondForms.length} {t.pond}
                       </button>
                       <button
                         type='button'
@@ -687,12 +684,7 @@ export function AdminMasterDataPage() {
         <div className='col-span-1 bg-white rounded-lg shadow-md flex flex-col overflow-hidden'>
           <div className='p-4 border-b border-gray-200 bg-gray-50'>
             <div className='flex items-center justify-between'>
-              <h2 className='text-lg text-gray-800 flex items-center gap-2'>
-                {activeTab === 'clients' ? (
-                  <Users size={20} className='text-blue-600' />
-                ) : (
-                  <Building size={20} className='text-blue-600' />
-                )}
+              <h2 className='text-lg font-semibold text-gray-800'>
                 {activeTab === 'clients' ? t.allClients : t.existingData}
               </h2>
               {selectedClient && activeTab !== 'clients' && (
@@ -719,19 +711,18 @@ export function AdminMasterDataPage() {
                       key={client.key}
                       className='border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors'
                     >
-                      <div className='flex items-start justify-between'>
-                        <div className='flex items-center gap-2'>
-                          <Users size={16} className='text-blue-600' />
-                          <h4 className='text-sm text-gray-800'>
-                            {client.value}
-                          </h4>
-                        </div>
+                      <div className='flex items-start justify-between gap-2'>
+                        <h4 className='text-sm text-gray-800'>
+                          {client.value}
+                        </h4>
                         <button
+                          type='button'
                           onClick={(e) => handleEditClient(client, e)}
-                          className='p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors'
+                          className='shrink-0 rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-50'
                           title={t.editClientName}
+                          aria-label={t.editClientName}
                         >
-                          <Edit2 size={14} />
+                          <Edit2 size={14} aria-hidden />
                         </button>
                       </div>
                     </div>
@@ -743,8 +734,7 @@ export function AdminMasterDataPage() {
             {activeTab !== 'clients' && (
               <>
                 {!selectedClientId ? (
-                  <div className='text-center py-12 text-gray-500 text-sm'>
-                    <Users size={48} className='mx-auto mb-3 text-gray-400' />
+                  <div className='rounded-lg border border-dashed border-gray-200 bg-gray-50 px-4 py-10 text-center text-sm text-gray-600'>
                     <p>{t.selectClientToViewData}</p>
                   </div>
                 ) : farmListLoading ? (
@@ -766,42 +756,39 @@ export function AdminMasterDataPage() {
                         key={farm.id}
                         className='border border-gray-200 rounded-lg overflow-hidden'
                       >
-                        <div className='w-full p-3 flex items-center justify-between hover:bg-gray-50 transition-colors'>
+                        <div className='w-full p-3 flex items-center justify-between gap-2 hover:bg-gray-50 transition-colors'>
                           <button
+                            type='button'
                             onClick={() => toggleFarmExpansion(String(farm.id))}
-                            className='flex-1 flex items-center justify-between'
+                            className='flex min-w-0 flex-1 items-center justify-between gap-2 text-left'
+                            aria-expanded={isExpanded}
                           >
-                            <div className='flex items-center gap-2'>
-                              <Building size={16} className='text-blue-600' />
-                              <div className='text-left'>
-                                <h4 className='text-sm text-gray-800'>
-                                  {formatFarmDisplayNameTH(farm.name)}
-                                </h4>
-                              </div>
-                            </div>
-                            <div className='flex items-center gap-2'>
-                              <StatusBadge status={farm.status} />
-                              <div className='flex items-center gap-1 text-xs bg-blue-50 px-2 py-1 rounded-full'>
-                                <Fish size={14} className='text-blue-600' />
-                                <span>
-                                  {isExpanded
+                            <h4 className='truncate text-sm text-gray-800'>
+                              {formatFarmDisplayNameTH(farm.name)}
+                            </h4>
+                            <div className='flex shrink-0 flex-col items-end gap-0.5 sm:flex-row sm:items-center sm:gap-2'>
+                              <span className='whitespace-nowrap rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-800'>
+                                {t.pondCountLabel(
+                                  isExpanded
                                     ? farmPonds.length
-                                    : farm.pondCount}
-                                </span>
-                              </div>
-                              {isExpanded ? (
-                                <ChevronDown size={16} />
-                              ) : (
-                                <ChevronRight size={16} />
-                              )}
+                                    : (farm.pondCount ?? 0),
+                                )}
+                              </span>
+                              <span className='whitespace-nowrap text-xs font-medium text-blue-600'>
+                                {isExpanded
+                                  ? t.collapseFarmPonds
+                                  : t.expandFarmPonds}
+                              </span>
                             </div>
                           </button>
                           <button
+                            type='button'
                             onClick={(e) => handleEditFarm(farm, e)}
-                            className='ml-2 p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors'
+                            className='shrink-0 rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-50'
                             title={t.editFarmName}
+                            aria-label={t.editFarmName}
                           >
-                            <Edit2 size={14} />
+                            <Edit2 size={14} aria-hidden />
                           </button>
                         </div>
                         {isExpanded && (
@@ -821,34 +808,27 @@ export function AdminMasterDataPage() {
                                     key={pond.id}
                                     className='bg-white border border-gray-200 rounded p-2'
                                   >
-                                    <div className='flex items-center justify-between mb-1'>
-                                      <div className='flex items-center gap-1 flex-1'>
-                                        <Fish
-                                          size={14}
-                                          className='text-blue-600'
-                                        />
-                                        <span className='text-xs text-gray-800'>
-                                          {formatPondDisplayNameTH(pond.name)}
-                                        </span>
-                                      </div>
-                                      <div className='flex items-center gap-1'>
+                                    <div className='mb-1 flex items-center justify-between gap-2'>
+                                      <span className='min-w-0 flex-1 text-xs text-gray-800'>
+                                        {formatPondDisplayNameTH(pond.name)}
+                                      </span>
+                                      <div className='flex shrink-0 items-center gap-2'>
                                         <button
+                                          type='button'
                                           onClick={(e) =>
                                             handleEditPond(pond, e)
                                           }
-                                          className='p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors'
+                                          className='rounded p-1 text-blue-600 transition-colors hover:bg-blue-50'
                                           title={t.editPondName}
+                                          aria-label={t.editPondName}
                                         >
-                                          <Edit2 size={12} />
+                                          <Edit2 size={12} aria-hidden />
                                         </button>
                                         <StatusBadge
                                           status={pond.status}
                                           className='py-0.5'
                                         />
                                       </div>
-                                    </div>
-                                    <div className='text-xs text-gray-600 pl-5'>
-                                      —
                                     </div>
                                   </div>
                                 ))}
@@ -873,6 +853,7 @@ export function AdminMasterDataPage() {
           onClose={() => {
             setIsEditModalOpen(false)
             setEditingItem(null)
+            setEditingClientSnapshot(null)
           }}
           currentName={editingItem.name}
           title={
@@ -882,12 +863,47 @@ export function AdminMasterDataPage() {
                 ? t.editFarmTitle
                 : t.editPondTitle
           }
-          type={editingItem.type}
           onSave={handleSaveEdit}
+          clientEditExtras={
+            editingItem.type === 'client' && editingClientSnapshot
+              ? {
+                  ownerName: editingClientSnapshot.ownerName,
+                  contactNumber: editingClientSnapshot.contactNumber,
+                  onOwnerNameChange: (value) =>
+                    setEditingClientSnapshot((prev) =>
+                      prev ? { ...prev, ownerName: value } : null,
+                    ),
+                  onContactNumberChange: (value) =>
+                    setEditingClientSnapshot((prev) =>
+                      prev ? { ...prev, contactNumber: value } : null,
+                    ),
+                  isTouristFishingEnabled:
+                    editingClientSnapshot.isTouristFishingEnabled,
+                  onTouristFishingEnabledChange: (value) =>
+                    setEditingClientSnapshot((prev) =>
+                      prev ? { ...prev, isTouristFishingEnabled: value } : null,
+                    ),
+                  touristFishingLabel: t.clientTouristFishingEnabled,
+                  labelOwnerName: t.contactPerson,
+                  labelContactNumber: t.phone,
+                  placeholderOwnerName: t.placeholderContactPerson,
+                  placeholderContactNumber: t.placeholderPhone,
+                  errorOwnerRequired: t.modalErrorOwnerRequired,
+                  errorContactRequired: t.modalErrorContactRequired,
+                }
+              : undefined
+          }
           locale={{
-            labelName: t.modalLabelName,
-            placeholderName: t.modalPlaceholderName,
-            errorNameRequired: t.modalErrorNameRequired,
+            labelName:
+              editingItem.type === 'client' ? t.clientName : t.modalLabelName,
+            placeholderName:
+              editingItem.type === 'client'
+                ? t.placeholderClientName
+                : t.modalPlaceholderName,
+            errorNameRequired:
+              editingItem.type === 'client'
+                ? t.modalErrorClientNameRequired
+                : t.modalErrorNameRequired,
             save: t.modalSave,
             cancel: t.modalCancel,
             close: t.modalClose,

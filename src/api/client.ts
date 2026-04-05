@@ -17,6 +17,7 @@ export interface ClientResponse {
   ownerName: string
   contactNumber: string
   isActive: boolean
+  isTouristFishingEnabled: boolean
   createdAt: string
   createdBy: string
   updatedAt: string
@@ -29,6 +30,7 @@ export interface UpdateClientRequest {
   ownerName: string
   contactNumber: string
   isActive: boolean
+  isTouristFishingEnabled: boolean
 }
 
 export const clientApi = {
