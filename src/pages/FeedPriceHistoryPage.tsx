@@ -1,10 +1,10 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft,
   TrendingUp,
   TrendingDown,
   Package,
   AlertCircle,
+  BarChart3,
 } from 'lucide-react'
 import {
   LineChart,
@@ -16,6 +16,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
+import { PageHeader } from '../components/PageHeader'
 import { th } from '../locales/th'
 import {
   useFeedCollectionQuery,
@@ -79,21 +80,12 @@ export function FeedPriceHistoryPage() {
 
   return (
     <div className='space-y-6'>
-      {/* Header */}
-      <div className='flex items-center gap-4'>
-        <button
-          onClick={() => navigate('/feed-collections')}
-          className='p-2 hover:bg-gray-100 rounded-lg transition-colors'
-        >
-          <ArrowLeft size={24} />
-        </button>
-        <div>
-          <h1 className='text-3xl text-gray-800'>{feed.name}</h1>
-          <p className='text-gray-600'>
-            {L.subtitle} — {feed.unit}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        backTo='/feed-collections'
+        title={feed.name}
+        subtitle={`${L.subtitle} — ${feed.unit}`}
+        icon={BarChart3}
+      />
 
       {/* Stats cards */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>

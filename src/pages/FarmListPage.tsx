@@ -1,10 +1,11 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, Eye, Grid } from 'lucide-react'
+import { Search, Eye, Grid, Building } from 'lucide-react'
 import { useFarmListQuery } from '../hooks/useFarm'
 import { useClient } from '../contexts/ClientContext'
 import { formatFarmDisplayNameTH } from '../utils/masterDataName'
 import { StatusBadge } from '../components/StatusBadge'
+import { PageHeader } from '../components/PageHeader'
 import { th } from '../locales/th'
 
 const L = th.farms
@@ -29,10 +30,7 @@ export function FarmsListPage() {
 
   return (
     <div className='space-y-6'>
-      <div>
-        <h1 className='text-3xl text-gray-800 mb-2'>{L.title}</h1>
-        <p className='text-gray-600'>{L.subtitle}</p>
-      </div>
+      <PageHeader title={L.title} subtitle={L.subtitle} icon={Building} />
 
       <div className='bg-white rounded-xl shadow-md p-6'>
         <div className='flex flex-col md:flex-row gap-4'>

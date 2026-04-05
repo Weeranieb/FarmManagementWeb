@@ -1,14 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import {
   Package,
   TrendingUp,
   BarChart3,
   Plus,
-  X,
   Search,
-  Pencil,
+  SlidersHorizontal,
 } from 'lucide-react'
+import { PageHeader } from '../components/PageHeader'
 import { th } from '../locales/th'
 import { useAuthQuery } from '../hooks/useAuth'
 import { UserLevel } from '../constants/userLevel'
@@ -16,25 +17,32 @@ import {
   useFeedCollectionListQuery,
   useCreateFeedCollectionMutation,
   useCreateFeedPriceHistoryMutation,
+  useUpdateFeedCollectionMutation,
 } from '../hooks/useFeedCollection'
 import type { FeedCollectionPageItem } from '../api/feedCollection'
+import {
+  FEED_TYPE_FRESH,
+  FEED_TYPE_PELLET,
+  feedTypeLabelTh,
+} from '../constants/feedType'
+import {
+  FeedCollectionAddModal,
+  type FeedCollectionAddFormState,
+} from '../components/feedCollections/FeedCollectionAddModal'
+import {
+  FeedCollectionEditDetailsModal,
+  type FeedCollectionEditDetailsFormState,
+} from '../components/feedCollections/FeedCollectionEditDetailsModal'
+import {
+  FeedCollectionUpdatePriceModal,
+  type FeedCollectionUpdatePriceFormState,
+} from '../components/feedCollections/FeedCollectionUpdatePriceModal'
+import {
+  todayISO,
+  toPriceUpdatedDateISO,
+} from '../components/feedCollections/formUtils'
 
 const L = th.feedCollections
-
-function todayISO() {
-  return new Date().toISOString().split('T')[0]
-}
-
-/** Avoids RangeError when date input is cleared or invalid (would block mutate / fetch). */
-function toPriceUpdatedDateISO(dateStr: string): string {
-  const raw = dateStr?.trim()
-  const base = raw || todayISO()
-  const d = new Date(base)
-  if (Number.isNaN(d.getTime())) {
-    return new Date(todayISO() + 'T12:00:00').toISOString()
-  }
-  return d.toISOString()
-}
 
 export function FeedCollectionsPage() {
   const { data: user } = useAuthQuery()
@@ -48,30 +56,82 @@ export function FeedCollectionsPage() {
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isUpdatePriceModalOpen, setIsUpdatePriceModalOpen] = useState(false)
+  const [isEditDetailsModalOpen, setIsEditDetailsModalOpen] = useState(false)
   const [selectedFeed, setSelectedFeed] =
     useState<FeedCollectionPageItem | null>(null)
+  /** Fixed viewport position — dropdown must not live inside overflow-x-auto / overflow-hidden ancestors. */
+  const [feedActionMenu, setFeedActionMenu] = useState<{
+    feedId: number
+    top: number
+    right: number
+  } | null>(null)
 
-  const [addForm, setAddForm] = useState({
+  useEffect(() => {
+    if (feedActionMenu === null) return
+    const closeIfOutside = (e: MouseEvent) => {
+      const t = e.target as Element | null
+      if (
+        t?.closest?.('[data-feed-actions-menu]') ||
+        t?.closest?.('[data-feed-actions-trigger]')
+      ) {
+        return
+      }
+      setFeedActionMenu(null)
+    }
+    document.addEventListener('mousedown', closeIfOutside)
+    return () => document.removeEventListener('mousedown', closeIfOutside)
+  }, [feedActionMenu])
+
+  useEffect(() => {
+    if (feedActionMenu === null) return
+    const close = () => setFeedActionMenu(null)
+    window.addEventListener('scroll', close, true)
+    window.addEventListener('resize', close)
+    return () => {
+      window.removeEventListener('scroll', close, true)
+      window.removeEventListener('resize', close)
+    }
+  }, [feedActionMenu])
+
+  const [addForm, setAddForm] = useState<FeedCollectionAddFormState>({
     name: '',
     unit: '',
+    feedType: FEED_TYPE_PELLET,
+    fcr: '',
     price: '',
     effectiveDate: todayISO(),
   })
-  const [updatePriceForm, setUpdatePriceForm] = useState({
-    price: '',
-    date: todayISO(),
-  })
+  const [editDetailsForm, setEditDetailsForm] =
+    useState<FeedCollectionEditDetailsFormState>({
+      id: 0,
+      name: '',
+      unit: '',
+      feedType: FEED_TYPE_PELLET,
+      fcr: '',
+    })
+  const [updatePriceForm, setUpdatePriceForm] =
+    useState<FeedCollectionUpdatePriceFormState>({
+      price: '',
+      date: todayISO(),
+    })
 
   const createMutation = useCreateFeedCollectionMutation()
   const createPriceMutation = useCreateFeedPriceHistoryMutation()
+  const updateFeedMutation = useUpdateFeedCollectionMutation()
 
-  function handleAddSubmit(e: React.FormEvent) {
+  function handleAddSubmit(e: FormEvent) {
     e.preventDefault()
     const price = parseFloat(addForm.price)
+    const fcrNum = parseFloat(addForm.fcr)
     createMutation.mutate(
       {
         name: addForm.name.trim(),
         unit: addForm.unit.trim(),
+        feedType: addForm.feedType,
+        fcr:
+          addForm.fcr.trim() !== '' && !Number.isNaN(fcrNum)
+            ? fcrNum
+            : undefined,
         feedPriceHistories:
           price > 0 && !Number.isNaN(price)
             ? [
@@ -90,6 +150,8 @@ export function FeedCollectionsPage() {
           setAddForm({
             name: '',
             unit: '',
+            feedType: FEED_TYPE_PELLET,
+            fcr: '',
             price: '',
             effectiveDate: todayISO(),
           })
@@ -98,7 +160,7 @@ export function FeedCollectionsPage() {
     )
   }
 
-  function handleUpdatePriceSubmit(e: React.FormEvent) {
+  function handleUpdatePriceSubmit(e: FormEvent) {
     e.preventDefault()
     if (!selectedFeed) return
     createPriceMutation.mutate(
@@ -125,38 +187,78 @@ export function FeedCollectionsPage() {
     setIsUpdatePriceModalOpen(true)
   }
 
+  function openEditDetailsModal(feed: FeedCollectionPageItem) {
+    const ft =
+      feed.feedType === FEED_TYPE_PELLET || feed.feedType === FEED_TYPE_FRESH
+        ? feed.feedType
+        : FEED_TYPE_PELLET
+    setEditDetailsForm({
+      id: feed.id,
+      name: feed.name,
+      unit: feed.unit,
+      feedType: ft,
+      fcr: feed.fcr != null ? String(feed.fcr) : '',
+    })
+    setIsEditDetailsModalOpen(true)
+  }
+
+  function handleEditDetailsSubmit(e: FormEvent) {
+    e.preventDefault()
+    const fcrNum = parseFloat(editDetailsForm.fcr)
+    updateFeedMutation.mutate(
+      {
+        id: editDetailsForm.id,
+        name: editDetailsForm.name.trim(),
+        unit: editDetailsForm.unit.trim(),
+        feedType: editDetailsForm.feedType,
+        fcr:
+          editDetailsForm.fcr.trim() !== '' && !Number.isNaN(fcrNum)
+            ? fcrNum
+            : undefined,
+      },
+      {
+        onSuccess: () => setIsEditDetailsModalOpen(false),
+      },
+    )
+  }
+
   function fmtPrice(v: number | null) {
     if (v == null) return '—'
     return `฿${v.toLocaleString()}`
   }
 
+  const emptyAddForm = (): FeedCollectionAddFormState => ({
+    name: '',
+    unit: '',
+    feedType: FEED_TYPE_PELLET,
+    fcr: '',
+    price: '',
+    effectiveDate: todayISO(),
+  })
+
   return (
     <div className='space-y-6'>
-      {/* Header */}
-      <div className='flex items-center justify-between'>
-        <div>
-          <h1 className='text-3xl text-gray-800 mb-2'>{L.title}</h1>
-          <p className='text-gray-600'>{L.subtitle}</p>
-        </div>
-        {isAdmin && (
-          <button
-            onClick={() => {
-              createMutation.reset()
-              setAddForm({
-                name: '',
-                unit: '',
-                price: '',
-                effectiveDate: todayISO(),
-              })
-              setIsAddModalOpen(true)
-            }}
-            className='flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg shadow-md hover:shadow-xl hover:from-blue-700 hover:to-blue-500 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200'
-          >
-            <Plus size={20} />
-            <span>{L.addFeed}</span>
-          </button>
-        )}
-      </div>
+      <PageHeader
+        title={L.title}
+        subtitle={L.subtitle}
+        icon={Package}
+        actions={
+          isAdmin ? (
+            <button
+              type='button'
+              onClick={() => {
+                createMutation.reset()
+                setAddForm(emptyAddForm())
+                setIsAddModalOpen(true)
+              }}
+              className='flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-700 to-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-md transition hover:from-blue-600 hover:to-blue-500'
+            >
+              <Plus size={18} />
+              <span>{L.addFeed}</span>
+            </button>
+          ) : undefined
+        }
+      />
 
       {/* Search */}
       <div className='bg-white rounded-xl shadow-md p-6'>
@@ -202,7 +304,13 @@ export function FeedCollectionsPage() {
                 </Link>
               </div>
 
-              <h3 className='text-base text-gray-900 mb-3'>{feed.name}</h3>
+              <h3 className='text-base text-gray-900 mb-1'>{feed.name}</h3>
+              <p className='text-xs text-gray-500 mb-2'>
+                {feedTypeLabelTh(feed.feedType)}
+                {feed.fcr != null && feed.fcr !== undefined
+                  ? ` · FCR ${feed.fcr}`
+                  : ''}
+              </p>
 
               <div className='flex items-baseline gap-2 mb-1'>
                 <span className='text-xl text-gray-900'>
@@ -232,6 +340,12 @@ export function FeedCollectionsPage() {
                     {L.colUnit}
                   </th>
                   <th className='px-6 py-4 text-left text-sm text-gray-600'>
+                    {L.colFeedType}
+                  </th>
+                  <th className='px-6 py-4 text-left text-sm text-gray-600'>
+                    {L.colFcr}
+                  </th>
+                  <th className='px-6 py-4 text-left text-sm text-gray-600'>
                     {L.colLatestPrice}
                   </th>
                   <th className='px-6 py-4 text-left text-sm text-gray-600'>
@@ -254,6 +368,14 @@ export function FeedCollectionsPage() {
                     <td className='px-6 py-4 text-gray-900'>{feed.name}</td>
                     <td className='px-6 py-4 text-sm text-gray-600'>
                       {feed.unit}
+                    </td>
+                    <td className='px-6 py-4 text-sm text-gray-700'>
+                      {feedTypeLabelTh(feed.feedType)}
+                    </td>
+                    <td className='px-6 py-4 text-sm text-gray-600 tabular-nums'>
+                      {feed.fcr != null && feed.fcr !== undefined
+                        ? feed.fcr
+                        : '—'}
                     </td>
                     <td className='px-6 py-4 text-gray-900'>
                       <div className='flex items-center gap-2'>
@@ -284,10 +406,29 @@ export function FeedCollectionsPage() {
                         </Link>
                         {isAdmin && (
                           <button
-                            onClick={() => openUpdatePriceModal(feed)}
-                            className='text-blue-600 hover:text-blue-700'
+                            type='button'
+                            data-feed-actions-trigger
+                            title={L.manageFeedMenu}
+                            aria-label={L.manageFeedMenu}
+                            aria-expanded={feedActionMenu?.feedId === feed.id}
+                            aria-haspopup='menu'
+                            onClick={(e) => {
+                              const r = (
+                                e.currentTarget as HTMLButtonElement
+                              ).getBoundingClientRect()
+                              setFeedActionMenu((prev) =>
+                                prev?.feedId === feed.id
+                                  ? null
+                                  : {
+                                      feedId: feed.id,
+                                      top: r.bottom + 6,
+                                      right: r.right,
+                                    },
+                              )
+                            }}
+                            className='p-1 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors'
                           >
-                            <Pencil size={16} />
+                            <SlidersHorizontal size={18} />
                           </button>
                         )}
                       </div>
@@ -305,172 +446,79 @@ export function FeedCollectionsPage() {
         <div className='text-center py-12 text-gray-500'>{L.empty}</div>
       )}
 
-      {/* Add Feed Modal */}
-      {isAddModalOpen && (
-        <div className='fixed inset-0 bg-gray-900/20 flex items-center justify-center z-50'>
-          <div className='bg-white rounded-lg shadow-xl p-8 w-96 relative'>
-            <div className='flex items-center justify-between mb-4'>
-              <h2 className='text-xl text-gray-800'>{L.addFeed}</h2>
+      <FeedCollectionAddModal
+        open={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        form={addForm}
+        setForm={setAddForm}
+        onSubmit={handleAddSubmit}
+        isPending={createMutation.isPending}
+        isError={createMutation.isError}
+        error={createMutation.error}
+      />
+
+      <FeedCollectionEditDetailsModal
+        open={isEditDetailsModalOpen}
+        onClose={() => setIsEditDetailsModalOpen(false)}
+        form={editDetailsForm}
+        setForm={setEditDetailsForm}
+        onSubmit={handleEditDetailsSubmit}
+        isPending={updateFeedMutation.isPending}
+        isError={updateFeedMutation.isError}
+      />
+
+      <FeedCollectionUpdatePriceModal
+        open={isUpdatePriceModalOpen}
+        feed={selectedFeed}
+        onClose={() => setIsUpdatePriceModalOpen(false)}
+        form={updatePriceForm}
+        setForm={setUpdatePriceForm}
+        onSubmit={handleUpdatePriceSubmit}
+        isPending={createPriceMutation.isPending}
+      />
+
+      {feedActionMenu &&
+        isAdmin &&
+        (() => {
+          const menuFeed = items.find((f) => f.id === feedActionMenu.feedId)
+          if (!menuFeed) return null
+          return createPortal(
+            <div
+              data-feed-actions-menu
+              role='menu'
+              className='fixed z-[200] min-w-[10.5rem] rounded-lg border border-gray-200 bg-white py-1 shadow-lg'
+              style={{
+                top: feedActionMenu.top,
+                left: feedActionMenu.right,
+                transform: 'translateX(-100%)',
+              }}
+            >
               <button
                 type='button'
-                onClick={() => setIsAddModalOpen(false)}
-                className='text-gray-500 hover:text-gray-700'
+                role='menuitem'
+                className='w-full px-3 py-2 text-left text-sm text-gray-800 hover:bg-blue-50'
+                onClick={() => {
+                  setFeedActionMenu(null)
+                  openEditDetailsModal(menuFeed)
+                }}
               >
-                <X size={20} />
+                {L.editDetails}
               </button>
-            </div>
-            <form onSubmit={handleAddSubmit}>
-              <div className='mb-4'>
-                <label className='block text-sm text-gray-600 mb-1'>
-                  {L.fieldName}
-                </label>
-                <input
-                  type='text'
-                  required
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500'
-                  value={addForm.name}
-                  onChange={(e) =>
-                    setAddForm({ ...addForm, name: e.target.value })
-                  }
-                />
-              </div>
-              <div className='mb-4'>
-                <label className='block text-sm text-gray-600 mb-1'>
-                  {L.fieldUnit}
-                </label>
-                <input
-                  type='text'
-                  required
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500'
-                  value={addForm.unit}
-                  onChange={(e) =>
-                    setAddForm({ ...addForm, unit: e.target.value })
-                  }
-                />
-              </div>
-              <div className='mb-4'>
-                <label className='block text-sm text-gray-600 mb-1'>
-                  {L.fieldPrice}
-                </label>
-                <input
-                  type='number'
-                  step='0.01'
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500'
-                  value={addForm.price}
-                  onChange={(e) =>
-                    setAddForm({ ...addForm, price: e.target.value })
-                  }
-                />
-              </div>
-              <div className='mb-4'>
-                <label className='block text-sm text-gray-600 mb-1'>
-                  {L.fieldPriceEffectiveDate}
-                </label>
-                <input
-                  type='date'
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500'
-                  value={addForm.effectiveDate}
-                  onChange={(e) =>
-                    setAddForm({ ...addForm, effectiveDate: e.target.value })
-                  }
-                />
-                <p className='text-xs text-gray-500 mt-1'>
-                  {L.fieldPriceEffectiveDateHint}
-                </p>
-              </div>
-              {createMutation.isError && (
-                <p className='mb-3 text-sm text-red-600' role='alert'>
-                  {L.saveFailed}
-                  {createMutation.error instanceof Error
-                    ? `: ${createMutation.error.message}`
-                    : ''}
-                </p>
-              )}
               <button
-                type='submit'
-                disabled={createMutation.isPending}
-                className='w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors'
+                type='button'
+                role='menuitem'
+                className='w-full px-3 py-2 text-left text-sm text-gray-800 hover:bg-blue-50'
+                onClick={() => {
+                  setFeedActionMenu(null)
+                  openUpdatePriceModal(menuFeed)
+                }}
               >
-                {createMutation.isPending ? th.common.loading : L.addFeed}
+                {L.updatePrice}
               </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Update Price Modal */}
-      {isUpdatePriceModalOpen && selectedFeed && (
-        <div className='fixed inset-0 bg-gray-900/20 flex items-center justify-center z-50'>
-          <div className='bg-white rounded-lg shadow-xl p-8 w-96 relative'>
-            <div className='flex items-center justify-between mb-4'>
-              <h2 className='text-xl text-gray-800'>{L.updatePrice}</h2>
-              <button
-                onClick={() => setIsUpdatePriceModalOpen(false)}
-                className='text-gray-500 hover:text-gray-700'
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <form onSubmit={handleUpdatePriceSubmit}>
-              <div className='mb-4'>
-                <label className='block text-sm text-gray-600 mb-1'>
-                  {L.fieldName}
-                </label>
-                <input
-                  type='text'
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50'
-                  value={selectedFeed.name}
-                  readOnly
-                />
-              </div>
-              <div className='mb-4'>
-                <label className='block text-sm text-gray-600 mb-1'>
-                  {L.fieldNewPrice}
-                </label>
-                <input
-                  type='number'
-                  step='0.01'
-                  required
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500'
-                  value={updatePriceForm.price}
-                  onChange={(e) =>
-                    setUpdatePriceForm({
-                      ...updatePriceForm,
-                      price: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div className='mb-4'>
-                <label className='block text-sm text-gray-600 mb-1'>
-                  {L.fieldDate}
-                </label>
-                <input
-                  type='date'
-                  required
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500'
-                  value={updatePriceForm.date}
-                  onChange={(e) =>
-                    setUpdatePriceForm({
-                      ...updatePriceForm,
-                      date: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <button
-                type='submit'
-                disabled={createPriceMutation.isPending}
-                className='w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors'
-              >
-                {createPriceMutation.isPending
-                  ? th.common.loading
-                  : L.updatePrice}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+            </div>,
+            document.body,
+          )
+        })()}
     </div>
   )
 }

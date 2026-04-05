@@ -5,6 +5,7 @@ import { usePondListWithDetails, type PondWithFarmName } from '../hooks/usePond'
 import { useClient } from '../contexts/ClientContext'
 import { StatusBadge } from '../components/StatusBadge'
 import { StockActionModal } from '../components/stock-action-modal'
+import { PageHeader } from '../components/PageHeader'
 import { th } from '../locales/th'
 import { formatDateThai } from '../utils/thaiTime'
 
@@ -61,24 +62,16 @@ export function PondsListPage() {
 
   return (
     <div className='space-y-6'>
-      <div className='flex items-start justify-between gap-6'>
-        <div>
-          <h1 className='text-3xl text-gray-800 mb-2'>{L.title}</h1>
-          <p className='text-gray-600'>{L.subtitle}</p>
+      <PageHeader title={L.title} subtitle={L.subtitle} icon={Fish} />
+
+      <div className='grid min-w-0 grid-cols-2 gap-4 sm:max-w-md'>
+        <div className='rounded-xl border border-gray-100 bg-white p-5 shadow-sm'>
+          <p className='mb-1 text-sm text-gray-600'>{L.totalPonds}</p>
+          <p className='text-2xl font-semibold text-gray-900'>{ponds.length}</p>
         </div>
-        <div className='grid grid-cols-2 gap-4 min-w-[280px]'>
-          <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-5'>
-            <p className='text-sm text-gray-600 mb-1'>{L.totalPonds}</p>
-            <p className='text-2xl font-semibold text-gray-900'>
-              {ponds.length}
-            </p>
-          </div>
-          <div className='bg-white rounded-xl shadow-sm border border-gray-100 p-5'>
-            <p className='text-sm text-gray-600 mb-1'>{L.statusActive}</p>
-            <p className='text-2xl font-semibold text-green-600'>
-              {activeCount}
-            </p>
-          </div>
+        <div className='rounded-xl border border-gray-100 bg-white p-5 shadow-sm'>
+          <p className='mb-1 text-sm text-gray-600'>{L.statusActive}</p>
+          <p className='text-2xl font-semibold text-green-600'>{activeCount}</p>
         </div>
       </div>
 

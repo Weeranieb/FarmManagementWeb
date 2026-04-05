@@ -28,6 +28,7 @@ export function useFarmListQuery(clientId?: number) {
   return useQuery({
     queryKey: [...farmKeys.list(), clientId ?? 'default'] as const,
     queryFn: () => farmApi.getFarmList(clientId),
+    enabled: clientId != null && clientId > 0,
     staleTime: 5 * 60 * 1000,
   })
 }
