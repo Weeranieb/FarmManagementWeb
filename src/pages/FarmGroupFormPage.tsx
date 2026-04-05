@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Save } from 'lucide-react'
+import { Save, Layers } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { PageHeader } from '../components/PageHeader'
 import { th } from '../locales/th'
 import { useClient } from '../contexts/ClientContext'
 import { useFarmGroupQuery, farmGroupKeys } from '../hooks/useFarmGroup'
@@ -86,18 +87,11 @@ function FarmGroupFormFields({
 
   return (
     <div className='space-y-6'>
-      <div className='flex items-center gap-4'>
-        <button
-          type='button'
-          onClick={() => navigate('/farm-groups')}
-          className='p-2 hover:bg-gray-100 rounded-lg'
-        >
-          <ArrowLeft size={24} />
-        </button>
-        <h1 className='text-3xl text-gray-800'>
-          {isEdit ? L.formTitleEdit : L.formTitle}
-        </h1>
-      </div>
+      <PageHeader
+        backTo='/farm-groups'
+        title={isEdit ? L.formTitleEdit : L.formTitle}
+        icon={Layers}
+      />
 
       <div className='bg-white rounded-xl shadow-md p-6'>
         <form onSubmit={handleSubmit} className='space-y-6'>

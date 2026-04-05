@@ -20,7 +20,6 @@ export const th = {
   layout: {
     appName: 'BoonmaFarm',
     appTagline: 'ระบบจัดการฟาร์ม',
-    clientView: 'มุมมองลูกค้า',
     selectClientPlaceholder: 'เลือกลูกค้า',
     selectClientToView: 'กรุณาเลือกลูกค้าเพื่อดูข้อมูล',
     navDashboard: 'แดชบอร์ด',
@@ -39,6 +38,10 @@ export const th = {
     myProfile: 'โปรไฟล์ของฉัน',
     settings: 'การตั้งค่า',
     logout: 'ออกจากระบบ',
+    sidebarToggleCollapse: 'ย่อเมนูด้านข้าง',
+    sidebarToggleExpand: 'ขยายเมนูด้านข้าง',
+    notifications: 'การแจ้งเตือน',
+    back: 'กลับ',
   },
 
   login: {

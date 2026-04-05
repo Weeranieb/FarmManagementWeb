@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 import { LoginPage } from './pages/LoginPage'
 import { ForgotPasswordPage } from './pages/ForgotPassword'
@@ -14,10 +15,16 @@ import { FarmGroupFormPage } from './pages/FarmGroupFormPage'
 import { WorkersListPage } from './pages/WorkersListPage.tsx'
 import { WorkerFormPage } from './pages/WorkerFormPage.tsx'
 import { FeedCollectionsPage } from './pages/FeedCollectionsPage'
-import { FeedPriceHistoryPage } from './pages/FeedPriceHistoryPage'
 import { ProtectedRoute } from './components/guards/ProtectedRoute'
 import { GuestRoute } from './components/guards/GuestRoute'
 import { SuperAdminRoute } from './components/guards/SuperAdminRoute'
+import { th } from './locales/th'
+
+const FeedPriceHistoryPage = lazy(() =>
+  import('./pages/FeedPriceHistoryPage').then((m) => ({
+    default: m.FeedPriceHistoryPage,
+  })),
+)
 
 export const router = createBrowserRouter([
   {
@@ -107,7 +114,17 @@ export const router = createBrowserRouter([
       },
       {
         path: '/feed-collections/:id/history',
-        element: <FeedPriceHistoryPage />,
+        element: (
+          <Suspense
+            fallback={
+              <div className='p-8 text-center text-slate-500'>
+                {th.common.loading}
+              </div>
+            }
+          >
+            <FeedPriceHistoryPage />
+          </Suspense>
+        ),
       },
       {
         path: '/admin/master-data',

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useCallback } from 'react'
 import {
   Building,
   Fish,
@@ -10,7 +10,7 @@ import {
   ChevronDown,
   Edit2,
 } from 'lucide-react'
-import { clientApi, type DropdownItem } from '../api/client'
+import { type DropdownItem } from '../api/client'
 import {
   farmApi,
   type FarmHierarchyItem,
@@ -20,15 +20,32 @@ import { pondApi } from '../api/pond'
 import { EditMasterDataModal } from '../components/EditMasterDataModal'
 import { normalizeFarmNameForStore } from '../utils/masterDataName'
 import { th } from '../locales/th'
+import { PageHeader } from '../components/PageHeader'
+import { useClient } from '../contexts/ClientContext'
+import { useClientListQuery } from '../hooks/useClient'
+import { farmKeys, useFarmHierarchyQuery } from '../hooks/useFarm'
+import { useQueryClient } from '@tanstack/react-query'
+import { useAppToast } from '../contexts/AppToastContext'
 
 const L = th.masterData
 type PondWithFarmId = FarmDetailPondItem & { farmId: number }
 
 export function MasterDataPage() {
-  // ——— useState ———
-  const [selectedClientId, setSelectedClientId] = useState<string>('')
-  const [clientList, setClientList] = useState<DropdownItem[]>([])
-  const [clientListLoading, setClientListLoading] = useState(true)
+  const { selectedClientId, setSelectedClientId } = useClient()
+  const { data: clientList = [], isLoading: clientListLoading } =
+    useClientListQuery()
+  const { showToast } = useAppToast()
+  const queryClient = useQueryClient()
+  const clientIdNum =
+    selectedClientId && !Number.isNaN(Number(selectedClientId))
+      ? Number(selectedClientId)
+      : undefined
+  const {
+    data: farmHierarchy = [],
+    isPending: hierarchyPending,
+    isFetching: hierarchyFetching,
+  } = useFarmHierarchyQuery(clientIdNum)
+
   const [activeTab, setActiveTab] = useState<'farms' | 'ponds'>('farms')
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
@@ -42,39 +59,8 @@ export function MasterDataPage() {
   const [farmForm, setFarmForm] = useState({ name: '' })
   const [pondForms, setPondForms] = useState([{ name: '' }])
   const [selectedFarmId, setSelectedFarmId] = useState('')
-  const [farmHierarchy, setFarmHierarchy] = useState<FarmHierarchyItem[]>([])
-  const [farmHierarchyLoading, setFarmHierarchyLoading] = useState(false)
 
-  // ——— useEffect ———
-  useEffect(() => {
-    clientApi
-      .getClientList()
-      .then(setClientList)
-      .catch(() => setClientList([]))
-      .finally(() => setClientListLoading(false))
-  }, [])
-
-  useEffect(() => {
-    if (!selectedClientId) return
-    let cancelled = false
-    queueMicrotask(() => {
-      if (!cancelled) setFarmHierarchyLoading(true)
-    })
-    farmApi
-      .getFarmHierarchy(Number(selectedClientId))
-      .then((data) => {
-        if (!cancelled) setFarmHierarchy(data)
-      })
-      .catch(() => {
-        if (!cancelled) setFarmHierarchy([])
-      })
-      .finally(() => {
-        if (!cancelled) setFarmHierarchyLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [selectedClientId])
+  const farmHierarchyLoading = hierarchyPending || hierarchyFetching
 
   // ——— derived / select ———
   const selectedClient = clientList.find(
@@ -86,31 +72,22 @@ export function MasterDataPage() {
     : []
 
   // Adapt hierarchy data to dropdown options for "Select Farm" (Create pond form).
-  const farmDropdownOptions: DropdownItem[] = useMemo(
-    () =>
-      (selectedClientId ? farmHierarchy : []).map((f) => ({
-        key: f.id,
-        value: f.name,
-      })),
-    [selectedClientId, farmHierarchy],
-  )
+  const farmDropdownOptions: DropdownItem[] = selectedClientId
+    ? farmHierarchy.map((f) => ({ key: f.id, value: f.name }))
+    : []
 
   const refetchHierarchy = useCallback((): Promise<void> => {
-    if (!selectedClientId) return Promise.resolve()
-    setFarmHierarchyLoading(true)
-    return farmApi
-      .getFarmHierarchy(Number(selectedClientId))
-      .then(setFarmHierarchy)
-      .catch(() => {
-        // Don't clear list on refetch error so existing data stays visible
-      })
-      .finally(() => setFarmHierarchyLoading(false)) as Promise<void>
-  }, [selectedClientId])
+    const cid = clientIdNum
+    if (!cid) return Promise.resolve()
+    return queryClient.invalidateQueries({
+      queryKey: [...farmKeys.all, 'hierarchy', cid],
+    })
+  }, [queryClient, clientIdNum])
 
   const handleFarmSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!farmForm.name) {
-      alert(L.alertFillRequired)
+      showToast('error', L.alertFillRequired)
       return
     }
     if (!selectedClientId) return
@@ -123,19 +100,22 @@ export function MasterDataPage() {
       setFarmForm({ name: '' })
       refetchHierarchy()
     } catch (err) {
-      alert(err instanceof Error ? err.message : L.alertCreateFarmFailed)
+      showToast(
+        'error',
+        err instanceof Error ? err.message : L.alertCreateFarmFailed,
+      )
     }
   }
 
   const handlePondSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedFarmId) {
-      alert(L.alertSelectFarm)
+      showToast('error', L.alertSelectFarm)
       return
     }
     const names = pondForms.map((f) => f.name.trim()).filter(Boolean)
     if (names.length === 0) {
-      alert(L.alertAtLeastOnePondName)
+      showToast('error', L.alertAtLeastOnePondName)
       return
     }
     const selectedFarm = clientFarms.find(
@@ -153,7 +133,10 @@ export function MasterDataPage() {
       setSelectedFarmId('')
       refetchHierarchy()
     } catch (err) {
-      alert(err instanceof Error ? err.message : L.alertCreatePondsFailed)
+      showToast(
+        'error',
+        err instanceof Error ? err.message : L.alertCreatePondsFailed,
+      )
     }
   }
 
@@ -228,23 +211,20 @@ export function MasterDataPage() {
       setIsEditModalOpen(false)
       setEditingItem(null)
     } catch (err) {
-      alert(err instanceof Error ? err.message : L.alertUpdateFailed)
+      showToast(
+        'error',
+        err instanceof Error ? err.message : L.alertUpdateFailed,
+      )
     }
   }
 
   return (
-    <div className='h-[calc(100vh-120px)] flex flex-col space-y-3'>
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-3'>
-          <div className='w-10 h-10 bg-gradient-to-r from-blue-800 to-blue-600 rounded-lg flex items-center justify-center'>
-            <Database size={20} className='text-white' />
-          </div>
-          <div>
-            <h1 className='text-2xl text-gray-800'>{L.pageTitle}</h1>
-            <p className='text-sm text-gray-600'>{L.pageSubtitle}</p>
-          </div>
-        </div>
-      </div>
+    <div className='flex min-h-0 flex-col space-y-3'>
+      <PageHeader
+        title={L.pageTitle}
+        subtitle={L.pageSubtitle}
+        icon={Database}
+      />
 
       {showSuccessMessage && (
         <div className='bg-green-50 border-l-4 border-green-500 p-3 rounded-lg shadow-md animate-fade-in'>

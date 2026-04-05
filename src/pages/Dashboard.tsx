@@ -6,6 +6,7 @@ import {
   Package,
   DollarSign,
   Activity,
+  LayoutDashboard,
 } from 'lucide-react'
 import {
   BarChart,
@@ -21,6 +22,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { Link } from 'react-router-dom'
+import { PageHeader } from '../components/PageHeader'
 import { th } from '../locales/th'
 
 const D = th.dashboard
@@ -108,11 +110,11 @@ export function DashboardPage() {
 
   return (
     <div className='space-y-6'>
-      {/* Page Header */}
-      <div>
-        <h1 className='text-3xl text-gray-800 mb-2'>{D.title}</h1>
-        <p className='text-gray-600'>{D.subtitle}</p>
-      </div>
+      <PageHeader
+        title={D.title}
+        subtitle={D.subtitle}
+        icon={LayoutDashboard}
+      />
 
       {/* Stats Cards */}
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>

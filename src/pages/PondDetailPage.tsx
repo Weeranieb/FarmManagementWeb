@@ -1,6 +1,5 @@
 import { useParams, Link } from 'react-router-dom'
 import {
-  ArrowLeft,
   Fish,
   Calendar,
   Activity,
@@ -22,6 +21,7 @@ import { pondApi } from '../api/pond'
 import { usePondQuery, pondKeys } from '../hooks/usePond'
 import { useFarmQuery } from '../hooks/useFarm'
 import { StockActionModal } from '../components/stock-action-modal'
+import { PageHeader } from '../components/PageHeader'
 import { th } from '../locales/th'
 import { formatFarmDisplayNameTH } from '../utils/masterDataName'
 import { formatDateThai } from '../utils/thaiTime'
@@ -302,77 +302,71 @@ export function PondDetailPage() {
 
   return (
     <div className='space-y-6'>
-      <div className='flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between lg:gap-6'>
-        <div className='flex min-w-0 flex-1 items-center gap-4'>
-          <Link
-            to='/ponds'
-            className='p-2 hover:bg-gray-100 rounded-lg transition-colors shrink-0'
-            aria-label={L.backToPonds}
-          >
-            <ArrowLeft size={24} className='text-gray-600' />
-          </Link>
-          <div className='min-w-0'>
-            <div className='flex items-center gap-3 flex-wrap'>
-              <h1 className='text-2xl sm:text-3xl text-gray-800 truncate'>
-                {pond.name}
-              </h1>
-              <span
-                className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium shrink-0 ${
-                  pond.status === 'active'
-                    ? 'bg-green-100 text-green-800'
-                    : pond.status === 'maintenance'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-gray-100 text-gray-800'
-                }`}
+      <PageHeader
+        backTo='/ponds'
+        backLabel={L.backToPonds}
+        title={pond.name}
+        subtitle={`${L.farm}: ${farm?.name ?? '—'}`}
+        icon={Fish}
+        actions={
+          <>
+            <span
+              className={`inline-flex shrink-0 items-center rounded-lg px-3 py-1.5 text-sm font-medium ${
+                pond.status === 'active'
+                  ? 'bg-green-100 text-green-800'
+                  : pond.status === 'maintenance'
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : 'bg-gray-100 text-gray-800'
+              }`}
+            >
+              {statusText}
+            </span>
+            <div className='flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:gap-3'>
+              <button
+                type='button'
+                className='inline-flex min-h-[44px] min-w-[7rem] flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-green-300 hover:bg-green-50 hover:shadow-md sm:w-28 sm:flex-initial whitespace-nowrap'
+                onClick={() => {
+                  setStockActionType('add')
+                  setIsStockModalOpen(true)
+                }}
               >
-                {statusText}
-              </span>
+                <Plus size={16} className='shrink-0' />
+                <span>{L.addStock}</span>
+              </button>
+              <button
+                type='button'
+                disabled={!canMoveOrSell}
+                title={
+                  !canMoveOrSell ? L.cannotMoveOrSellMaintenance : undefined
+                }
+                className='inline-flex min-h-[44px] min-w-[7rem] flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-blue-300 hover:bg-blue-50 hover:shadow-md disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:w-28 sm:flex-initial whitespace-nowrap'
+                onClick={() => {
+                  setStockActionType('transfer')
+                  setIsStockModalOpen(true)
+                }}
+              >
+                <ArrowRight size={16} className='shrink-0' />
+                <span>{L.transfer}</span>
+              </button>
+              <button
+                type='button'
+                disabled={!canMoveOrSell}
+                title={
+                  !canMoveOrSell ? L.cannotMoveOrSellMaintenance : undefined
+                }
+                className='inline-flex min-h-[44px] min-w-[7rem] flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-amber-300 hover:bg-amber-50 hover:shadow-md disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:w-28 sm:flex-initial whitespace-nowrap'
+                onClick={() => {
+                  setStockActionType('sell')
+                  setIsStockModalOpen(true)
+                }}
+              >
+                <ShoppingCart size={16} className='shrink-0' />
+                <span>{L.sell}</span>
+              </button>
             </div>
-            <p className='text-gray-600 mt-1'>
-              {L.farm}: {farm?.name ?? '—'}
-            </p>
-          </div>
-        </div>
-        <div className='flex w-full flex-wrap items-center justify-start gap-2 sm:gap-3 lg:w-auto lg:shrink-0 lg:justify-end'>
-          <button
-            type='button'
-            className='inline-flex min-h-[44px] min-w-[7rem] flex-1 items-center justify-center gap-2 px-4 py-2.5 sm:flex-initial sm:w-28 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all hover:bg-green-50 hover:border-green-300 hover:shadow-md whitespace-nowrap'
-            onClick={() => {
-              setStockActionType('add')
-              setIsStockModalOpen(true)
-            }}
-          >
-            <Plus size={16} className='shrink-0' />
-            <span>{L.addStock}</span>
-          </button>
-          <button
-            type='button'
-            disabled={!canMoveOrSell}
-            title={!canMoveOrSell ? L.cannotMoveOrSellMaintenance : undefined}
-            className='inline-flex min-h-[44px] min-w-[7rem] flex-1 items-center justify-center gap-2 px-4 py-2.5 sm:flex-initial sm:w-28 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none hover:bg-blue-50 hover:border-blue-300 hover:shadow-md'
-            onClick={() => {
-              setStockActionType('transfer')
-              setIsStockModalOpen(true)
-            }}
-          >
-            <ArrowRight size={16} className='shrink-0' />
-            <span>{L.transfer}</span>
-          </button>
-          <button
-            type='button'
-            disabled={!canMoveOrSell}
-            title={!canMoveOrSell ? L.cannotMoveOrSellMaintenance : undefined}
-            className='inline-flex min-h-[44px] min-w-[7rem] flex-1 items-center justify-center gap-2 px-4 py-2.5 sm:flex-initial sm:w-28 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm text-sm transition-all whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none hover:bg-amber-50 hover:border-amber-300 hover:shadow-md'
-            onClick={() => {
-              setStockActionType('sell')
-              setIsStockModalOpen(true)
-            }}
-          >
-            <ShoppingCart size={16} className='shrink-0' />
-            <span>{L.sell}</span>
-          </button>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <div className='grid grid-cols-1 lg:grid-cols-4 gap-6'>
         <div className='lg:col-span-3 space-y-6'>

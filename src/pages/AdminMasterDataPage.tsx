@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import {
   Building,
   Fish,
@@ -11,9 +11,13 @@ import {
   Edit2,
 } from 'lucide-react'
 import { clientApi, type DropdownItem } from '../api/client'
+import { useQueries, useQueryClient } from '@tanstack/react-query'
 import { useClientListQuery, useInvalidateClientList } from '../hooks/useClient'
 import { farmApi, type FarmResponse } from '../api/farm'
 import { pondApi, type PondResponse } from '../api/pond'
+import { farmKeys, useFarmListQuery } from '../hooks/useFarm'
+import { pondKeys } from '../hooks/usePond'
+import { useAppToast } from '../contexts/AppToastContext'
 import { EditMasterDataModal } from '../components/EditMasterDataModal'
 import { StatusBadge } from '../components/StatusBadge'
 import {
@@ -22,6 +26,7 @@ import {
 } from '../utils/masterDataName'
 import { normalizeFarmNameForStore } from '../utils/masterDataName'
 import { adminMasterDataTh } from '../locales/adminMasterData.th'
+import { PageHeader } from '../components/PageHeader'
 
 const t = adminMasterDataTh
 
@@ -31,6 +36,16 @@ export function AdminMasterDataPage() {
   const { data: clientList = [], isLoading: clientListLoading } =
     useClientListQuery()
   const invalidateClientList = useInvalidateClientList()
+  const { showToast } = useAppToast()
+  const queryClient = useQueryClient()
+  const selectedClientIdNum = selectedClientId
+    ? Number(selectedClientId)
+    : undefined
+  const { data: farmListData, isLoading: farmListLoading } = useFarmListQuery(
+    selectedClientIdNum && selectedClientIdNum > 0
+      ? selectedClientIdNum
+      : undefined,
+  )
   const [activeTab, setActiveTab] = useState<'clients' | 'farms' | 'ponds'>(
     'clients',
   )
@@ -53,74 +68,24 @@ export function AdminMasterDataPage() {
   const [farmForm, setFarmForm] = useState({ name: '' })
   const [pondForms, setPondForms] = useState([{ name: '' }])
   const [selectedFarmId, setSelectedFarmId] = useState('')
-  const [farmList, setFarmList] = useState<FarmResponse[]>([])
-  const [farmListLoading, setFarmListLoading] = useState(false)
-  const [pondsByFarmId, setPondsByFarmId] = useState<
-    Record<string, PondResponse[]>
-  >({})
-  const [pondsLoadingFarmIds, setPondsLoadingFarmIds] = useState<Set<string>>(
-    new Set(),
-  )
+  const farmList = farmListData?.farms ?? []
 
-  // ——— fetch farm list when client is selected ———
-  useEffect(() => {
-    if (!selectedClientId) {
-      queueMicrotask(() => {
-        setFarmList([])
-        setPondsByFarmId({})
-      })
-      return
-    }
-    let cancelled = false
-    queueMicrotask(() => {
-      if (!cancelled) setFarmListLoading(true)
-    })
-    farmApi
-      .getFarmList(Number(selectedClientId))
-      .then((res) => {
-        if (!cancelled) setFarmList(res?.farms ?? [])
-      })
-      .catch(() => {
-        if (!cancelled) setFarmList([])
-      })
-      .finally(() => {
-        if (!cancelled) setFarmListLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [selectedClientId])
+  const pondQueries = useQueries({
+    queries: expandedFarms.map((farmIdStr) => ({
+      queryKey: pondKeys.list(Number(farmIdStr)),
+      queryFn: () => pondApi.getPondList(Number(farmIdStr)),
+      enabled: Boolean(selectedClientId) && activeTab !== 'clients',
+      staleTime: 5 * 60 * 1000,
+    })),
+  })
 
-  // ——— fetch pond list when a farm is expanded ———
-  useEffect(() => {
-    if (activeTab === 'clients' || !selectedClientId) return
-    expandedFarms.forEach((farmId) => {
-      if (pondsByFarmId[farmId] !== undefined) return
-      if (pondsLoadingFarmIds.has(farmId)) return
-      setPondsLoadingFarmIds((prev) => new Set(prev).add(farmId))
-      pondApi
-        .getPondList(Number(farmId))
-        .then((list) => {
-          setPondsByFarmId((prev) => ({ ...prev, [farmId]: list ?? [] }))
-        })
-        .catch(() => {
-          setPondsByFarmId((prev) => ({ ...prev, [farmId]: [] }))
-        })
-        .finally(() => {
-          setPondsLoadingFarmIds((prev) => {
-            const next = new Set(prev)
-            next.delete(farmId)
-            return next
-          })
-        })
+  const pondQueryByFarmId = useMemo(() => {
+    const m: Record<string, (typeof pondQueries)[number] | undefined> = {}
+    expandedFarms.forEach((id, i) => {
+      m[id] = pondQueries[i]
     })
-  }, [
-    selectedClientId,
-    activeTab,
-    expandedFarms,
-    pondsByFarmId,
-    pondsLoadingFarmIds,
-  ])
+    return m
+  }, [expandedFarms, pondQueries])
 
   // ——— derived ———
   const selectedClient = clientList.find(
@@ -134,34 +99,21 @@ export function AdminMasterDataPage() {
   )
 
   const refetchFarmList = useCallback(() => {
-    if (!selectedClientId) return
-    setFarmListLoading(true)
-    farmApi
-      .getFarmList(Number(selectedClientId))
-      .then((res) => setFarmList(res?.farms ?? []))
-      .catch(() => setFarmList([]))
-      .finally(() => setFarmListLoading(false))
-  }, [selectedClientId])
+    const id = selectedClientIdNum
+    if (!id) return
+    void queryClient.invalidateQueries({
+      queryKey: [...farmKeys.list(), id],
+    })
+  }, [queryClient, selectedClientIdNum])
 
-  const refetchPondsForFarm = useCallback((farmId: number) => {
-    const id = String(farmId)
-    setPondsLoadingFarmIds((prev) => new Set(prev).add(id))
-    pondApi
-      .getPondList(farmId)
-      .then((list) => {
-        setPondsByFarmId((prev) => ({ ...prev, [id]: list ?? [] }))
+  const refetchPondsForFarm = useCallback(
+    (farmId: number) => {
+      void queryClient.invalidateQueries({
+        queryKey: pondKeys.list(farmId),
       })
-      .catch(() => {
-        setPondsByFarmId((prev) => ({ ...prev, [id]: [] }))
-      })
-      .finally(() => {
-        setPondsLoadingFarmIds((prev) => {
-          const next = new Set(prev)
-          next.delete(id)
-          return next
-        })
-      })
-  }, [])
+    },
+    [queryClient],
+  )
 
   const refetchHierarchy = useCallback(() => {
     refetchFarmList()
@@ -174,7 +126,7 @@ export function AdminMasterDataPage() {
     const ownerName = clientForm.contactPerson.trim()
     const contactNumber = clientForm.phone.trim()
     if (!name || !ownerName || !contactNumber) {
-      alert(t.alertFillRequired)
+      showToast('error', t.alertFillRequired)
       return
     }
     try {
@@ -190,14 +142,17 @@ export function AdminMasterDataPage() {
       })
       invalidateClientList()
     } catch (err) {
-      alert(err instanceof Error ? err.message : t.alertCreateClientFailed)
+      showToast(
+        'error',
+        err instanceof Error ? err.message : t.alertCreateClientFailed,
+      )
     }
   }
 
   const handleFarmSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!farmForm.name.trim()) {
-      alert(t.alertFillRequired)
+      showToast('error', t.alertFillRequired)
       return
     }
     if (!selectedClientId) return
@@ -218,19 +173,22 @@ export function AdminMasterDataPage() {
       setFarmForm({ name: '' })
       refetchHierarchy()
     } catch (err) {
-      alert(err instanceof Error ? err.message : t.alertCreateFarmFailed)
+      showToast(
+        'error',
+        err instanceof Error ? err.message : t.alertCreateFarmFailed,
+      )
     }
   }
 
   const handlePondSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedFarmId) {
-      alert(t.alertSelectFarm)
+      showToast('error', t.alertSelectFarm)
       return
     }
     const names = pondForms.map((f) => f.name.trim()).filter(Boolean)
     if (names.length === 0) {
-      alert(t.alertAtLeastOnePondName)
+      showToast('error', t.alertAtLeastOnePondName)
       return
     }
     const selectedFarm = clientFarms.find(
@@ -251,7 +209,10 @@ export function AdminMasterDataPage() {
       refetchFarmList()
       refetchPondsForFarm(Number(selectedFarmId))
     } catch (err) {
-      alert(err instanceof Error ? err.message : t.alertCreatePondsFailed)
+      showToast(
+        'error',
+        err instanceof Error ? err.message : t.alertCreatePondsFailed,
+      )
     }
   }
 
@@ -356,7 +317,10 @@ export function AdminMasterDataPage() {
       setIsEditModalOpen(false)
       setEditingItem(null)
     } catch (err) {
-      alert(err instanceof Error ? err.message : t.alertUpdateFailed)
+      showToast(
+        'error',
+        err instanceof Error ? err.message : t.alertUpdateFailed,
+      )
     }
   }
 
@@ -366,18 +330,12 @@ export function AdminMasterDataPage() {
     clientForm.phone.trim() !== ''
 
   return (
-    <div className='h-[calc(100vh-120px)] flex flex-col space-y-3'>
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-3'>
-          <div className='w-10 h-10 bg-gradient-to-r from-blue-800 to-blue-600 rounded-lg flex items-center justify-center'>
-            <Database size={20} className='text-white' />
-          </div>
-          <div>
-            <h1 className='text-2xl text-gray-800'>{t.pageTitle}</h1>
-            <p className='text-sm text-gray-600'>{t.pageSubtitle}</p>
-          </div>
-        </div>
-      </div>
+    <div className='flex min-h-0 flex-col space-y-3'>
+      <PageHeader
+        title={t.pageTitle}
+        subtitle={t.pageSubtitle}
+        icon={Database}
+      />
 
       {showSuccessMessage && (
         <div className='bg-green-50 border-l-4 border-green-500 p-3 rounded-lg shadow-md animate-fade-in'>
@@ -799,10 +757,9 @@ export function AdminMasterDataPage() {
                   </div>
                 ) : (
                   clientFarms.map((farm) => {
-                    const farmPonds = pondsByFarmId[String(farm.id)] ?? []
-                    const pondsLoading = pondsLoadingFarmIds.has(
-                      String(farm.id),
-                    )
+                    const pondQ = pondQueryByFarmId[String(farm.id)]
+                    const farmPonds = pondQ?.data ?? []
+                    const pondsLoading = pondQ?.isPending ?? false
                     const isExpanded = expandedFarms.includes(String(farm.id))
                     return (
                       <div

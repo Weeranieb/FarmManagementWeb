@@ -17,6 +17,7 @@ import { useFeedCollectionListQuery } from '../hooks/useFeedCollection'
 import type { DailyLogMonth } from '../api/dailyLog'
 import { ExcelUploadModal } from './ExcelUploadModal'
 import { FEED_TYPE_FRESH, FEED_TYPE_PELLET } from '../constants/feedType'
+import { useAppToast } from '../contexts/AppToastContext'
 
 const L = th.dailyFeed
 
@@ -81,6 +82,7 @@ function buildRowsFromMonth(data: DailyLogMonth | undefined): {
 }
 
 export function DailyFeedTab({ pondId }: DailyFeedTabProps) {
+  const { showToast } = useAppToast()
   const numPondId = Number(pondId)
   const now = new Date()
   const [currentMonth, setCurrentMonth] = useState(
@@ -190,11 +192,11 @@ export function DailyFeedTab({ pondId }: DailyFeedTabProps) {
       (e) => e.pelletMorning > 0 || e.pelletEvening > 0,
     )
     if (hasFresh && freshFcId == null) {
-      alert(L.selectFresh)
+      showToast('error', L.selectFresh)
       return
     }
     if (hasPellet && pelletFcId == null) {
-      alert(L.selectPellet)
+      showToast('error', L.selectPellet)
       return
     }
 

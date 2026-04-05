@@ -1,10 +1,11 @@
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, Grid, Fish, Activity } from 'lucide-react'
+import { Grid, Fish, Activity, Building } from 'lucide-react'
 import { useFarmQuery } from '../hooks/useFarm'
 import { pondApi } from '../api/pond'
 import { formatFarmDisplayNameTH } from '../utils/masterDataName'
 import { StatusBadge } from '../components/StatusBadge'
+import { PageHeader } from '../components/PageHeader'
 import { th } from '../locales/th'
 
 const L = th.farmDetail
@@ -26,15 +27,12 @@ export function FarmDetailPage() {
   if (farmLoading || !id) {
     return (
       <div className='space-y-6'>
-        <div className='flex items-center gap-4'>
-          <Link
-            to='/farms'
-            className='p-2 hover:bg-gray-100 rounded-lg transition-colors'
-          >
-            <ArrowLeft size={24} />
-          </Link>
-        </div>
-        <div className='bg-white rounded-xl shadow-md p-12 text-center'>
+        <PageHeader
+          backTo='/farms'
+          title={farmLoading ? L.loading : L.farmNotFound}
+          icon={Building}
+        />
+        <div className='rounded-xl bg-white p-12 text-center shadow-md'>
           <p className='text-gray-500'>
             {farmLoading ? L.loading : L.farmNotFound}
           </p>
@@ -46,15 +44,8 @@ export function FarmDetailPage() {
   if (farmError || !farm) {
     return (
       <div className='space-y-6'>
-        <div className='flex items-center gap-4'>
-          <Link
-            to='/farms'
-            className='p-2 hover:bg-gray-100 rounded-lg transition-colors'
-          >
-            <ArrowLeft size={24} />
-          </Link>
-        </div>
-        <div className='bg-white rounded-xl shadow-md p-12 text-center'>
+        <PageHeader backTo='/farms' title={L.farmNotFound} icon={Building} />
+        <div className='rounded-xl bg-white p-12 text-center shadow-md'>
           <p className='text-gray-500'>{L.farmNotFound}</p>
         </div>
       </div>
@@ -69,19 +60,11 @@ export function FarmDetailPage() {
 
   return (
     <div className='space-y-6'>
-      <div className='flex items-center gap-4'>
-        <Link
-          to='/farms'
-          className='p-2 hover:bg-gray-100 rounded-lg transition-colors'
-        >
-          <ArrowLeft size={24} />
-        </Link>
-        <div>
-          <h1 className='text-3xl text-gray-800'>
-            {formatFarmDisplayNameTH(farm.name)}
-          </h1>
-        </div>
-      </div>
+      <PageHeader
+        backTo='/farms'
+        title={formatFarmDisplayNameTH(farm.name)}
+        icon={Building}
+      />
 
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
         <div className='bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg p-6 border border-blue-200'>

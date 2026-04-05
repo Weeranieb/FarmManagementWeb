@@ -1,6 +1,16 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Search, Plus, Phone, MapPin, X, Pencil, Trash2 } from 'lucide-react'
+import {
+  Search,
+  Plus,
+  Phone,
+  MapPin,
+  X,
+  Pencil,
+  Trash2,
+  Store,
+} from 'lucide-react'
+import { PageHeader } from '../components/PageHeader'
 import { th } from '../locales/th'
 import { useAuthQuery } from '../hooks/useAuth'
 import { UserLevel } from '../constants/userLevel'
@@ -101,21 +111,23 @@ export function MerchantsListPage() {
 
   return (
     <div className='space-y-6'>
-      <div className='flex items-center justify-between'>
-        <div>
-          <h1 className='text-3xl text-gray-800 mb-2'>{L.title}</h1>
-          <p className='text-gray-600'>{L.subtitle}</p>
-        </div>
-        {isSuperAdmin && (
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className='flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg shadow-md hover:shadow-xl hover:from-blue-700 hover:to-blue-500 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200'
-          >
-            <Plus size={20} />
-            <span>{L.addMerchant}</span>
-          </button>
-        )}
-      </div>
+      <PageHeader
+        title={L.title}
+        subtitle={L.subtitle}
+        icon={Store}
+        actions={
+          isSuperAdmin ? (
+            <button
+              type='button'
+              onClick={() => setIsAddModalOpen(true)}
+              className='flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-700 to-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-md transition hover:from-blue-600 hover:to-blue-500'
+            >
+              <Plus size={18} />
+              <span>{L.addMerchant}</span>
+            </button>
+          ) : undefined
+        }
+      />
 
       <div className='bg-white rounded-xl shadow-md p-6'>
         <div className='flex flex-col md:flex-row gap-4'>

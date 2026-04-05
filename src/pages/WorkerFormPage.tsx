@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft, Save, Users } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { PageHeader } from '../components/PageHeader'
 import { th } from '../locales/th'
 import { useClient } from '../contexts/ClientContext'
 import { useWorkerQuery, workerKeys } from '../hooks/useWorker'
@@ -111,18 +112,11 @@ function WorkerFormFields({
 
   return (
     <div className='space-y-6'>
-      <div className='flex items-center gap-4'>
-        <button
-          type='button'
-          onClick={() => navigate('/workers')}
-          className='p-2 hover:bg-gray-100 rounded-lg'
-        >
-          <ArrowLeft size={24} />
-        </button>
-        <h1 className='text-3xl text-gray-800'>
-          {isEdit ? L.formTitleEdit : L.formTitle}
-        </h1>
-      </div>
+      <PageHeader
+        backTo='/workers'
+        title={isEdit ? L.formTitleEdit : L.formTitle}
+        icon={Users}
+      />
 
       <div className='bg-white rounded-xl shadow-md p-6'>
         <form onSubmit={handleSubmit} className='space-y-6'>

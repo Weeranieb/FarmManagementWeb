@@ -10,15 +10,13 @@ import {
   User,
   Settings,
   LogOut,
-  Menu,
-  X,
   Bell,
   ChevronDown,
+  ChevronLeft,
   Database,
   Layers,
 } from 'lucide-react'
-import { useAuthQuery } from '../hooks/useAuth'
-import { useLogoutMutation } from '../hooks/useAuth'
+import { useAuthQuery, useLogoutMutation } from '../hooks/useAuth'
 import { useClientListQuery } from '../hooks/useClient'
 import { useClient } from '../contexts/ClientContext'
 import { UserLevel } from '../constants/userLevel'
@@ -27,7 +25,9 @@ import { th } from '../locales/th'
 export function MainLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
+  const [isNotifOpen, setIsNotifOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const notifRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
   const { data: user } = useAuthQuery()
   const logoutMutation = useLogoutMutation()
@@ -38,9 +38,6 @@ export function MainLayout() {
   const isAdminUser =
     user?.userLevel === UserLevel.SuperAdmin ||
     user?.userLevel === UserLevel.ClientAdmin
-  const selectedClient = clientList.find(
-    (c) => String(c.key) === selectedClientId,
-  )
   const L = th.layout
 
   const navItems = [
@@ -60,10 +57,18 @@ export function MainLayout() {
   }
 
   useEffect(() => {
-    const currentRef = dropdownRef.current
     const handleClickOutside = (event: MouseEvent) => {
-      if (currentRef && !currentRef.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsProfileDropdownOpen(false)
+      }
+      if (
+        notifRef.current &&
+        !notifRef.current.contains(event.target as Node)
+      ) {
+        setIsNotifOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -81,102 +86,255 @@ export function MainLayout() {
       ? `${user.firstName} ${user.lastName}`.trim()
       : user?.firstName || user?.username || L.profileUser
 
+  const sidebarWide = isSidebarOpen
+
+  const navLinkClass = (active: boolean, collapsed: boolean) =>
+    [
+      'flex items-center gap-3 rounded-xl text-sm transition-colors',
+      collapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
+      active
+        ? 'border border-blue-100 bg-blue-50 font-medium text-blue-700'
+        : 'border border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+    ].join(' ')
+
   return (
-    <div className='min-h-screen bg-blue-50'>
-      <header className='bg-gradient-to-r from-blue-800 to-blue-600 text-white shadow-md sticky top-0 z-30'>
-        <div className='flex items-center justify-between px-3 py-2 min-h-0'>
-          <div className='flex items-center gap-2.5'>
-            <button
-              type='button'
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className='p-1.5 hover:bg-white/10 rounded-lg transition-colors'
-              aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
-            >
-              {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-            <div className='flex items-center gap-2'>
-              <div className='w-8 h-8 bg-white/20 rounded-md flex items-center justify-center shrink-0'>
-                <Fish size={18} className='text-white' />
-              </div>
-              <div className='leading-tight'>
-                <h1 className='text-base font-semibold tracking-tight'>
-                  {L.appName}
-                </h1>
-                <p className='text-[10px] text-blue-100/95 leading-snug'>
-                  {L.appTagline}
-                </p>
+    <div className='flex h-screen min-h-0 overflow-hidden bg-[var(--shell-page-bg,#f8fafc)]'>
+      <aside
+        className={`relative z-40 flex h-full min-h-0 shrink-0 flex-col border-r border-slate-200 bg-white shadow-sm transition-[width] duration-300 ${
+          sidebarWide ? 'w-60' : 'w-16'
+        }`}
+      >
+        <button
+          type='button'
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className='absolute -right-3 top-5 z-50 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-slate-600 shadow-md transition-colors hover:bg-slate-700'
+          aria-expanded={sidebarWide}
+          aria-label={
+            sidebarWide ? L.sidebarToggleCollapse : L.sidebarToggleExpand
+          }
+        >
+          <ChevronLeft
+            size={12}
+            className={`text-white transition-transform ${sidebarWide ? '' : 'rotate-180'}`}
+          />
+        </button>
+
+        <div
+          className={`flex shrink-0 items-center gap-3 border-b border-slate-100 py-4 ${
+            sidebarWide ? 'px-4' : 'justify-center px-2'
+          }`}
+        >
+          <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50'>
+            <Fish size={20} className='text-blue-600' />
+          </div>
+          {sidebarWide && (
+            <div className='min-w-0 overflow-hidden'>
+              <p className='text-base font-semibold leading-tight text-slate-900'>
+                {L.appName}
+              </p>
+              <p className='text-xs text-slate-500'>{L.appTagline}</p>
+            </div>
+          )}
+        </div>
+
+        <div className='flex min-h-0 flex-1 flex-col overflow-hidden py-3'>
+          {isAdminUser && sidebarWide && (
+            <div className='mb-3 border-b border-slate-100 px-3 pb-3'>
+              <select
+                value={selectedClientId}
+                onChange={(e) => setSelectedClientId(e.target.value)}
+                aria-label={L.selectClientPlaceholder}
+                className='w-full rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-800 shadow-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/30'
+              >
+                <option value='' disabled>
+                  {L.selectClientPlaceholder}
+                </option>
+                {clientList.map((client) => (
+                  <option key={client.key} value={String(client.key)}>
+                    {client.value}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {isAdminUser && !sidebarWide && (
+            <div className='mb-3 flex justify-center border-b border-slate-100 px-2 pb-3'>
+              <div
+                className='flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100'
+                title={L.selectClientPlaceholder}
+              >
+                <Users size={16} className='text-slate-500' />
               </div>
             </div>
-          </div>
+          )}
 
-          <div className='flex items-center gap-2'>
-            <button
-              type='button'
-              className='p-1.5 hover:bg-white/10 rounded-lg transition-colors relative'
-              aria-label='Notifications'
+          <nav className='min-h-0 flex-1 space-y-0.5 overflow-y-auto overflow-x-hidden px-2'>
+            {navItems.map((item) => {
+              const Icon = item.icon
+              const active = isActive(item.path)
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  title={!sidebarWide ? item.label : undefined}
+                  className={navLinkClass(active, !sidebarWide)}
+                >
+                  <Icon
+                    size={19}
+                    className={`shrink-0 ${active ? 'text-blue-600' : 'text-slate-500'}`}
+                  />
+                  {sidebarWide && (
+                    <span className='truncate'>{item.label}</span>
+                  )}
+                </Link>
+              )
+            })}
+          </nav>
+
+          {isSuperAdmin && (
+            <div className='mt-2 border-t border-slate-100 px-2 pt-3'>
+              {sidebarWide && (
+                <p className='mb-2 px-2 text-[10px] font-medium uppercase tracking-wider text-slate-500'>
+                  {L.navAdmin}
+                </p>
+              )}
+              <Link
+                to='/admin/master-data'
+                title={!sidebarWide ? L.navMasterData : undefined}
+                className={navLinkClass(
+                  isActive('/admin/master-data'),
+                  !sidebarWide,
+                )}
+              >
+                <Database
+                  size={19}
+                  className={`shrink-0 ${isActive('/admin/master-data') ? 'text-blue-600' : 'text-slate-500'}`}
+                />
+                {sidebarWide && (
+                  <span className='truncate'>{L.navMasterData}</span>
+                )}
+              </Link>
+            </div>
+          )}
+
+          <div className='mt-auto space-y-0.5 border-t border-slate-100 px-2 pt-3'>
+            <div className='relative' ref={notifRef}>
+              <button
+                type='button'
+                title={!sidebarWide ? L.notifications : undefined}
+                onClick={() => setIsNotifOpen(!isNotifOpen)}
+                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 ${!sidebarWide ? 'justify-center' : ''}`}
+              >
+                <span className='relative shrink-0'>
+                  <Bell size={19} />
+                  <span className='absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border-2 border-white bg-sky-400' />
+                </span>
+                {sidebarWide && <span>{L.notifications}</span>}
+              </button>
+              {isNotifOpen && (
+                <div
+                  className={`absolute z-50 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl ${
+                    sidebarWide
+                      ? 'bottom-full left-0 mb-2'
+                      : 'bottom-0 left-full ml-2'
+                  }`}
+                >
+                  <div className='border-b border-slate-100 bg-slate-50 px-4 py-3'>
+                    <p className='text-sm font-medium text-slate-800'>
+                      {L.notifications}
+                    </p>
+                  </div>
+                  <div className='px-4 py-6 text-center text-sm text-slate-500'>
+                    —
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Link
+              to='/profile'
+              title={!sidebarWide ? L.settings : undefined}
+              className={navLinkClass(isActive('/profile'), !sidebarWide)}
             >
-              <Bell size={18} />
-              <span className='absolute top-1 right-1 w-1.5 h-1.5 bg-blue-300 rounded-full' />
-            </button>
+              <Settings
+                size={19}
+                className={`shrink-0 ${isActive('/profile') ? 'text-blue-600' : 'text-slate-500'}`}
+              />
+              {sidebarWide && <span className='truncate'>{L.settings}</span>}
+            </Link>
 
             <div className='relative' ref={dropdownRef}>
-              <div
-                className='flex items-center gap-2 px-2 py-1 hover:bg-white/10 rounded-lg cursor-pointer transition-colors'
+              <button
+                type='button'
                 onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors hover:bg-slate-100 ${!sidebarWide ? 'justify-center' : ''}`}
               >
-                <div className='w-7 h-7 bg-white/20 rounded-full flex items-center justify-center shrink-0'>
-                  <User size={15} />
+                <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100'>
+                  <User size={15} className='text-blue-700' />
                 </div>
-                <div className='hidden md:block text-left leading-tight'>
-                  <p className='text-xs font-medium truncate max-w-[10rem]'>
-                    {displayName}
-                  </p>
-                  <p className='text-[10px] text-blue-100'>{L.profileRole}</p>
-                </div>
-                <ChevronDown
-                  size={14}
-                  className={`shrink-0 transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`}
-                />
-              </div>
+                {sidebarWide && (
+                  <>
+                    <div className='min-w-0 flex-1 overflow-hidden'>
+                      <p className='truncate text-sm font-medium leading-tight text-slate-900'>
+                        {displayName}
+                      </p>
+                      <p className='truncate text-xs text-slate-500'>
+                        {L.profileRole}
+                      </p>
+                    </div>
+                    <ChevronDown
+                      size={14}
+                      className={`shrink-0 text-slate-400 transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`}
+                    />
+                  </>
+                )}
+              </button>
 
               {isProfileDropdownOpen && (
-                <div className='absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50'>
-                  <div className='px-4 py-3 border-b border-gray-200 bg-gray-50'>
-                    <p className='text-sm font-medium text-gray-900'>
+                <div
+                  className={`absolute z-50 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl ${
+                    sidebarWide
+                      ? 'bottom-full left-0 mb-2'
+                      : 'bottom-0 left-full ml-2'
+                  }`}
+                >
+                  <div className='border-b border-slate-100 bg-slate-50 px-4 py-3'>
+                    <p className='text-sm font-medium text-slate-900'>
                       {displayName}
                     </p>
-                    <p className='text-xs text-gray-600'>
+                    <p className='text-xs text-slate-600'>
                       {user?.contactNumber || L.profileEmail}
                     </p>
                   </div>
-                  <div className='py-2'>
+                  <div className='py-1'>
                     <Link
                       to='/profile'
                       onClick={() => setIsProfileDropdownOpen(false)}
-                      className='flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-blue-50 transition-colors'
+                      className='flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-blue-50'
                     >
-                      <User size={18} />
+                      <User size={16} />
                       <span>{L.myProfile}</span>
                     </Link>
                     <Link
                       to='/profile'
                       onClick={() => setIsProfileDropdownOpen(false)}
-                      className='flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-blue-50 transition-colors'
+                      className='flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-blue-50'
                     >
-                      <Settings size={18} />
+                      <Settings size={16} />
                       <span>{L.settings}</span>
                     </Link>
                   </div>
-                  <div className='border-t border-gray-200'>
+                  <div className='border-t border-slate-100'>
                     <button
                       type='button'
                       onClick={() => {
                         setIsProfileDropdownOpen(false)
                         handleLogout()
                       }}
-                      className='w-full flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 transition-colors'
+                      className='flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50'
                     >
-                      <LogOut size={18} />
+                      <LogOut size={16} />
                       <span>{L.logout}</span>
                     </button>
                   </div>
@@ -185,136 +343,19 @@ export function MainLayout() {
             </div>
           </div>
         </div>
-      </header>
+      </aside>
 
-      <div className='flex min-h-0'>
-        <aside
-          className={`shrink-0 ${
-            isSidebarOpen ? 'w-[11.5rem]' : 'w-0'
-          } transition-all duration-300 overflow-hidden bg-gradient-to-b from-slate-50/90 to-white border-r border-gray-200/80 shadow-[4px_0_24px_-8px_rgba(15,23,42,0.08)] sticky top-[52px] h-[calc(100vh-52px)] z-20`}
-        >
-          <nav className='px-2.5 py-3 h-full flex flex-col gap-0'>
-            {isAdminUser && (
-              <div className='pb-3 mb-3 border-b border-gray-200/90'>
-                <div className='mb-2'>
-                  <label className='text-[10px] font-medium text-gray-500 uppercase tracking-wider px-1 block mb-2'>
-                    {L.clientView}
-                  </label>
-                  <select
-                    value={selectedClientId}
-                    onChange={(e) => setSelectedClientId(e.target.value)}
-                    className='w-full px-2.5 py-2 text-xs border border-blue-200 rounded-xl bg-white text-gray-800 shadow-sm focus:ring-2 focus:ring-blue-400/40 focus:border-blue-400 outline-none transition-shadow'
-                  >
-                    <option value='' disabled>
-                      {L.selectClientPlaceholder}
-                    </option>
-                    {clientList.map((client) => (
-                      <option key={client.key} value={String(client.key)}>
-                        {client.value}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {selectedClient && (
-                  <div className='mt-2 rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white px-2.5 py-2 shadow-sm'>
-                    <p className='text-[11px] text-blue-900 flex items-center gap-2 min-w-0'>
-                      <Users size={14} className='shrink-0 text-blue-600' />
-                      <span className='font-medium truncate'>
-                        {selectedClient.value}
-                      </span>
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className='flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-0.5 py-0.5 space-y-1'>
-              {navItems.map((item) => {
-                const Icon = item.icon
-                const active = isActive(item.path)
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`flex items-center gap-2 px-2.5 py-2 rounded-xl text-[13px] transition-all duration-200 ${
-                      active
-                        ? 'font-medium text-white bg-gradient-to-r from-blue-800 to-blue-600 shadow-md shadow-blue-900/20 ring-1 ring-white/15'
-                        : 'text-gray-700 hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-gray-200/80'
-                    }`}
-                  >
-                    <Icon
-                      size={17}
-                      className={`shrink-0 ${active ? 'opacity-100' : 'text-gray-500'}`}
-                    />
-                    <span className='min-w-0 leading-snug'>{item.label}</span>
-                  </Link>
-                )
-              })}
-            </div>
-
-            {isSuperAdmin && (
-              <div className='pt-3 mt-0.5 border-t border-gray-200/90 px-0.5'>
-                <div className='px-1.5 mb-1.5'>
-                  <p className='text-[10px] font-medium text-gray-500 uppercase tracking-wider'>
-                    {L.navAdmin}
-                  </p>
-                </div>
-                <Link
-                  to='/admin/master-data'
-                  className={`flex items-center gap-2 px-2.5 py-2 rounded-xl text-[13px] transition-all duration-200 ${
-                    isActive('/admin/master-data')
-                      ? 'font-medium text-white bg-gradient-to-r from-blue-800 to-blue-600 shadow-md shadow-blue-900/20 ring-1 ring-white/15'
-                      : 'text-gray-700 hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-gray-200/80'
-                  }`}
-                >
-                  <Database
-                    size={17}
-                    className={`shrink-0 ${isActive('/admin/master-data') ? '' : 'text-gray-500'}`}
-                  />
-                  <span className='min-w-0 leading-snug'>
-                    {L.navMasterData}
-                  </span>
-                </Link>
-              </div>
-            )}
-
-            <div className='pt-3 border-t border-gray-200/90 px-0.5 space-y-1'>
-              <Link
-                to='/profile'
-                className={`flex items-center gap-2 px-2.5 py-2 rounded-xl text-[13px] transition-all duration-200 ${
-                  isActive('/profile')
-                    ? 'font-medium text-white bg-gradient-to-r from-blue-800 to-blue-600 shadow-md shadow-blue-900/20 ring-1 ring-white/15'
-                    : 'text-gray-700 hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-gray-200/80'
-                }`}
-              >
-                <Settings
-                  size={17}
-                  className={`shrink-0 ${isActive('/profile') ? '' : 'text-gray-500'}`}
-                />
-                <span className='min-w-0 leading-snug'>{L.settings}</span>
-              </Link>
-              <button
-                type='button'
-                onClick={handleLogout}
-                className='w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-[13px] text-red-600 hover:bg-red-50/90 hover:shadow-sm hover:ring-1 hover:ring-red-100 transition-all duration-200'
-              >
-                <LogOut size={17} className='shrink-0' />
-                <span className='min-w-0 leading-snug'>{L.logout}</span>
-              </button>
-            </div>
-          </nav>
-        </aside>
-
-        <main className='flex-1 min-w-0 p-6 transition-all duration-300'>
+      <main className='min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden'>
+        <div className='p-6 lg:p-8'>
           {isAdminUser && !selectedClientId ? (
-            <div className='flex items-center justify-center min-h-[50vh]'>
-              <p className='text-gray-500'>{L.selectClientToView}</p>
+            <div className='flex min-h-[50vh] items-center justify-center'>
+              <p className='text-slate-500'>{L.selectClientToView}</p>
             </div>
           ) : (
             <Outlet />
           )}
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   )
 }

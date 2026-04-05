@@ -1,6 +1,14 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  /* App shell (MainLayout): light sidebar + slate page surface */
+  --shell-page-bg: #f8fafc; /* slate-50 */
+  --shell-sidebar-bg: #ffffff;
+  --shell-sidebar-border: #e2e8f0; /* slate-200 */
+  --shell-nav-active-bg: #eff6ff; /* blue-50 */
+  --shell-nav-active-fg: #1d4ed8; /* blue-700 */
+  --shell-accent: #3b82f6; /* blue-500 — PageHeader bar / icon */
+
   --font-size: 16px;
   --background: #ffffff;
   --foreground: oklch(0.145 0 0);
@@ -180,4 +188,3 @@
     line-height: 1.5;
   }
 }
-
