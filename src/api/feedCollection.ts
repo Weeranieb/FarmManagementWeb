@@ -5,6 +5,8 @@ export interface FeedCollectionResponse {
   clientId: number
   name: string
   unit: string
+  feedType: string
+  fcr?: number | null
   createdAt: string
   createdBy: string
   updatedAt: string
@@ -24,9 +26,19 @@ export interface FeedCollectionPageResponse {
 export interface CreateFeedCollectionRequest {
   name: string
   unit: string
+  feedType?: string
+  fcr?: number
   /** When the token has no client (e.g. super admin), backend requires this. */
   clientId?: number
   feedPriceHistories?: { price: number; priceUpdatedDate: string }[]
+}
+
+export interface UpdateFeedCollectionRequest {
+  id: number
+  name: string
+  unit: string
+  feedType: string
+  fcr?: number
 }
 
 export interface CreateFeedCollectionResponse {
@@ -64,5 +76,9 @@ export const feedCollectionApi = {
       '/feed-collection',
       body,
     )
+  },
+
+  update: async (body: UpdateFeedCollectionRequest): Promise<void> => {
+    return apiClient.put<void>('/feed-collection', body)
   },
 }

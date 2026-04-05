@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   feedCollectionApi,
   type CreateFeedCollectionRequest,
+  type UpdateFeedCollectionRequest,
 } from '../api/feedCollection'
 import { useAuthQuery } from './useAuth'
 import { useClient } from '../contexts/ClientContext'
@@ -89,6 +90,17 @@ export function useCreateFeedCollectionMutation() {
         clientId != null ? { ...body, clientId } : body,
       )
     },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: feedCollectionKeys.all })
+    },
+  })
+}
+
+export function useUpdateFeedCollectionMutation() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (body: UpdateFeedCollectionRequest) =>
+      feedCollectionApi.update(body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: feedCollectionKeys.all })
     },

@@ -434,7 +434,7 @@ export function PondDetailPage() {
                 >
                   <div className='flex items-center gap-2'>
                     <UtensilsCrossed size={18} />
-                    {L.tabDailyFeed}
+                    {L.tabDailyLog}
                   </div>
                 </button>
                 <button

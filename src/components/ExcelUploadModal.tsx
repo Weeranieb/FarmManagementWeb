@@ -19,24 +19,28 @@ export interface ExcelFeedOption {
 interface ExcelUploadModalProps {
   onClose: () => void
   currentMonth: string
-  feeds: ExcelFeedOption[]
+  freshFeeds: ExcelFeedOption[]
+  pelletFeeds: ExcelFeedOption[]
   isSubmitting?: boolean
   onUpload: (
     file: File,
-    feedCollectionId: number,
+    ids: {
+      freshFeedCollectionId?: number
+      pelletFeedCollectionId?: number
+    },
   ) => Promise<{ rowsImported: number; savedPath: string }>
 }
 
 export function ExcelUploadModal({
   onClose,
   currentMonth,
-  feeds,
+  freshFeeds,
+  pelletFeeds,
   isSubmitting = false,
   onUpload,
 }: ExcelUploadModalProps) {
-  const [selectedFeedId, setSelectedFeedId] = useState<number | null>(
-    () => feeds[0]?.id ?? null,
-  )
+  const [freshId, setFreshId] = useState<number | ''>('')
+  const [pelletId, setPelletId] = useState<number | ''>('')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -57,10 +61,17 @@ export function ExcelUploadModal({
   }
 
   const handleSubmit = async () => {
-    if (selectedFile == null || selectedFeedId == null) return
+    if (selectedFile == null) return
+    if (freshId === '' && pelletId === '') {
+      setError('เลือกเหยื่อสดหรืออาหารเม็ดอย่างน้อยหนึ่งรายการ')
+      return
+    }
     setError(null)
     try {
-      await onUpload(selectedFile, selectedFeedId)
+      await onUpload(selectedFile, {
+        freshFeedCollectionId: freshId === '' ? undefined : Number(freshId),
+        pelletFeedCollectionId: pelletId === '' ? undefined : Number(pelletId),
+      })
       onClose()
     } catch (err) {
       setError(err instanceof Error ? err.message : L.excelParseError)
@@ -73,7 +84,9 @@ export function ExcelUploadModal({
     onClose()
   }
 
-  if (feeds.length === 0) {
+  const noFeeds = freshFeeds.length === 0 && pelletFeeds.length === 0
+
+  if (noFeeds) {
     return (
       <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'>
         <div className='w-full max-w-md rounded-xl bg-white p-6 shadow-2xl'>
@@ -110,22 +123,55 @@ export function ExcelUploadModal({
         <div className='flex-1 overflow-y-auto p-6'>
           <p className='mb-4 text-sm text-gray-600'>{L.excelServerNote}</p>
 
-          <div className='mb-6'>
-            <label className='mb-2 block text-sm font-medium text-gray-700'>
-              {L.selectFeedForExcel}
-            </label>
-            <select
-              value={selectedFeedId ?? ''}
-              onChange={(e) => setSelectedFeedId(Number(e.target.value))}
-              className='w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500'
-            >
-              {feeds.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.name} ({f.unit})
-                </option>
-              ))}
-            </select>
-          </div>
+          {freshFeeds.length > 0 && (
+            <div className='mb-4'>
+              <label className='mb-2 block text-sm font-medium text-gray-700'>
+                {L.excelSelectFresh}
+              </label>
+              <select
+                value={freshId === '' ? '' : String(freshId)}
+                onChange={(e) => {
+                  setError(null)
+                  setFreshId(
+                    e.target.value === '' ? '' : Number(e.target.value),
+                  )
+                }}
+                className='w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500'
+              >
+                <option value=''>—</option>
+                {freshFeeds.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.name} ({f.unit})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {pelletFeeds.length > 0 && (
+            <div className='mb-6'>
+              <label className='mb-2 block text-sm font-medium text-gray-700'>
+                {L.excelSelectPellet}
+              </label>
+              <select
+                value={pelletId === '' ? '' : String(pelletId)}
+                onChange={(e) => {
+                  setError(null)
+                  setPelletId(
+                    e.target.value === '' ? '' : Number(e.target.value),
+                  )
+                }}
+                className='w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500'
+              >
+                <option value=''>—</option>
+                {pelletFeeds.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.name} ({f.unit})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className='mb-6'>
             <label className='mb-2 block text-sm font-medium text-gray-700'>
@@ -137,10 +183,10 @@ export function ExcelUploadModal({
                 accept='.xlsx'
                 onChange={handleFileSelect}
                 className='hidden'
-                id='excel-upload-daily-feed'
+                id='excel-upload-daily-log'
               />
               <label
-                htmlFor='excel-upload-daily-feed'
+                htmlFor='excel-upload-daily-log'
                 className='cursor-pointer'
               >
                 <Upload size={48} className='mx-auto mb-3 text-gray-400' />
@@ -182,7 +228,7 @@ export function ExcelUploadModal({
             </div>
           )}
 
-          {selectedFile && !error && (
+          {selectedFile && (
             <div className='flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4'>
               <CheckCircle size={20} className='text-green-600' />
               <p className='text-sm text-green-800'>{L.excelReadyToSend}</p>
@@ -201,7 +247,7 @@ export function ExcelUploadModal({
           <button
             type='button'
             onClick={handleSubmit}
-            disabled={!selectedFile || selectedFeedId == null || isSubmitting}
+            disabled={!selectedFile || isSubmitting}
             className='flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300'
           >
             <CheckCircle size={18} />
