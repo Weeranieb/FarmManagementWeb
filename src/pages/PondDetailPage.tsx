@@ -12,6 +12,7 @@ import {
   UtensilsCrossed,
   Plus,
   ArrowRight,
+  Download,
 } from 'lucide-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
@@ -20,7 +21,9 @@ import { farmKeys } from '../hooks/useFarm'
 import { pondApi } from '../api/pond'
 import { usePondQuery, pondKeys } from '../hooks/usePond'
 import { useFarmQuery } from '../hooks/useFarm'
+import { useClientDetailQuery } from '../hooks/useClient'
 import { StockActionModal } from '../components/stock-action-modal'
+import { ExportModal } from '../components/ExportModal'
 import { PageHeader } from '../components/PageHeader'
 import { th } from '../locales/th'
 import { formatFarmDisplayNameTH } from '../utils/masterDataName'
@@ -198,7 +201,15 @@ export function PondDetailPage() {
     isLoading: pondLoading,
     error: pondError,
   } = usePondQuery(pondId)
-  const { data: farm } = useFarmQuery(pond?.farmId ?? 0, !!pond)
+  const { data: farm, isPending: farmPending } = useFarmQuery(
+    pond?.farmId ?? 0,
+    !!pond,
+  )
+  const hasFarmClientId = Boolean(farm?.clientId)
+  const { data: clientDetail, isFetched: clientDetailFetched } =
+    useClientDetailQuery(farm?.clientId ?? 0, hasFarmClientId)
+  const dailyFeedClientContextReady =
+    !farmPending && (!hasFarmClientId || clientDetailFetched)
   const { data: pondListInFarm } = useQuery({
     queryKey: pondKeys.list(pond?.farmId ?? 0),
     queryFn: () => pondApi.getPondList(pond!.farmId),
@@ -221,11 +232,17 @@ export function PondDetailPage() {
       }))
   }, [pondListInFarm, pond, farm?.name])
 
+  const farmPondsForDailyLog = useMemo(
+    () => (pondListInFarm ?? []).map((p) => ({ id: p.id, name: p.name })),
+    [pondListInFarm],
+  )
+
   const [activeTab, setActiveTab] = useState<
     'current' | 'history' | 'dailyfeed'
   >('current')
   const [selectedCycle, setSelectedCycle] = useState<number | null>(null)
   const [isStockModalOpen, setIsStockModalOpen] = useState(false)
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const [stockActionType, setStockActionType] = useState<
     'add' | 'transfer' | 'sell'
   >('add')
@@ -308,63 +325,67 @@ export function PondDetailPage() {
         title={pond.name}
         subtitle={`${L.farm}: ${farm?.name ?? '—'}`}
         icon={Fish}
+        titleAddon={
+          <span
+            className={`inline-flex shrink-0 items-center rounded-lg px-3 py-1.5 text-sm font-medium ${
+              pond.status === 'active'
+                ? 'bg-green-100 text-green-800'
+                : pond.status === 'maintenance'
+                  ? 'bg-yellow-100 text-yellow-800'
+                  : 'bg-gray-100 text-gray-800'
+            }`}
+          >
+            {statusText}
+          </span>
+        }
         actions={
-          <>
-            <span
-              className={`inline-flex shrink-0 items-center rounded-lg px-3 py-1.5 text-sm font-medium ${
-                pond.status === 'active'
-                  ? 'bg-green-100 text-green-800'
-                  : pond.status === 'maintenance'
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-gray-100 text-gray-800'
-              }`}
+          <div className='flex w-full flex-wrap items-center justify-end gap-1.5 sm:w-auto sm:gap-2'>
+            <button
+              type='button'
+              className='inline-flex min-h-9 min-w-[5.5rem] flex-1 items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-gray-400 hover:bg-gray-50 hover:shadow-md sm:w-auto sm:flex-initial sm:px-3 whitespace-nowrap'
+              onClick={() => setIsExportModalOpen(true)}
             >
-              {statusText}
-            </span>
-            <div className='flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:gap-3'>
-              <button
-                type='button'
-                className='inline-flex min-h-[44px] min-w-[7rem] flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-green-300 hover:bg-green-50 hover:shadow-md sm:w-28 sm:flex-initial whitespace-nowrap'
-                onClick={() => {
-                  setStockActionType('add')
-                  setIsStockModalOpen(true)
-                }}
-              >
-                <Plus size={16} className='shrink-0' />
-                <span>{L.addStock}</span>
-              </button>
-              <button
-                type='button'
-                disabled={!canMoveOrSell}
-                title={
-                  !canMoveOrSell ? L.cannotMoveOrSellMaintenance : undefined
-                }
-                className='inline-flex min-h-[44px] min-w-[7rem] flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-blue-300 hover:bg-blue-50 hover:shadow-md disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:w-28 sm:flex-initial whitespace-nowrap'
-                onClick={() => {
-                  setStockActionType('transfer')
-                  setIsStockModalOpen(true)
-                }}
-              >
-                <ArrowRight size={16} className='shrink-0' />
-                <span>{L.transfer}</span>
-              </button>
-              <button
-                type='button'
-                disabled={!canMoveOrSell}
-                title={
-                  !canMoveOrSell ? L.cannotMoveOrSellMaintenance : undefined
-                }
-                className='inline-flex min-h-[44px] min-w-[7rem] flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-amber-300 hover:bg-amber-50 hover:shadow-md disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:w-28 sm:flex-initial whitespace-nowrap'
-                onClick={() => {
-                  setStockActionType('sell')
-                  setIsStockModalOpen(true)
-                }}
-              >
-                <ShoppingCart size={16} className='shrink-0' />
-                <span>{L.sell}</span>
-              </button>
-            </div>
-          </>
+              <Download size={15} className='shrink-0' />
+              <span>{th.exportReport.button}</span>
+            </button>
+            <button
+              type='button'
+              className='inline-flex min-h-9 min-w-[5.5rem] flex-1 items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-green-300 hover:bg-green-50 hover:shadow-md sm:w-auto sm:flex-initial sm:px-3 whitespace-nowrap'
+              onClick={() => {
+                setStockActionType('add')
+                setIsStockModalOpen(true)
+              }}
+            >
+              <Plus size={15} className='shrink-0' />
+              <span>{L.addStock}</span>
+            </button>
+            <button
+              type='button'
+              disabled={!canMoveOrSell}
+              title={!canMoveOrSell ? L.cannotMoveOrSellMaintenance : undefined}
+              className='inline-flex min-h-9 min-w-[5.5rem] flex-1 items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-blue-300 hover:bg-blue-50 hover:shadow-md disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:flex-initial sm:px-3 whitespace-nowrap'
+              onClick={() => {
+                setStockActionType('transfer')
+                setIsStockModalOpen(true)
+              }}
+            >
+              <ArrowRight size={15} className='shrink-0' />
+              <span>{L.transfer}</span>
+            </button>
+            <button
+              type='button'
+              disabled={!canMoveOrSell}
+              title={!canMoveOrSell ? L.cannotMoveOrSellMaintenance : undefined}
+              className='inline-flex min-h-9 min-w-[5.5rem] flex-1 items-center justify-center gap-1.5 rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-amber-300 hover:bg-amber-50 hover:shadow-md disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:flex-initial sm:px-3 whitespace-nowrap'
+              onClick={() => {
+                setStockActionType('sell')
+                setIsStockModalOpen(true)
+              }}
+            >
+              <ShoppingCart size={15} className='shrink-0' />
+              <span>{L.sell}</span>
+            </button>
+          </div>
         }
       />
 
@@ -849,7 +870,22 @@ export function PondDetailPage() {
 
               {activeTab === 'dailyfeed' && (
                 <div className='space-y-6'>
-                  <DailyFeedTab pondId={String(pond.id)} />
+                  {!dailyFeedClientContextReady ? (
+                    <div className='text-center py-12 text-gray-500'>
+                      {th.common.loading}
+                    </div>
+                  ) : (
+                    <DailyFeedTab
+                      pondId={pond.id}
+                      farmId={pond.farmId}
+                      farmPonds={farmPondsForDailyLog}
+                      showTouristCatch={
+                        hasFarmClientId
+                          ? Boolean(clientDetail?.isTouristFishingEnabled)
+                          : false
+                      }
+                    />
+                  )}
                 </div>
               )}
             </div>
@@ -863,19 +899,17 @@ export function PondDetailPage() {
             </h3>
             <div className='flex flex-wrap gap-2'>
               {(pond.fishTypes ?? []).length > 0 ? (
-                (pond.fishTypes ?? []).map(
-                  (fishType: string, index: number) => (
-                    <div
-                      key={index}
-                      className='flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg border border-blue-200 text-sm'
-                    >
-                      <Fish size={14} />
-                      <span className='font-medium'>
-                        {fishTypeDisplayLabel(fishType)}
-                      </span>
-                    </div>
-                  ),
-                )
+                (pond.fishTypes ?? []).map((fishType: string) => (
+                  <div
+                    key={fishType}
+                    className='flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg border border-blue-200 text-sm'
+                  >
+                    <Fish size={14} />
+                    <span className='font-medium'>
+                      {fishTypeDisplayLabel(fishType)}
+                    </span>
+                  </div>
+                ))
               ) : (
                 <p className='text-sm text-gray-500'>—</p>
               )}
@@ -936,6 +970,15 @@ export function PondDetailPage() {
           </div>
         </div>
       </div>
+
+      {isExportModalOpen && (
+        <ExportModal
+          onClose={() => setIsExportModalOpen(false)}
+          scope='pond'
+          name={pond.name}
+          entityId={pond.id}
+        />
+      )}
 
       <StockActionModal
         key={isStockModalOpen ? stockActionType : 'closed'}

@@ -13,6 +13,7 @@ export function useDailyLogQuery(pondId: number, month: string) {
     queryFn: () => dailyLogApi.getMonth(pondId, month),
     enabled: pondId > 0 && month.length === 7,
     staleTime: 60 * 1000,
+    refetchOnWindowFocus: false,
   })
 }
 
@@ -27,15 +28,11 @@ export function useDailyLogBulkMutation(pondId: number) {
   })
 }
 
-export function useDailyLogUploadMutation(pondId: number) {
+export function useDailyLogTemplateImportMutation(farmId: number) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (params: {
-      file: File
-      month: string
-      freshFeedCollectionId?: number
-      pelletFeedCollectionId?: number
-    }) => dailyLogApi.uploadExcel(pondId, params),
+    mutationFn: (params: { file: File; selectedPondIds: number[] }) =>
+      dailyLogApi.importTemplate(farmId, params),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: dailyLogKeys.all })
     },

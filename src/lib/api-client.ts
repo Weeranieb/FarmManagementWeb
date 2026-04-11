@@ -213,6 +213,53 @@ class ApiClient {
       method: 'DELETE',
     })
   }
+
+  /**
+   * GET a binary response (e.g. file export). Triggers browser download on success.
+   * Uses the same base URL and credentials as JSON requests.
+   */
+  async downloadBlob(
+    endpoint: string,
+    fallbackFilename: string,
+  ): Promise<void> {
+    const response = await fetch(
+      `${this.baseURL}${endpoint}`,
+      this.buildConfig({ method: 'GET' }),
+    )
+
+    this.handleUnauthorized(response)
+
+    if (!response.ok) {
+      const payload = await this.parseJsonPayload(response)
+      this.throwIfHttpError(response, payload)
+    }
+
+    const blob = await response.blob()
+    const cd = response.headers.get('Content-Disposition')
+    let filename = fallbackFilename
+    const m = cd?.match(/filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i)
+    if (m) {
+      const raw = m[1] ?? m[2]
+      try {
+        filename = decodeURIComponent(raw)
+      } catch {
+        filename = raw
+      }
+    }
+
+    const objectUrl = URL.createObjectURL(blob)
+    try {
+      const a = document.createElement('a')
+      a.href = objectUrl
+      a.download = filename
+      a.rel = 'noopener'
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+    } finally {
+      URL.revokeObjectURL(objectUrl)
+    }
+  }
 }
 
 export const apiClient = new ApiClient(API_BASE_URL)
