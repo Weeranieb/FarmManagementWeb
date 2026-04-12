@@ -348,6 +348,13 @@ export const th = {
     unitFish: 'ตัว',
     prevMonthAria: 'เดือนก่อน',
     nextMonthAria: 'เดือนถัดไป',
+    monthNavAtCycleStart:
+      'เลือกได้ตั้งแต่เดือนที่เริ่มรอบการเลี้ยงจนถึงเดือนปัจจุบัน',
+    monthNavAtCurrentMonth: 'ไม่สามารถเลือกเดือนหลังจากเดือนปัจจุบัน',
+    rowDayLocked:
+      'วันนี้อยู่นอกช่วงบันทึก (ก่อนวันเริ่มรอบ หรือหลังวันนี้) — ไม่สามารถแก้ไข',
+    loadMonthError: 'โหลดบันทึกรายเดือนไม่สำเร็จ',
+    retryLoadMonth: 'ลองอีกครั้ง',
   },
 
   exportReport: {

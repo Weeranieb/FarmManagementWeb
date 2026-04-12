@@ -879,6 +879,7 @@ export function PondDetailPage() {
                       pondId={pond.id}
                       farmId={pond.farmId}
                       farmPonds={farmPondsForDailyLog}
+                      cycleStartDate={pond.startDate}
                       showTouristCatch={
                         hasFarmClientId
                           ? Boolean(clientDetail?.isTouristFishingEnabled)

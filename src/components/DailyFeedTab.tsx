@@ -37,6 +37,7 @@ interface DailyFeedTabProps {
   farmId: number
   farmPonds: FarmPondOption[]
   showTouristCatch: boolean
+  cycleStartDate?: string | null
 }
 
 function formatMonth(month: string) {
@@ -59,6 +60,72 @@ function isFutureDay(year: number, month: number, day: number): boolean {
   const t = new Date()
   const todayStart = new Date(t.getFullYear(), t.getMonth(), t.getDate())
   return rowDate.getTime() > todayStart.getTime()
+}
+
+/** Local midnight timestamp for a calendar day (no UTC shift). */
+function localDayStartMs(year: number, month: number, day: number): number {
+  return new Date(year, month - 1, day).getTime()
+}
+
+/** Parse YYYY-MM-DD prefix from API; compare as local calendar dates. */
+function cycleStartLocalMs(iso?: string | null): number | null {
+  if (!iso) return null
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso.trim())
+  if (!m) return null
+  const y = Number(m[1])
+  const mo = Number(m[2])
+  const d = Number(m[3])
+  if (!Number.isFinite(y) || !Number.isFinite(mo) || !Number.isFinite(d))
+    return null
+  return localDayStartMs(y, mo, d)
+}
+
+/** True when this row's day is strictly before the active cycle start date. */
+function isBeforeCycleStart(
+  year: number,
+  month: number,
+  day: number,
+  cycleStartDate?: string | null,
+): boolean {
+  const t0 = cycleStartLocalMs(cycleStartDate)
+  if (t0 == null) return false
+  return localDayStartMs(year, month, day) < t0
+}
+
+/** Local calendar YYYY-MM for "today". */
+function todayYearMonth(): string {
+  const t = new Date()
+  return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}`
+}
+
+/** First YYYY-MM from an API date string (YYYY-MM-DD…); avoids TZ shifting the month. */
+function yearMonthFromIsoDate(iso: string): string | null {
+  const m = /^(\d{4})-(\d{2})/.exec(iso.trim())
+  if (!m) return null
+  return `${m[1]}-${m[2]}`
+}
+
+function clampYearMonth(
+  value: string,
+  minMonth: string,
+  maxMonth: string,
+): string {
+  if (value < minMonth) return minMonth
+  if (value > maxMonth) return maxMonth
+  return value
+}
+
+function monthNavigationBounds(cycleStartDate?: string | null) {
+  const maxMonth = todayYearMonth()
+  let minMonth = '1970-01'
+  if (cycleStartDate) {
+    const ym = yearMonthFromIsoDate(cycleStartDate)
+    if (ym) minMonth = ym
+  }
+  if (minMonth > maxMonth) {
+    minMonth = maxMonth
+  }
+  return { minMonth, maxMonth }
 }
 
 type DayRow = {
@@ -196,15 +263,32 @@ export function DailyFeedTab({
   farmId,
   farmPonds,
   showTouristCatch,
+  cycleStartDate,
 }: DailyFeedTabProps) {
   const { showToast } = useAppToast()
-  const now = new Date()
-  const [currentMonth, setCurrentMonth] = useState(
-    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
+  const { minMonth, maxMonth } = useMemo(
+    () => monthNavigationBounds(cycleStartDate),
+    [cycleStartDate],
   )
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const b = monthNavigationBounds(cycleStartDate)
+    return clampYearMonth(todayYearMonth(), b.minMonth, b.maxMonth)
+  })
   const [isEditing, setIsEditing] = useState(false)
 
-  const { data, isLoading } = useDailyLogQuery(pondId, currentMonth)
+  const viewMonth = useMemo(
+    () => clampYearMonth(currentMonth, minMonth, maxMonth),
+    [currentMonth, minMonth, maxMonth],
+  )
+
+  const {
+    data,
+    isLoading,
+    isError,
+    error: monthQueryError,
+    refetch,
+    isFetching,
+  } = useDailyLogQuery(pondId, viewMonth)
   const { data: feedCollections } = useFeedCollectionListQuery()
   const feedList = useMemo(
     () => feedCollections?.items ?? [],
@@ -238,7 +322,7 @@ export function DailyFeedTab({
 
   function switchMonth(target: string) {
     if (isEditing) {
-      dirtyMonthsRef.current.set(currentMonth, {
+      dirtyMonthsRef.current.set(viewMonth, {
         rows: JSON.parse(JSON.stringify(localRows)),
         freshFcId,
         pelletFcId,
@@ -262,8 +346,11 @@ export function DailyFeedTab({
 
   function hasUnsavedChanges(): boolean {
     const orig = originalRowsRef.current
-    const numDays = getDaysInMonth(currentMonth)
+    const numDays = getDaysInMonth(viewMonth)
+    const [cy, cm] = viewMonth.split('-').map(Number)
     for (let d = 1; d <= numDays; d++) {
+      if (isFutureDay(cy, cm, d)) continue
+      if (isBeforeCycleStart(cy, cm, d, cycleStartDate)) continue
       const cur = localRows[d] ?? emptyRow()
       const prev = orig[d] ?? emptyRow()
       if (!isRowEqual(cur, prev)) return true
@@ -275,20 +362,22 @@ export function DailyFeedTab({
   }
 
   function goToMonth(target: string) {
+    const next = clampYearMonth(target, minMonth, maxMonth)
+    if (next === viewMonth) return
     if (!isEditing) {
-      switchMonth(target)
+      switchMonth(next)
       return
     }
     if (!hasUnsavedChanges()) {
-      switchMonth(target)
+      switchMonth(next)
       return
     }
-    setPendingMonth(target)
+    setPendingMonth(next)
   }
 
   function confirmPendingMonth() {
     if (pendingMonth == null) return
-    switchMonth(pendingMonth)
+    switchMonth(clampYearMonth(pendingMonth, minMonth, maxMonth))
     setPendingMonth(null)
   }
 
@@ -296,15 +385,18 @@ export function DailyFeedTab({
     setPendingMonth(null)
   }
 
+  const canGoPrevMonth = viewMonth > minMonth
+  const canGoNextMonth = viewMonth < maxMonth
+
   function prevMonth() {
-    const [y, m] = currentMonth.split('-').map(Number)
+    const [y, m] = viewMonth.split('-').map(Number)
     const pm = m === 1 ? 12 : m - 1
     const py = m === 1 ? y - 1 : y
     goToMonth(`${py}-${String(pm).padStart(2, '0')}`)
   }
 
   function nextMonth() {
-    const [y, m] = currentMonth.split('-').map(Number)
+    const [y, m] = viewMonth.split('-').map(Number)
     const nm = m === 12 ? 1 : m + 1
     const ny = m === 12 ? y + 1 : y
     goToMonth(`${ny}-${String(nm).padStart(2, '0')}`)
@@ -323,15 +415,16 @@ export function DailyFeedTab({
 
   function handleCancel() {
     setPendingMonth(null)
-    dirtyMonthsRef.current.delete(currentMonth)
+    dirtyMonthsRef.current.delete(viewMonth)
     originalRowsRef.current = {}
     setEditBaselineRows({})
     setIsEditing(false)
   }
 
   const handleNum = (day: number, field: keyof DayRow, raw: string) => {
-    const [y, m] = currentMonth.split('-').map(Number)
+    const [y, m] = viewMonth.split('-').map(Number)
     if (isFutureDay(y, m, day)) return
+    if (isBeforeCycleStart(y, m, day, cycleStartDate)) return
     const num = raw === '' ? 0 : parseFloat(raw)
     if (Number.isNaN(num) || num < 0) return
     const intFields: (keyof DayRow)[] = ['deathFishCount', 'touristCatchCount']
@@ -343,14 +436,15 @@ export function DailyFeedTab({
   }
 
   function handleSave() {
-    const numDays = getDaysInMonth(currentMonth)
-    const [saveY, saveM] = currentMonth.split('-').map(Number)
+    const numDays = getDaysInMonth(viewMonth)
+    const [saveY, saveM] = viewMonth.split('-').map(Number)
     const entries: ({ day: number } & DayRow)[] = []
     const deleteDays: number[] = []
     const orig = originalRowsRef.current
 
     for (let d = 1; d <= numDays; d++) {
       if (isFutureDay(saveY, saveM, d)) continue
+      if (isBeforeCycleStart(saveY, saveM, d, cycleStartDate)) continue
       const cur = localRows[d] ?? emptyRow()
       const prev = orig[d] ?? emptyRow()
       const curEmpty = !isRowNonEmpty(cur)
@@ -365,7 +459,7 @@ export function DailyFeedTab({
 
     if (entries.length === 0 && deleteDays.length === 0) {
       setIsEditing(false)
-      dirtyMonthsRef.current.delete(currentMonth)
+      dirtyMonthsRef.current.delete(viewMonth)
       originalRowsRef.current = {}
       setEditBaselineRows({})
       return
@@ -387,7 +481,7 @@ export function DailyFeedTab({
     }
     bulkMutation.mutate(
       {
-        month: currentMonth,
+        month: viewMonth,
         freshFeedCollectionId: freshFcId ?? undefined,
         pelletFeedCollectionId: pelletFcId ?? undefined,
         entries,
@@ -395,7 +489,7 @@ export function DailyFeedTab({
       },
       {
         onSuccess: () => {
-          dirtyMonthsRef.current.delete(currentMonth)
+          dirtyMonthsRef.current.delete(viewMonth)
           originalRowsRef.current = {}
           setEditBaselineRows({})
           setIsEditing(false)
@@ -407,12 +501,12 @@ export function DailyFeedTab({
     )
   }
 
-  const daysInMonth = getDaysInMonth(currentMonth)
+  const daysInMonth = getDaysInMonth(viewMonth)
   const days = useMemo(
     () => Array.from({ length: daysInMonth }, (_, i) => i + 1),
     [daysInMonth],
   )
-  const [yearNum, monthNum] = currentMonth.split('-').map(Number)
+  const [yearNum, monthNum] = viewMonth.split('-').map(Number)
 
   const rowsForView = isEditing ? localRows : serverBuiltRows
   const freshFcForView = isEditing
@@ -447,6 +541,8 @@ export function DailyFeedTab({
     let deaths = 0
     let tourist = 0
     for (const d of days) {
+      if (isFutureDay(yearNum, monthNum, d)) continue
+      if (isBeforeCycleStart(yearNum, monthNum, d, cycleStartDate)) continue
       const r = rowsForView[d] ?? emptyRow()
       freshMorning += r.freshMorning
       freshEvening += r.freshEvening
@@ -465,7 +561,7 @@ export function DailyFeedTab({
       totalFresh: freshMorning + freshEvening,
       totalPellet: pelletMorning + pelletEvening,
     }
-  }, [days, rowsForView])
+  }, [days, rowsForView, yearNum, monthNum, cycleStartDate])
 
   const getVal = (day: number, field: keyof DayRow): number =>
     rowsForView[day]?.[field] ?? 0
@@ -507,7 +603,12 @@ export function DailyFeedTab({
     if (!isEditing) {
       return (
         <td
-          className={`${borderR} box-border ${DAY_BODY_ROW} align-middle px-1.5 text-center ${DAY_BODY_TEXT} text-gray-700 ${bgClass}`}
+          title={inputDisabled ? L.rowDayLocked : undefined}
+          className={`${borderR} box-border ${DAY_BODY_ROW} align-middle px-1.5 text-center ${DAY_BODY_TEXT} ${
+            inputDisabled
+              ? 'bg-slate-200/90 text-slate-600'
+              : `text-gray-700 ${bgClass}`
+          }`}
         >
           {viewCellDisplay(val)}
         </td>
@@ -517,7 +618,9 @@ export function DailyFeedTab({
     const locked = inputDisabled
     return (
       <td
-        className={`${borderR} box-border ${DAY_BODY_ROW} align-middle border-b border-gray-300 p-0 ${cellBgEdit}`}
+        className={`${borderR} box-border ${DAY_BODY_ROW} align-middle border-b border-gray-400 p-0 ${
+          locked ? 'bg-slate-200/90' : cellBgEdit
+        }`}
       >
         <input
           type='number'
@@ -526,15 +629,35 @@ export function DailyFeedTab({
           value={val === 0 ? '' : val}
           onChange={(e) => handleNum(day, field, e.target.value)}
           placeholder=''
+          title={locked ? L.rowDayLocked : undefined}
           disabled={locked}
           className={`w-full h-7 min-h-7 px-0.5 text-center ${DAY_BODY_TEXT} border-0 outline-none rounded [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
             locked
-              ? 'cursor-not-allowed bg-gray-100/80 text-gray-500 opacity-70'
+              ? 'cursor-not-allowed bg-slate-300/95 text-slate-600 font-medium'
               : inputDiffClass ||
                 'bg-white/80 focus:bg-white focus:ring-2 focus:ring-blue-400 focus:ring-inset'
           }`}
         />
       </td>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className='text-center py-12 space-y-4 px-4'>
+        <p className='text-red-600 font-medium'>{L.loadMonthError}</p>
+        <p className='text-sm text-gray-600 max-w-md mx-auto'>
+          {errorMessageForToast(monthQueryError)}
+        </p>
+        <button
+          type='button'
+          onClick={() => void refetch()}
+          disabled={isFetching}
+          className='inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
+        >
+          {isFetching ? th.common.loading : L.retryLoadMonth}
+        </button>
+      </div>
     )
   }
 
@@ -552,9 +675,9 @@ export function DailyFeedTab({
           <button
             type='button'
             onClick={prevMonth}
-            disabled={bulkMutation.isPending}
+            disabled={bulkMutation.isPending || !canGoPrevMonth}
             aria-label={L.prevMonthAria}
-            title={L.prevMonthAria}
+            title={!canGoPrevMonth ? L.monthNavAtCycleStart : L.prevMonthAria}
             className='p-1.5 hover:bg-gray-100 rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50'
           >
             <ChevronLeft size={18} className='text-gray-600' aria-hidden />
@@ -562,15 +685,15 @@ export function DailyFeedTab({
           <div className='flex items-center gap-2 px-2 min-w-[170px] justify-center'>
             <Calendar size={17} className='text-blue-600 flex-shrink-0' />
             <span className='font-semibold text-gray-800 whitespace-nowrap'>
-              {formatMonth(currentMonth)}
+              {formatMonth(viewMonth)}
             </span>
           </div>
           <button
             type='button'
             onClick={nextMonth}
-            disabled={bulkMutation.isPending}
+            disabled={bulkMutation.isPending || !canGoNextMonth}
             aria-label={L.nextMonthAria}
-            title={L.nextMonthAria}
+            title={!canGoNextMonth ? L.monthNavAtCurrentMonth : L.nextMonthAria}
             className='p-1.5 hover:bg-gray-100 rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-50'
           >
             <ChevronRight size={18} className='text-gray-600' aria-hidden />
@@ -676,7 +799,7 @@ export function DailyFeedTab({
         </div>
       </div>
 
-      {/* Spreadsheet Table */}
+      {/* Outer border on wrapper: table border-collapse + border on <table> often hides top/side strokes; cells draw the inner grid. */}
       <div className='bg-white rounded-xl border border-gray-400 shadow-sm overflow-hidden'>
         <div className='overflow-x-auto'>
           <table
@@ -693,16 +816,16 @@ export function DailyFeedTab({
               {showTouristCatch && <col className='w-28' />}
             </colgroup>
             <thead>
-              <tr>
+              <tr className='[&>th]:border-t-0'>
                 <th
                   rowSpan={2}
-                  className={`sticky left-0 z-20 bg-gray-100 border border-gray-400 px-2 py-1.5 text-center text-gray-700 text-xs leading-tight ${DATE_COL_DIM}`}
+                  className={`sticky left-0 z-20 bg-gray-100 border border-gray-400 border-t-0 border-l-0 px-2 py-1.5 text-center text-gray-700 text-xs leading-tight ${DATE_COL_DIM}`}
                 >
                   {th.pondDetail.date}
                 </th>
                 <th
                   colSpan={2}
-                  className='bg-green-100 border border-gray-400 px-2 py-1.5 text-center text-green-800 text-xs font-semibold leading-tight'
+                  className='bg-green-100 border border-gray-400 border-t-0 px-2 py-1.5 text-center text-green-800 text-xs font-semibold leading-tight'
                 >
                   <span className='inline-flex flex-wrap items-baseline justify-center gap-x-1 gap-y-0.5'>
                     <span>{L.freshFeed}</span>
@@ -715,7 +838,7 @@ export function DailyFeedTab({
                 </th>
                 <th
                   colSpan={2}
-                  className='bg-amber-100 border border-gray-400 px-2 py-1.5 text-center text-amber-800 text-xs font-semibold leading-tight'
+                  className='bg-amber-100 border border-gray-400 border-t-0 px-2 py-1.5 text-center text-amber-800 text-xs font-semibold leading-tight'
                 >
                   <span className='inline-flex flex-wrap items-baseline justify-center gap-x-1 gap-y-0.5'>
                     <span>{L.pelletFeed}</span>
@@ -728,7 +851,9 @@ export function DailyFeedTab({
                 </th>
                 <th
                   rowSpan={2}
-                  className='bg-purple-100 border border-gray-400 px-2 py-1.5 text-center text-purple-800 text-xs font-semibold leading-tight w-20'
+                  className={`bg-purple-100 border border-gray-400 border-t-0 px-2 py-1.5 text-center text-purple-800 text-xs font-semibold leading-tight w-20 ${
+                    showTouristCatch ? '' : 'border-r-0'
+                  }`}
                 >
                   {L.deathFish}
                   <br />
@@ -737,7 +862,7 @@ export function DailyFeedTab({
                 {showTouristCatch && (
                   <th
                     rowSpan={2}
-                    className='bg-fuchsia-100 border border-gray-400 px-2 py-1.5 text-center text-fuchsia-800 text-xs font-semibold leading-tight w-24'
+                    className='bg-fuchsia-100 border border-gray-400 border-t-0 border-r-0 px-2 py-1.5 text-center text-fuchsia-800 text-xs font-semibold leading-tight w-24'
                   >
                     {L.touristCatch}
                     <br />
@@ -755,7 +880,7 @@ export function DailyFeedTab({
                 <th className='bg-amber-50 border border-gray-400 px-1.5 py-1 text-center text-amber-700 text-xs font-medium leading-tight w-20'>
                   {L.morning} ({pelletUnitLabel})
                 </th>
-                <th className='bg-amber-50 border border-gray-400 px-1.5 py-1 text-center text-amber-700 text-xs font-medium leading-tight w-20'>
+                <th className='bg-amber-50 border border-gray-400 border-r-0 px-1.5 py-1 text-center text-amber-700 text-xs font-medium leading-tight w-20'>
                   {L.evening} ({pelletUnitLabel})
                 </th>
               </tr>
@@ -766,6 +891,13 @@ export function DailyFeedTab({
                 const dow = getDayOfWeek(yearNum, monthNum, day)
                 const isWeekend = dow === 0 || dow === 6
                 const rowIsFuture = isFutureDay(yearNum, monthNum, day)
+                const rowBeforeStart = isBeforeCycleStart(
+                  yearNum,
+                  monthNum,
+                  day,
+                  cycleStartDate,
+                )
+                const rowInactive = rowIsFuture || rowBeforeStart
                 const r = rowsForView[day]
                 const hasData =
                   r &&
@@ -782,32 +914,41 @@ export function DailyFeedTab({
                   isEditing &&
                   origHadData &&
                   !isRowNonEmpty(curRowForDelete) &&
-                  !rowIsFuture
+                  !rowInactive
 
                 return (
                   <tr
                     key={day}
                     className={`
-                      border-b border-gray-300 transition-colors
-                      ${isWeekend ? 'bg-gray-50/70' : 'bg-white'}
-                      ${hasData && !isWeekend && !rowIsDelete ? 'bg-blue-50/20' : ''}
+                      border-b border-gray-400 transition-colors
+                      ${
+                        rowInactive
+                          ? 'bg-slate-100'
+                          : isWeekend
+                            ? 'bg-gray-50/70'
+                            : 'bg-white'
+                      }
+                      ${hasData && !isWeekend && !rowIsDelete && !rowInactive ? 'bg-blue-50/20' : ''}
                       ${rowIsDelete ? 'bg-red-50/30' : ''}
-                      ${!rowIsFuture && !rowIsDelete ? 'hover:bg-yellow-50/40' : ''}
+                      ${!rowInactive && !rowIsDelete ? 'hover:bg-yellow-50/40' : ''}
                     `}
                   >
                     <td
-                      className={`sticky left-0 z-10 ${DATE_COL_DIM} box-border ${DAY_BODY_ROW} align-middle border-r border-gray-400 px-1.5 text-center ${
-                        rowIsDelete
-                          ? 'bg-red-100'
-                          : isWeekend
-                            ? 'bg-gray-100'
-                            : 'bg-gray-50'
+                      title={rowInactive ? L.rowDayLocked : undefined}
+                      className={`sticky left-0 z-10 ${DATE_COL_DIM} box-border ${DAY_BODY_ROW} align-middle border-r border-gray-400 border-l-0 px-1.5 text-center ${
+                        rowInactive
+                          ? 'bg-slate-300/95'
+                          : rowIsDelete
+                            ? 'bg-red-100'
+                            : isWeekend
+                              ? 'bg-gray-100'
+                              : 'bg-gray-50'
                       }`}
                     >
                       <span
                         className={`font-bold ${DAY_BODY_TEXT} ${
-                          rowIsFuture
-                            ? 'text-gray-400'
+                          rowInactive
+                            ? 'text-slate-600'
                             : rowIsDelete
                               ? 'text-red-800 line-through decoration-red-600'
                               : isWeekend
@@ -824,7 +965,7 @@ export function DailyFeedTab({
                       'bg-green-50/40',
                       'any',
                       false,
-                      rowIsFuture,
+                      rowInactive,
                     )}
                     {renderCell(
                       day,
@@ -832,7 +973,7 @@ export function DailyFeedTab({
                       'bg-green-50/40',
                       'any',
                       false,
-                      rowIsFuture,
+                      rowInactive,
                     )}
                     {renderCell(
                       day,
@@ -840,7 +981,7 @@ export function DailyFeedTab({
                       'bg-amber-50/40',
                       'any',
                       false,
-                      rowIsFuture,
+                      rowInactive,
                     )}
                     {renderCell(
                       day,
@@ -848,15 +989,15 @@ export function DailyFeedTab({
                       'bg-amber-50/40',
                       'any',
                       false,
-                      rowIsFuture,
+                      rowInactive,
                     )}
                     {renderCell(
                       day,
                       'deathFishCount',
                       'bg-purple-50/40',
                       '1',
-                      false,
-                      rowIsFuture,
+                      !showTouristCatch,
+                      rowInactive,
                     )}
                     {showTouristCatch &&
                       renderCell(
@@ -865,7 +1006,7 @@ export function DailyFeedTab({
                         'bg-fuchsia-50/40',
                         '1',
                         true,
-                        rowIsFuture,
+                        rowInactive,
                       )}
                   </tr>
                 )
@@ -873,9 +1014,9 @@ export function DailyFeedTab({
             </tbody>
 
             <tfoot>
-              <tr className='border-t-2 border-gray-500 bg-gray-100'>
+              <tr className='border-t border-gray-400 bg-gray-100'>
                 <td
-                  className={`sticky left-0 z-10 ${DATE_COL_DIM} box-border bg-gray-200 border-r border-gray-400 px-1.5 py-1.5 text-center font-bold text-gray-700 text-xs leading-tight`}
+                  className={`sticky left-0 z-10 ${DATE_COL_DIM} box-border bg-gray-200 border-r border-gray-400 border-l-0 px-1.5 py-1.5 text-center font-bold text-gray-700 text-xs leading-tight`}
                 >
                   {L.totalLabel}
                 </td>
@@ -891,18 +1032,22 @@ export function DailyFeedTab({
                 <td className='border-r border-gray-400 px-1.5 py-1.5 text-center font-bold text-amber-700 text-xs leading-tight bg-amber-100'>
                   {fmtOrEmpty(totals.pelletEvening)}
                 </td>
-                <td className='border-r border-gray-400 px-1.5 py-1.5 text-center font-bold text-purple-700 text-xs leading-tight bg-purple-100'>
+                <td
+                  className={`border-r border-gray-400 px-1.5 py-1.5 text-center font-bold text-purple-700 text-xs leading-tight bg-purple-100 ${
+                    showTouristCatch ? '' : 'border-r-0'
+                  }`}
+                >
                   {totals.deaths}
                 </td>
                 {showTouristCatch && (
-                  <td className='px-1.5 py-1.5 text-center font-bold text-fuchsia-700 text-xs leading-tight bg-fuchsia-100'>
+                  <td className='border-r-0 px-1.5 py-1.5 text-center font-bold text-fuchsia-700 text-xs leading-tight bg-fuchsia-100'>
                     {totals.tourist}
                   </td>
                 )}
               </tr>
-              <tr className='bg-blue-50'>
+              <tr className='border-t border-gray-400 bg-blue-50 [&>td]:border-b-0'>
                 <td
-                  className={`sticky left-0 z-10 ${DATE_COL_DIM} box-border bg-blue-100 border-r border-gray-400 px-1.5 py-1.5 text-center font-bold text-blue-800 text-xs leading-tight`}
+                  className={`sticky left-0 z-10 ${DATE_COL_DIM} box-border bg-blue-100 border-r border-gray-400 border-l-0 px-1.5 py-1.5 text-center font-bold text-blue-800 text-xs leading-tight`}
                 >
                   {L.totalAllLabel}
                 </td>
@@ -918,11 +1063,15 @@ export function DailyFeedTab({
                 >
                   {fmt(totals.totalPellet)} {pelletUnitLabel}
                 </td>
-                <td className='border-r border-gray-400 px-1.5 py-1.5 text-center font-semibold text-purple-700 text-xs leading-tight bg-purple-50'>
+                <td
+                  className={`border-r border-gray-400 px-1.5 py-1.5 text-center font-semibold text-purple-700 text-xs leading-tight bg-purple-50 ${
+                    showTouristCatch ? '' : 'border-r-0'
+                  }`}
+                >
                   {`${totals.deaths} ${L.unitFish}`}
                 </td>
                 {showTouristCatch && (
-                  <td className='px-1.5 py-1.5 text-center font-semibold text-fuchsia-700 text-xs leading-tight bg-fuchsia-50'>
+                  <td className='border-r-0 px-1.5 py-1.5 text-center font-semibold text-fuchsia-700 text-xs leading-tight bg-fuchsia-50'>
                     {`${totals.tourist} ${L.unitFish}`}
                   </td>
                 )}
