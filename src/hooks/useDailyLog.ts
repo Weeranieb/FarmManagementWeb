@@ -37,10 +37,16 @@ export function useDailyLogTemplateImportMutation(farmId: number) {
   return useMutation({
     mutationFn: (params: { file: File; selectedPondIds: number[] }) =>
       dailyLogApi.importTemplate(farmId, params),
-    onSuccess: (data) => {
+    onSuccess: async (data, variables) => {
+      const pondIds = new Set<number>(variables.selectedPondIds)
       for (const r of data.results) {
-        qc.invalidateQueries({ queryKey: dailyLogKeys.pond(r.pondId) })
+        pondIds.add(r.pondId)
       }
+      await Promise.all(
+        [...pondIds].map((id) =>
+          qc.invalidateQueries({ queryKey: dailyLogKeys.pond(id) }),
+        ),
+      )
     },
   })
 }

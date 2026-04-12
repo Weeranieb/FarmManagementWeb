@@ -233,7 +233,12 @@ export function PondDetailPage() {
   }, [pondListInFarm, pond, farm?.name])
 
   const farmPondsForDailyLog = useMemo(
-    () => (pondListInFarm ?? []).map((p) => ({ id: p.id, name: p.name })),
+    () =>
+      (pondListInFarm ?? []).map((p) => ({
+        id: p.id,
+        name: p.name,
+        status: p.status,
+      })),
     [pondListInFarm],
   )
 

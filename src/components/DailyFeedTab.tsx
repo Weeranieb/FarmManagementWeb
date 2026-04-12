@@ -281,12 +281,17 @@ export function DailyFeedTab({
     [currentMonth, minMonth, maxMonth],
   )
 
+  const hasActiveFarmPond = useMemo(
+    () => farmPonds.some((p) => p.status === 'active'),
+    [farmPonds],
+  )
+
   const {
     data,
     isLoading,
     isError,
     error: monthQueryError,
-    refetch,
+    refetch: refetchMonthLog,
     isFetching,
   } = useDailyLogQuery(pondId, viewMonth)
   const { data: feedCollections } = useFeedCollectionListQuery()
@@ -651,7 +656,7 @@ export function DailyFeedTab({
         </p>
         <button
           type='button'
-          onClick={() => void refetch()}
+          onClick={() => void refetchMonthLog()}
           disabled={isFetching}
           className='inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
         >
@@ -729,6 +734,7 @@ export function DailyFeedTab({
                 disabled={
                   farmId <= 0 ||
                   farmPonds.length === 0 ||
+                  !hasActiveFarmPond ||
                   templateImportMutation.isPending
                 }
                 className='flex items-center gap-1.5 px-3 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors text-sm shadow-sm disabled:cursor-not-allowed disabled:opacity-50'
@@ -1169,7 +1175,7 @@ export function DailyFeedTab({
       {/* Template Import Modal */}
       {isTemplateModalOpen && farmId > 0 && (
         <TemplateImportModal
-          key={pondId}
+          key={`${pondId}-${farmPonds.length}`}
           onClose={() => setIsTemplateModalOpen(false)}
           farmPonds={farmPonds}
           defaultSelectedIds={[pondId]}
@@ -1179,6 +1185,8 @@ export function DailyFeedTab({
               file,
               selectedPondIds,
             })
+            handleCancel()
+            await refetchMonthLog()
             const totalRows = res.results.reduce(
               (sum, r) => sum + r.rowsImported,
               0,

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   X,
   Upload,
@@ -14,6 +14,19 @@ const L = th.dailyFeed
 export interface FarmPondOption {
   id: number
   name: string
+  status: string
+}
+
+function pondIsActive(p: FarmPondOption): boolean {
+  return p.status === 'active'
+}
+
+function initialSelectionForPonds(
+  defaultSelectedIds: number[],
+  farmPonds: FarmPondOption[],
+): Set<number> {
+  const activeIds = new Set(farmPonds.filter(pondIsActive).map((p) => p.id))
+  return new Set(defaultSelectedIds.filter((id) => activeIds.has(id)))
 }
 
 interface TemplateImportModalProps {
@@ -34,16 +47,33 @@ export function TemplateImportModal({
   isSubmitting = false,
   onImport,
 }: TemplateImportModalProps) {
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(
-    () => new Set(defaultSelectedIds),
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(() =>
+    initialSelectionForPonds(defaultSelectedIds, farmPonds),
   )
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  const activeSelectedCount = useMemo(
+    () =>
+      [...selectedIds].filter((id) => {
+        const p = farmPonds.find((x) => x.id === id)
+        return p != null && pondIsActive(p)
+      }).length,
+    [selectedIds, farmPonds],
+  )
+
   const togglePond = (id: number) => {
     setError(null)
     setSelectedIds((prev) => {
-      const next = new Set(prev)
+      const activeIds = new Set(farmPonds.filter(pondIsActive).map((p) => p.id))
+      const pruned = new Set([...prev].filter((i) => activeIds.has(i)))
+      const row = farmPonds.find((p) => p.id === id)
+      if (!row || !pondIsActive(row)) {
+        const unchanged =
+          pruned.size === prev.size && [...pruned].every((i) => prev.has(i))
+        return unchanged ? prev : pruned
+      }
+      const next = new Set(pruned)
       if (next.has(id)) {
         next.delete(id)
       } else {
@@ -71,13 +101,17 @@ export function TemplateImportModal({
 
   const handleSubmit = async () => {
     if (selectedFile == null) return
-    if (selectedIds.size === 0) {
+    const activeSelectedIds = Array.from(selectedIds).filter((id) => {
+      const p = farmPonds.find((x) => x.id === id)
+      return p != null && pondIsActive(p)
+    })
+    if (activeSelectedIds.length === 0) {
       setError(L.templateSelectPondError)
       return
     }
     setError(null)
     try {
-      await onImport(selectedFile, Array.from(selectedIds))
+      await onImport(selectedFile, activeSelectedIds)
       onClose()
     } catch (err) {
       setError(err instanceof Error ? err.message : L.excelParseError)
@@ -87,7 +121,7 @@ export function TemplateImportModal({
   const handleClose = () => {
     setSelectedFile(null)
     setError(null)
-    setSelectedIds(new Set(defaultSelectedIds))
+    setSelectedIds(initialSelectionForPonds(defaultSelectedIds, farmPonds))
     onClose()
   }
 
@@ -133,19 +167,36 @@ export function TemplateImportModal({
               {L.templatePondLabel}
             </label>
             <ul className='max-h-40 space-y-2 overflow-y-auto rounded-lg border border-gray-200 p-3'>
-              {farmPonds.map((p) => (
-                <li key={p.id}>
-                  <label className='flex cursor-pointer items-center gap-2 text-sm text-gray-800'>
-                    <input
-                      type='checkbox'
-                      checked={selectedIds.has(p.id)}
-                      onChange={() => togglePond(p.id)}
-                      className='h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500'
-                    />
-                    <span>{p.name}</span>
-                  </label>
-                </li>
-              ))}
+              {farmPonds.map((p) => {
+                const active = pondIsActive(p)
+                return (
+                  <li key={p.id}>
+                    <label
+                      className={`flex items-center gap-2 text-sm ${
+                        active
+                          ? 'cursor-pointer text-gray-800'
+                          : 'cursor-not-allowed text-gray-400'
+                      }`}
+                    >
+                      <input
+                        type='checkbox'
+                        checked={active && selectedIds.has(p.id)}
+                        disabled={!active}
+                        onChange={() => togglePond(p.id)}
+                        className='h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50'
+                      />
+                      <span>
+                        {p.name}
+                        {!active && (
+                          <span className='ml-1.5 text-xs font-normal text-gray-400'>
+                            {L.templatePondInactive}
+                          </span>
+                        )}
+                      </span>
+                    </label>
+                  </li>
+                )
+              })}
             </ul>
           </div>
 
@@ -175,10 +226,12 @@ export function TemplateImportModal({
                 }
               >
                 <Upload size={48} className='mx-auto mb-3 text-gray-400' />
-                <p className='mb-1 text-gray-700'>
+                <p className='mb-1 break-all text-gray-700'>
                   {selectedFile ? selectedFile.name : L.excelClickToUpload}
                 </p>
-                <p className='text-sm text-gray-500'>.xlsx</p>
+                <p className='text-sm text-gray-500'>
+                  {selectedFile ? L.excelTapToChangeFile : L.excelFormatHint}
+                </p>
               </label>
             </div>
           </div>
@@ -198,7 +251,7 @@ export function TemplateImportModal({
             </div>
           )}
 
-          {selectedFile && selectedIds.size > 0 && (
+          {selectedFile && activeSelectedCount > 0 && (
             <div className='flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4'>
               <CheckCircle size={20} className='text-green-600' />
               <p className='text-sm text-green-800'>{L.excelReadyToSend}</p>
@@ -217,7 +270,9 @@ export function TemplateImportModal({
           <button
             type='button'
             onClick={handleSubmit}
-            disabled={!selectedFile || selectedIds.size === 0 || isSubmitting}
+            disabled={
+              !selectedFile || activeSelectedCount === 0 || isSubmitting
+            }
             className='flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-2 text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-300'
           >
             <CheckCircle size={18} />
