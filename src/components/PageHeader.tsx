@@ -8,6 +8,8 @@ const L = th.layout
 export interface PageHeaderProps {
   title: string
   subtitle?: string
+  /** Renders inline after the title (e.g. status badge). */
+  titleAddon?: ReactNode
   actions?: ReactNode
   backTo?: string
   backLabel?: string
@@ -18,6 +20,7 @@ export interface PageHeaderProps {
 export function PageHeader({
   title,
   subtitle,
+  titleAddon,
   actions,
   backTo,
   backLabel,
@@ -51,6 +54,7 @@ export function PageHeader({
             <h1 className='text-xl font-semibold tracking-tight text-slate-900'>
               {title}
             </h1>
+            {titleAddon}
           </div>
           {subtitle ? (
             <p className='mt-0.5 text-sm leading-relaxed text-slate-500'>

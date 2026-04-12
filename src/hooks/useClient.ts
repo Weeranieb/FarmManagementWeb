@@ -4,6 +4,7 @@ import { clientApi } from '../api/client'
 export const clientKeys = {
   all: ['clients'] as const,
   list: () => [...clientKeys.all, 'list'] as const,
+  detail: (id: number) => [...clientKeys.all, 'detail', id] as const,
 }
 
 /**
@@ -14,6 +15,15 @@ export function useClientListQuery() {
     queryKey: clientKeys.list(),
     queryFn: () => clientApi.getClientList(),
     staleTime: 2 * 60 * 1000, // 2 minutes
+  })
+}
+
+export function useClientDetailQuery(clientId: number, enabled = true) {
+  return useQuery({
+    queryKey: clientKeys.detail(clientId),
+    queryFn: () => clientApi.getClient(clientId),
+    enabled: enabled && clientId > 0,
+    staleTime: 5 * 60 * 1000,
   })
 }
 

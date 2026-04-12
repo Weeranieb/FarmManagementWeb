@@ -1,10 +1,13 @@
+import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Grid, Fish, Activity, Building } from 'lucide-react'
+import { Grid, Fish, Activity, Building, Download } from 'lucide-react'
 import { useFarmQuery } from '../hooks/useFarm'
 import { pondApi } from '../api/pond'
+import { pondKeys } from '../hooks/usePond'
 import { formatFarmDisplayNameTH } from '../utils/masterDataName'
 import { StatusBadge } from '../components/StatusBadge'
+import { ExportModal } from '../components/ExportModal'
 import { PageHeader } from '../components/PageHeader'
 import { th } from '../locales/th'
 
@@ -19,10 +22,12 @@ export function FarmDetailPage() {
     error: farmError,
   } = useFarmQuery(farmId, !!id)
   const { data: farmPonds = [] } = useQuery({
-    queryKey: ['ponds', 'farm', farmId],
+    queryKey: pondKeys.list(farmId),
     queryFn: () => pondApi.getPondList(farmId),
     enabled: Number.isFinite(farmId) && !!farm,
+    staleTime: 2 * 60 * 1000,
   })
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
 
   if (farmLoading || !id) {
     return (
@@ -64,6 +69,16 @@ export function FarmDetailPage() {
         backTo='/farms'
         title={formatFarmDisplayNameTH(farm.name)}
         icon={Building}
+        actions={
+          <button
+            type='button'
+            className='inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-gray-400 hover:bg-gray-50 hover:shadow-md whitespace-nowrap'
+            onClick={() => setIsExportModalOpen(true)}
+          >
+            <Download size={16} className='shrink-0' />
+            <span>{th.exportReport.button}</span>
+          </button>
+        }
       />
 
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
@@ -128,6 +143,15 @@ export function FarmDetailPage() {
           ))}
         </div>
       </div>
+
+      {isExportModalOpen && (
+        <ExportModal
+          onClose={() => setIsExportModalOpen(false)}
+          scope='farm'
+          name={formatFarmDisplayNameTH(farm.name)}
+          entityId={farmId}
+        />
+      )}
     </div>
   )
 }

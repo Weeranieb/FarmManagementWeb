@@ -38,11 +38,18 @@ export interface DailyLogBulkUpsertRequest {
   freshFeedCollectionId?: number
   pelletFeedCollectionId?: number
   entries: DailyLogBulkUpsertEntry[]
+  deleteDays?: number[]
 }
 
-export interface DailyLogExcelUploadResponse {
+export interface DailyLogTemplateImportResult {
+  pondId: number
+  pondName: string
   rowsImported: number
-  savedPath: string
+}
+
+export interface DailyLogTemplateImportResponse {
+  results: DailyLogTemplateImportResult[]
+  skipped: string[]
 }
 
 export const dailyLogApi = {
@@ -59,29 +66,24 @@ export const dailyLogApi = {
     return apiClient.put<void>(`/pond/${pondId}/daily-logs`, body)
   },
 
-  uploadExcel: async (
-    pondId: number,
-    params: {
-      file: File
-      month: string
-      freshFeedCollectionId?: number
-      pelletFeedCollectionId?: number
-    },
-  ): Promise<DailyLogExcelUploadResponse> => {
+  /** Path relative to API base (`/api/v1` in dev). */
+  pondExportPath: (pondId: number, month: string): string =>
+    `/pond/${pondId}/daily-logs/export?month=${encodeURIComponent(month)}&format=xlsx`,
+
+  farmExportPath: (farmId: number, month: string): string =>
+    `/farm/${farmId}/daily-logs/export?month=${encodeURIComponent(month)}&format=xlsx`,
+
+  importTemplate: async (
+    farmId: number,
+    params: { file: File; selectedPondIds: number[] },
+  ): Promise<DailyLogTemplateImportResponse> => {
     const form = new FormData()
     form.append('file', params.file)
-    form.append('month', params.month)
-    if (params.freshFeedCollectionId != null) {
-      form.append('freshFeedCollectionId', String(params.freshFeedCollectionId))
+    for (const id of params.selectedPondIds) {
+      form.append('selectedPondIds', String(id))
     }
-    if (params.pelletFeedCollectionId != null) {
-      form.append(
-        'pelletFeedCollectionId',
-        String(params.pelletFeedCollectionId),
-      )
-    }
-    return apiClient.postForm<DailyLogExcelUploadResponse>(
-      `/pond/${pondId}/daily-logs/upload`,
+    return apiClient.postForm<DailyLogTemplateImportResponse>(
+      `/farm/${farmId}/daily-logs/import-template`,
       form,
     )
   },
