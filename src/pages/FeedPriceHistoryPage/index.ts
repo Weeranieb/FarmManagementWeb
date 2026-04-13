@@ -1,0 +1,1 @@
+export { FeedPriceHistoryPage } from './FeedPriceHistoryPage'

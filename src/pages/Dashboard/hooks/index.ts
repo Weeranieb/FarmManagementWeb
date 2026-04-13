@@ -1,0 +1,1 @@
+export { useDashboardPage } from './useDashboardPage'

@@ -1,0 +1,1 @@
+export { FeedCollectionsPage } from './FeedCollectionsPage'

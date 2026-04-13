@@ -1,0 +1,1 @@
+export { useFeedCollectionsPage } from './useFeedCollectionsPage'

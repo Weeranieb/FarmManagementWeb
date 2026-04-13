@@ -1,0 +1,1 @@
+export { usePondDetailPage } from './usePondDetailPage'

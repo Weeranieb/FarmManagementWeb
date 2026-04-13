@@ -1,0 +1,1 @@
+export { useFarmDetailPage } from './useFarmDetailPage'
