@@ -1,6 +1,6 @@
 import type { FarmResponse } from '../../../api/farm'
 import { formatFarmDisplayNameTH } from '../../../utils/masterDataName'
-import type { AdminMasterDataLocale } from '../../../locales/th'
+import { th, type AdminMasterDataLocale } from '../../../locales/th'
 
 type T = AdminMasterDataLocale
 
@@ -23,6 +23,7 @@ type Props = {
   ) => void
   onSubmit: (e: React.FormEvent) => void
   onResetPonds: () => void
+  isSubmitting?: boolean
 }
 
 export function CreatePondTab({
@@ -38,6 +39,7 @@ export function CreatePondTab({
   updatePondForm,
   onSubmit,
   onResetPonds,
+  isSubmitting = false,
 }: Props) {
   if (!selectedClientId) {
     return (
@@ -56,7 +58,7 @@ export function CreatePondTab({
         <select
           value={selectedFarmId}
           onChange={(e) => setSelectedFarmId(e.target.value)}
-          disabled={farmListLoading}
+          disabled={farmListLoading || isSubmitting}
           className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-300 disabled:cursor-not-allowed'
           aria-label={t.selectFarm}
         >
@@ -89,8 +91,9 @@ export function CreatePondTab({
               {pondForms.length > 1 && (
                 <button
                   type='button'
+                  disabled={isSubmitting}
                   onClick={() => removePondForm(index)}
-                  className='px-2 py-1 text-xs border border-red-300 text-red-600 rounded hover:bg-red-50 transition-all'
+                  className='px-2 py-1 text-xs border border-red-300 text-red-600 rounded hover:bg-red-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   {t.remove}
                 </button>
@@ -104,8 +107,9 @@ export function CreatePondTab({
                 type='text'
                 value={pondForm.name}
                 onChange={(e) => updatePondForm(index, 'name', e.target.value)}
+                disabled={isSubmitting}
                 placeholder={t.placeholderPondName}
-                className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none'
+                className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100 disabled:text-gray-500'
               />
             </div>
           </div>
@@ -113,23 +117,31 @@ export function CreatePondTab({
       </div>
       <button
         type='button'
+        disabled={isSubmitting}
         onClick={addPondForm}
-        className='w-full flex items-center justify-center px-4 py-2 text-sm border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-all'
+        className='w-full flex items-center justify-center px-4 py-2 text-sm border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed'
       >
         {t.addAnotherPond}
       </button>
       <div className='flex items-center gap-3 pt-4 border-t border-gray-200'>
         <button
           type='submit'
-          disabled={!selectedFarmId || pondForms.some((f) => !f.name.trim())}
+          disabled={
+            !selectedFarmId ||
+            pondForms.some((f) => !f.name.trim()) ||
+            isSubmitting
+          }
           className='flex-1 flex items-center justify-center px-4 py-2 text-sm bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:from-transparent disabled:to-transparent'
         >
-          {t.createPonds} {pondForms.length} {t.pond}
+          {isSubmitting
+            ? th.common.loading
+            : `${t.createPonds} ${pondForms.length} ${t.pond}`}
         </button>
         <button
           type='button'
+          disabled={isSubmitting}
           onClick={onResetPonds}
-          className='px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors'
+          className='px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
         >
           {t.reset}
         </button>

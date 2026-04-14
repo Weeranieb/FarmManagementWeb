@@ -113,6 +113,7 @@ export function AdminMasterDataPage() {
                 setClientForm={ctx.setClientForm}
                 onSubmit={ctx.handleClientSubmit}
                 isClientFormValid={ctx.isClientFormValid}
+                isSubmitting={ctx.isSavingClientForm}
               />
             )}
             {ctx.activeTab === 'farms' && (
@@ -123,6 +124,7 @@ export function AdminMasterDataPage() {
                 onFarmNameChange={ctx.handleFarmNameChange}
                 onSubmit={ctx.handleFarmSubmit}
                 onReset={() => ctx.setFarmForm({ name: '' })}
+                isSubmitting={ctx.isSavingFarmForm}
               />
             )}
             {ctx.activeTab === 'ponds' && (
@@ -142,6 +144,7 @@ export function AdminMasterDataPage() {
                   ctx.setPondForms([{ name: '' }])
                   ctx.setSelectedFarmId('')
                 }}
+                isSubmitting={ctx.isSavingPondForm}
               />
             )}
           </div>
@@ -169,7 +172,9 @@ export function AdminMasterDataPage() {
         <EditMasterDataModal
           key={`${ctx.editingItem.type}-${ctx.editingItem.id}`}
           isOpen={ctx.isEditModalOpen}
+          isSaving={ctx.isEditSaving}
           onClose={() => {
+            if (ctx.isEditSaving) return
             ctx.setIsEditModalOpen(false)
             ctx.setEditingItem(null)
             ctx.setEditingClientSnapshot(null)
@@ -209,6 +214,7 @@ export function AdminMasterDataPage() {
                   placeholderContactNumber: t.placeholderPhone,
                   errorOwnerRequired: t.modalErrorOwnerRequired,
                   errorContactRequired: t.modalErrorContactRequired,
+                  errorContactDigitsOnly: t.phoneDigitsOnly,
                 }
               : undefined
           }

@@ -40,6 +40,9 @@ export function useMasterDataPage() {
   const [farmForm, setFarmForm] = useState({ name: '' })
   const [pondForms, setPondForms] = useState([{ name: '' }])
   const [selectedFarmId, setSelectedFarmId] = useState('')
+  const [isSavingFarmForm, setIsSavingFarmForm] = useState(false)
+  const [isSavingPondForm, setIsSavingPondForm] = useState(false)
+  const [isEditSaving, setIsEditSaving] = useState(false)
 
   const farmHierarchyLoading = hierarchyPending || hierarchyFetching
 
@@ -71,6 +74,7 @@ export function useMasterDataPage() {
     }
     if (!selectedClientId) return
     const name = normalizeFarmNameForStore(farmForm.name.trim())
+    setIsSavingFarmForm(true)
     try {
       await farmApi.createFarm({ clientId: Number(selectedClientId), name })
       setSuccessMessage(L.successFarmCreated(name, selectedClient?.value ?? ''))
@@ -83,6 +87,8 @@ export function useMasterDataPage() {
         'error',
         err instanceof Error ? err.message : L.alertCreateFarmFailed,
       )
+    } finally {
+      setIsSavingFarmForm(false)
     }
   }
 
@@ -100,6 +106,7 @@ export function useMasterDataPage() {
     const selectedFarm = clientFarms.find(
       (f) => String(f.id) === selectedFarmId,
     )
+    setIsSavingPondForm(true)
     try {
       await pondApi.createPonds({ farmId: Number(selectedFarmId), names })
       const pondCount = names.length
@@ -116,6 +123,8 @@ export function useMasterDataPage() {
         'error',
         err instanceof Error ? err.message : L.alertCreatePondsFailed,
       )
+    } finally {
+      setIsSavingPondForm(false)
     }
   }
 
@@ -169,6 +178,7 @@ export function useMasterDataPage() {
     if (!editingItem) return
     const raw = newName.trim()
     if (!raw) return
+    setIsEditSaving(true)
     try {
       if (editingItem.type === 'farm') {
         const name = normalizeFarmNameForStore(raw)
@@ -194,6 +204,8 @@ export function useMasterDataPage() {
         'error',
         err instanceof Error ? err.message : L.alertUpdateFailed,
       )
+    } finally {
+      setIsEditSaving(false)
     }
   }
 
@@ -238,5 +250,8 @@ export function useMasterDataPage() {
     handleSaveEdit,
     setFarmForm,
     setPondForms,
+    isSavingFarmForm,
+    isSavingPondForm,
+    isEditSaving,
   }
 }

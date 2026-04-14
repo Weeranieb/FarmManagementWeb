@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { EditMasterDataModal } from '../../components/EditMasterDataModal'
 import { PageHeader } from '../../components/PageHeader'
+import { th } from '../../locales/th'
 import { useMasterDataPage } from './hooks'
 
 export function MasterDataPage() {
@@ -119,24 +120,32 @@ export function MasterDataPage() {
                       type='text'
                       value={ctx.farmForm.name}
                       onChange={(e) => ctx.handleFarmNameChange(e.target.value)}
+                      disabled={ctx.isSavingFarmForm}
                       placeholder={L.placeholderFarmName}
-                      className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none'
+                      className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100 disabled:text-gray-500'
                       required
                     />
                   </div>
                   <div className='flex items-center gap-3 pt-4 border-t border-gray-200'>
                     <button
                       type='submit'
-                      disabled={!ctx.farmForm.name.trim()}
+                      disabled={
+                        !ctx.farmForm.name.trim() || ctx.isSavingFarmForm
+                      }
                       className='flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:from-transparent disabled:to-transparent'
                     >
                       <Plus size={16} />
-                      <span>{L.createFarm}</span>
+                      <span>
+                        {ctx.isSavingFarmForm
+                          ? th.common.loading
+                          : L.createFarm}
+                      </span>
                     </button>
                     <button
                       type='button'
+                      disabled={ctx.isSavingFarmForm}
                       onClick={() => ctx.setFarmForm({ name: '' })}
-                      className='px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all'
+                      className='px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed'
                     >
                       {L.reset}
                     </button>
@@ -156,7 +165,9 @@ export function MasterDataPage() {
                       onChange={(e) => ctx.setSelectedFarmId(e.target.value)}
                       className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-300 disabled:cursor-not-allowed'
                       required
-                      disabled={ctx.farmHierarchyLoading}
+                      disabled={
+                        ctx.farmHierarchyLoading || ctx.isSavingPondForm
+                      }
                     >
                       <option value=''>
                         {ctx.farmHierarchyLoading
@@ -187,8 +198,9 @@ export function MasterDataPage() {
                           {ctx.pondForms.length > 1 && (
                             <button
                               type='button'
+                              disabled={ctx.isSavingPondForm}
                               onClick={() => ctx.removePondForm(index)}
-                              className='px-2 py-1 text-xs border border-red-300 text-red-600 rounded hover:bg-red-50 transition-all'
+                              className='px-2 py-1 text-xs border border-red-300 text-red-600 rounded hover:bg-red-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed'
                             >
                               {L.remove}
                             </button>
@@ -205,8 +217,9 @@ export function MasterDataPage() {
                             onChange={(e) =>
                               ctx.updatePondForm(index, 'name', e.target.value)
                             }
+                            disabled={ctx.isSavingPondForm}
                             placeholder={L.placeholderPondName}
-                            className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none'
+                            className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100 disabled:text-gray-500'
                             required
                           />
                         </div>
@@ -215,8 +228,9 @@ export function MasterDataPage() {
                   </div>
                   <button
                     type='button'
+                    disabled={ctx.isSavingPondForm}
                     onClick={ctx.addPondForm}
-                    className='w-full flex items-center justify-center gap-2 px-4 py-2 text-sm border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-all'
+                    className='w-full flex items-center justify-center gap-2 px-4 py-2 text-sm border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed'
                   >
                     <Plus size={16} />
                     <span>{L.addAnotherPond}</span>
@@ -226,22 +240,26 @@ export function MasterDataPage() {
                       type='submit'
                       disabled={
                         !ctx.selectedFarmId ||
-                        ctx.pondForms.some((f) => !f.name.trim())
+                        ctx.pondForms.some((f) => !f.name.trim()) ||
+                        ctx.isSavingPondForm
                       }
                       className='flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:from-transparent disabled:to-transparent'
                     >
                       <Plus size={16} />
                       <span>
-                        {L.createPonds} {ctx.pondForms.length} {L.pond}
+                        {ctx.isSavingPondForm
+                          ? th.common.loading
+                          : `${L.createPonds} ${ctx.pondForms.length} ${L.pond}`}
                       </span>
                     </button>
                     <button
                       type='button'
+                      disabled={ctx.isSavingPondForm}
                       onClick={() => {
                         ctx.setPondForms([{ name: '' }])
                         ctx.setSelectedFarmId('')
                       }}
-                      className='px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all'
+                      className='px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed'
                     >
                       {L.reset}
                     </button>
@@ -388,7 +406,11 @@ export function MasterDataPage() {
         <EditMasterDataModal
           key={`${ctx.editingItem.type}-${ctx.editingItem.id}`}
           isOpen={ctx.isEditModalOpen}
-          onClose={() => ctx.setIsEditModalOpen(false)}
+          isSaving={ctx.isEditSaving}
+          onClose={() => {
+            if (ctx.isEditSaving) return
+            ctx.setIsEditModalOpen(false)
+          }}
           currentName={ctx.editingItem.name}
           title={
             ctx.editingItem.type === 'farm' ? L.editFarmTitle : L.editPondTitle

@@ -5,6 +5,7 @@ import {
   AlertCircle,
   CheckCircle,
   FileSpreadsheet,
+  Loader2,
 } from 'lucide-react'
 import { th } from '../locales/th'
 import type { DailyLogTemplateImportResponse } from '../api/dailyLog'
@@ -119,6 +120,7 @@ export function TemplateImportModal({
   }
 
   const handleClose = () => {
+    if (isSubmitting) return
     setSelectedFile(null)
     setError(null)
     setSelectedIds(initialSelectionForPonds(defaultSelectedIds, farmPonds))
@@ -152,8 +154,9 @@ export function TemplateImportModal({
           </div>
           <button
             type='button'
+            disabled={isSubmitting}
             onClick={handleClose}
-            className='rounded-lg p-1 hover:bg-white/20'
+            className='rounded-lg p-1 hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40'
           >
             <X size={24} />
           </button>
@@ -262,8 +265,9 @@ export function TemplateImportModal({
         <div className='flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4'>
           <button
             type='button'
+            disabled={isSubmitting}
             onClick={handleClose}
-            className='rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-100'
+            className='rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50'
           >
             {th.masterData.modalCancel}
           </button>
@@ -275,8 +279,12 @@ export function TemplateImportModal({
             }
             className='flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-2 text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-300'
           >
-            <CheckCircle size={18} />
-            {L.templateConfirm}
+            {isSubmitting ? (
+              <Loader2 size={18} className='animate-spin' aria-hidden />
+            ) : (
+              <CheckCircle size={18} aria-hidden />
+            )}
+            {isSubmitting ? th.common.loading : L.templateConfirm}
           </button>
         </div>
       </div>

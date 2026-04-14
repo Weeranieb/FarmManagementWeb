@@ -1,4 +1,4 @@
-import type { AdminMasterDataLocale } from '../../../locales/th'
+import { th, type AdminMasterDataLocale } from '../../../locales/th'
 
 type T = AdminMasterDataLocale
 
@@ -9,6 +9,7 @@ type Props = {
   onFarmNameChange: (value: string) => void
   onSubmit: (e: React.FormEvent) => void
   onReset: () => void
+  isSubmitting?: boolean
 }
 
 export function CreateFarmTab({
@@ -18,6 +19,7 @@ export function CreateFarmTab({
   onFarmNameChange,
   onSubmit,
   onReset,
+  isSubmitting = false,
 }: Props) {
   if (!selectedClientId) {
     return (
@@ -37,22 +39,24 @@ export function CreateFarmTab({
           type='text'
           value={farmForm.name}
           onChange={(e) => onFarmNameChange(e.target.value)}
+          disabled={isSubmitting}
           placeholder={t.placeholderFarmName}
-          className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none'
+          className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100 disabled:text-gray-500'
         />
       </div>
       <div className='flex items-center gap-3 pt-4 border-t border-gray-200'>
         <button
           type='submit'
-          disabled={!farmForm.name.trim()}
+          disabled={!farmForm.name.trim() || isSubmitting}
           className='flex-1 flex items-center justify-center px-4 py-2 text-sm bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:from-transparent disabled:to-transparent'
         >
-          {t.createFarm}
+          {isSubmitting ? th.common.loading : t.createFarm}
         </button>
         <button
           type='button'
+          disabled={isSubmitting}
           onClick={onReset}
-          className='px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors'
+          className='px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
         >
           {t.reset}
         </button>

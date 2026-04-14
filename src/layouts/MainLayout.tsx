@@ -333,14 +333,19 @@ export function MainLayout() {
                   <div className='border-t border-slate-100'>
                     <button
                       type='button'
+                      disabled={logoutMutation.isPending}
                       onClick={() => {
                         setIsProfileDropdownOpen(false)
                         handleLogout()
                       }}
-                      className='flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50'
+                      className='flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50'
                     >
                       <LogOut size={16} />
-                      <span>{L.logout}</span>
+                      <span>
+                        {logoutMutation.isPending
+                          ? th.common.loading
+                          : L.logout}
+                      </span>
                     </button>
                   </div>
                 </div>

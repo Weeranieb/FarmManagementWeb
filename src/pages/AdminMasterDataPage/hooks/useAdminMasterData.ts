@@ -18,6 +18,7 @@ import {
   formatFarmDisplayNameTH,
   normalizeFarmNameForStore,
 } from '../../../utils/masterDataName'
+import { filterDigitsOnly, isDigitsOnly } from '../../../utils/phoneInput'
 import { th } from '../../../locales/th'
 import type { EditingItem } from '../types'
 
@@ -58,6 +59,10 @@ export function useAdminMasterData() {
   const [farmForm, setFarmForm] = useState({ name: '' })
   const [pondForms, setPondForms] = useState([{ name: '' }])
   const [selectedFarmId, setSelectedFarmId] = useState('')
+  const [isSavingClientForm, setIsSavingClientForm] = useState(false)
+  const [isSavingFarmForm, setIsSavingFarmForm] = useState(false)
+  const [isSavingPondForm, setIsSavingPondForm] = useState(false)
+  const [isEditSaving, setIsEditSaving] = useState(false)
   const farmList = farmListData?.farms ?? []
 
   const pondQueries = useQueries({
@@ -118,6 +123,11 @@ export function useAdminMasterData() {
       showToast('error', t.alertFillRequired)
       return
     }
+    if (!isDigitsOnly(contactNumber)) {
+      showToast('error', t.phoneDigitsOnly)
+      return
+    }
+    setIsSavingClientForm(true)
     try {
       await clientApi.createClient({ name, ownerName, contactNumber })
       setSuccessMessage(t.successClientCreated(name))
@@ -135,6 +145,8 @@ export function useAdminMasterData() {
         'error',
         err instanceof Error ? err.message : t.alertCreateClientFailed,
       )
+    } finally {
+      setIsSavingClientForm(false)
     }
   }
 
@@ -146,6 +158,7 @@ export function useAdminMasterData() {
     }
     if (!selectedClientId) return
     const name = normalizeFarmNameForStore(farmForm.name.trim())
+    setIsSavingFarmForm(true)
     try {
       await farmApi.createFarm({
         clientId: Number(selectedClientId),
@@ -166,6 +179,8 @@ export function useAdminMasterData() {
         'error',
         err instanceof Error ? err.message : t.alertCreateFarmFailed,
       )
+    } finally {
+      setIsSavingFarmForm(false)
     }
   }
 
@@ -183,6 +198,7 @@ export function useAdminMasterData() {
     const selectedFarm = clientFarms.find(
       (f) => String(f.id) === selectedFarmId,
     )
+    setIsSavingPondForm(true)
     try {
       await pondApi.createPonds({ farmId: Number(selectedFarmId), names })
       const pondCount = names.length
@@ -202,6 +218,8 @@ export function useAdminMasterData() {
         'error',
         err instanceof Error ? err.message : t.alertCreatePondsFailed,
       )
+    } finally {
+      setIsSavingPondForm(false)
     }
   }
 
@@ -246,7 +264,10 @@ export function useAdminMasterData() {
     e.stopPropagation()
     try {
       const full = await clientApi.getClient(Number(client.key))
-      setEditingClientSnapshot(full)
+      setEditingClientSnapshot({
+        ...full,
+        contactNumber: filterDigitsOnly(full.contactNumber ?? ''),
+      })
       setEditingItem({
         id: String(client.key),
         name: full.name,
@@ -285,6 +306,7 @@ export function useAdminMasterData() {
     if (!editingItem) return
     const raw = newName.trim()
     if (!raw) return
+    setIsEditSaving(true)
     try {
       if (editingItem.type === 'client') {
         const snap = editingClientSnapshot
@@ -292,11 +314,16 @@ export function useAdminMasterData() {
           showToast('error', t.alertLoadClientFailed)
           return
         }
+        const contactNum = snap.contactNumber.trim()
+        if (!isDigitsOnly(contactNum)) {
+          showToast('error', t.phoneDigitsOnly)
+          return
+        }
         await clientApi.updateClient({
           id: snap.id,
           name: raw,
           ownerName: snap.ownerName.trim(),
-          contactNumber: snap.contactNumber.trim(),
+          contactNumber: contactNum,
           isActive: snap.isActive,
           isTouristFishingEnabled: snap.isTouristFishingEnabled,
         })
@@ -328,13 +355,15 @@ export function useAdminMasterData() {
         'error',
         err instanceof Error ? err.message : t.alertUpdateFailed,
       )
+    } finally {
+      setIsEditSaving(false)
     }
   }
 
   const isClientFormValid =
     clientForm.name.trim() !== '' &&
     clientForm.contactPerson.trim() !== '' &&
-    clientForm.phone.trim() !== ''
+    isDigitsOnly(clientForm.phone)
 
   const onClientSelectChange = (value: string) => {
     setSelectedClientId(value)
@@ -387,5 +416,9 @@ export function useAdminMasterData() {
     handleEditPond,
     handleSaveEdit,
     isClientFormValid,
+    isSavingClientForm,
+    isSavingFarmForm,
+    isSavingPondForm,
+    isEditSaving,
   }
 }

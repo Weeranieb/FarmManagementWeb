@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { X } from 'lucide-react'
+import { X, Loader2 } from 'lucide-react'
+import { filterDigitsOnly, isDigitsOnly } from '../utils/phoneInput'
+import { th } from '../locales/th'
 
 export interface EditMasterDataModalLocale {
   labelName: string
@@ -34,6 +36,7 @@ export interface EditMasterDataModalClientExtras {
   placeholderContactNumber: string
   errorOwnerRequired: string
   errorContactRequired: string
+  errorContactDigitsOnly: string
 }
 
 interface EditMasterDataModalProps {
@@ -41,7 +44,9 @@ interface EditMasterDataModalProps {
   onClose: () => void
   currentName: string
   title: string
-  onSave: (newName: string) => void
+  onSave: (newName: string) => void | Promise<void>
+  /** When true, blocks interaction and shows saving overlay (set by parent during API). */
+  isSaving?: boolean
   locale?: Partial<EditMasterDataModalLocale>
   clientEditExtras?: EditMasterDataModalClientExtras | null
 }
@@ -52,6 +57,7 @@ export function EditMasterDataModal({
   currentName,
   title,
   onSave,
+  isSaving = false,
   locale: localeOverride,
   clientEditExtras,
 }: EditMasterDataModalProps) {
@@ -61,6 +67,7 @@ export function EditMasterDataModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    if (isSaving) return
     const trimmed = name.trim()
     setError('')
     if (!trimmed) {
@@ -72,8 +79,13 @@ export function EditMasterDataModal({
         setError(clientEditExtras.errorOwnerRequired)
         return
       }
-      if (!clientEditExtras.contactNumber.trim()) {
+      const contactTrimmed = clientEditExtras.contactNumber.trim()
+      if (!contactTrimmed) {
         setError(clientEditExtras.errorContactRequired)
+        return
+      }
+      if (!isDigitsOnly(contactTrimmed)) {
+        setError(clientEditExtras.errorContactDigitsOnly)
         return
       }
     }
@@ -84,7 +96,7 @@ export function EditMasterDataModal({
   const formCanSubmit = clientEditExtras
     ? Boolean(name.trim()) &&
       Boolean(clientEditExtras.ownerName.trim()) &&
-      Boolean(clientEditExtras.contactNumber.trim())
+      isDigitsOnly(clientEditExtras.contactNumber)
     : Boolean(name.trim())
 
   if (!isOpen) return null
@@ -93,16 +105,34 @@ export function EditMasterDataModal({
     <div className='fixed inset-0 z-50 flex items-center justify-center'>
       <div
         className='absolute inset-0 bg-black/50'
-        onClick={onClose}
+        onClick={() => {
+          if (!isSaving) onClose()
+        }}
         aria-hidden
       />
-      <div className='relative bg-white rounded-lg shadow-xl w-full max-w-md mx-4 p-6'>
+      <div className='relative overflow-hidden rounded-lg bg-white shadow-xl w-full max-w-md mx-4 p-6'>
+        {isSaving && (
+          <div
+            className='absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-lg bg-white/70 backdrop-blur-[1px]'
+            role='status'
+            aria-live='polite'
+            aria-busy='true'
+          >
+            <Loader2 className='h-8 w-8 animate-spin text-blue-600' />
+            <span className='text-sm font-medium text-slate-700'>
+              {th.common.loading}
+            </span>
+          </div>
+        )}
         <div className='flex items-center justify-between mb-4'>
           <h2 className='text-lg font-semibold text-gray-800'>{title}</h2>
           <button
             type='button'
-            onClick={onClose}
-            className='p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors'
+            disabled={isSaving}
+            onClick={() => {
+              if (!isSaving) onClose()
+            }}
+            className='p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-40'
             aria-label={locale.close}
           >
             <X size={20} />
@@ -120,7 +150,8 @@ export function EditMasterDataModal({
                 setName(e.target.value)
                 if (error) setError('')
               }}
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
+              disabled={isSaving}
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500 ${
                 error ? 'border-red-500' : 'border-gray-300'
               }`}
               placeholder={locale.placeholderName}
@@ -145,7 +176,8 @@ export function EditMasterDataModal({
                     clientEditExtras.onOwnerNameChange(e.target.value)
                     if (error) setError('')
                   }}
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none'
+                  disabled={isSaving}
+                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500'
                   placeholder={clientEditExtras.placeholderOwnerName}
                 />
               </div>
@@ -155,12 +187,17 @@ export function EditMasterDataModal({
                 </label>
                 <input
                   type='tel'
+                  inputMode='numeric'
+                  pattern='[0-9]*'
                   value={clientEditExtras.contactNumber}
                   onChange={(e) => {
-                    clientEditExtras.onContactNumberChange(e.target.value)
+                    clientEditExtras.onContactNumberChange(
+                      filterDigitsOnly(e.target.value),
+                    )
                     if (error) setError('')
                   }}
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none'
+                  disabled={isSaving}
+                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500'
                   placeholder={clientEditExtras.placeholderContactNumber}
                 />
               </div>
@@ -169,12 +206,13 @@ export function EditMasterDataModal({
                   id='edit-client-tourist-fishing'
                   type='checkbox'
                   checked={clientEditExtras.isTouristFishingEnabled}
+                  disabled={isSaving}
                   onChange={(e) =>
                     clientEditExtras.onTouristFishingEnabledChange(
                       e.target.checked,
                     )
                   }
-                  className='h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                  className='h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50'
                 />
                 <label
                   htmlFor='edit-client-tourist-fishing'
@@ -188,17 +226,26 @@ export function EditMasterDataModal({
           <div className='flex justify-end gap-2 pt-2'>
             <button
               type='button'
-              onClick={onClose}
-              className='px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors'
+              disabled={isSaving}
+              onClick={() => {
+                if (!isSaving) onClose()
+              }}
+              className='px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:cursor-not-allowed disabled:opacity-50'
             >
               {locale.cancel}
             </button>
             <button
               type='submit'
-              disabled={!formCanSubmit}
-              className='px-4 py-2 bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:from-transparent disabled:to-transparent'
+              disabled={!formCanSubmit || isSaving}
+              className='inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-800 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:from-transparent disabled:to-transparent'
             >
-              {locale.save}
+              {isSaving && (
+                <Loader2
+                  className='h-4 w-4 shrink-0 animate-spin'
+                  aria-hidden
+                />
+              )}
+              {isSaving ? th.common.loading : locale.save}
             </button>
           </div>
         </form>
