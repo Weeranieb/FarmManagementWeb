@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   Calendar,
   Save,
@@ -9,9 +10,11 @@ import {
   Droplets,
   Fish,
   TrendingDown,
+  Camera,
 } from 'lucide-react'
 import { th } from '../../locales/th'
 import { TemplateImportModal } from '../TemplateImportModal'
+import { PhotoScanModal } from '../PhotoScanModal'
 import type { DailyFeedTabProps, DayRow } from './types'
 import { DATE_COL_DIM, DAY_BODY_ROW, DAY_BODY_TEXT } from './constants'
 import {
@@ -89,6 +92,8 @@ export function DailyFeedTab({
     setIsTemplateModalOpen,
     showToast,
   } = hook
+
+  const [isScanModalOpen, setIsScanModalOpen] = useState(false)
 
   const getVal = (day: number, field: keyof DayRow): number =>
     rowsForView[day]?.[field] ?? 0
@@ -249,6 +254,14 @@ export function DailyFeedTab({
             </>
           ) : (
             <>
+              <button
+                type='button'
+                onClick={() => setIsScanModalOpen(true)}
+                className='flex items-center gap-1.5 px-3 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors text-sm shadow-sm'
+              >
+                <Camera size={15} />
+                {L.scanUploadBtn}
+              </button>
               <button
                 type='button'
                 onClick={() => setIsTemplateModalOpen(true)}
@@ -688,6 +701,18 @@ export function DailyFeedTab({
             </div>
           </div>
         </div>
+      )}
+
+      {isScanModalOpen && (
+        <PhotoScanModal
+          pondId={pondId}
+          currentMonth={viewMonth}
+          onClose={() => setIsScanModalOpen(false)}
+          onSaved={() => {
+            handleCancel()
+            void refetchMonthLog()
+          }}
+        />
       )}
 
       {isTemplateModalOpen && farmId > 0 && (
