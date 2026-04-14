@@ -52,6 +52,11 @@ export function MainLayout() {
 
   const isActive = (path: string) => location.pathname.startsWith(path)
 
+  const clientFreeRoutes = ['/admin', '/profile']
+  const requiresClient = !clientFreeRoutes.some((prefix) =>
+    location.pathname.startsWith(prefix),
+  )
+
   const handleLogout = () => {
     logoutMutation.mutate()
   }
@@ -347,7 +352,7 @@ export function MainLayout() {
 
       <main className='min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden'>
         <div className='p-6 lg:p-8'>
-          {isAdminUser && !selectedClientId ? (
+          {isAdminUser && !selectedClientId && requiresClient ? (
             <div className='flex min-h-[50vh] items-center justify-center'>
               <p className='text-slate-500'>{L.selectClientToView}</p>
             </div>
