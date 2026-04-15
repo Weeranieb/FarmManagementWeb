@@ -1,20 +1,13 @@
-import { useState, useEffect, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useLoginMutation, getRememberedUsername } from '../../../hooks/useAuth'
 
 export function useLoginPage() {
-  const [username, setUsername] = useState('')
+  const remembered = getRememberedUsername()
+  const [username, setUsername] = useState(remembered || '')
   const [password, setPassword] = useState('')
-  const [rememberMe, setRememberMe] = useState(false)
+  const [rememberMe, setRememberMe] = useState(!!remembered)
   const [showPassword, setShowPassword] = useState(false)
   const loginMutation = useLoginMutation()
-
-  useEffect(() => {
-    const remembered = getRememberedUsername()
-    if (remembered) {
-      setUsername(remembered)
-      setRememberMe(true)
-    }
-  }, [])
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
