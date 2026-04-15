@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/v1/:path*",
-      "destination": "https://farm-management-api.vercel.app/api/v1/:path*"
+      "destination": "https://farm-management-api-dev.vercel.app/api/v1/:path*"
     },
     {
       "source": "/health",
-      "destination": "https://farm-management-api.vercel.app/health"
+      "destination": "https://farm-management-api-dev.vercel.app/health"
     },
     {
       "source": "/(.*)",
