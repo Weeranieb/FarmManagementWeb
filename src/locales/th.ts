@@ -5,9 +5,9 @@
 export const th = {
   common: {
     loading: 'กำลังโหลด...',
-    appName: 'BoonmaFarm',
+    appName: 'Farm OS',
     appTagline: 'ระบบจัดการฟาร์ม',
-    copyright: '© 2026 Boonma Farm สงวนลิขสิทธิ์',
+    copyright: '© 2026 Farm OS สงวนลิขสิทธิ์',
   },
 
   fishType: {
@@ -18,7 +18,7 @@ export const th = {
   },
 
   layout: {
-    appName: 'BoonmaFarm',
+    appName: 'Farm OS',
     appTagline: 'ระบบจัดการฟาร์ม',
     selectClientPlaceholder: 'เลือกลูกค้า',
     selectClientToView: 'กรุณาเลือกลูกค้าเพื่อดูข้อมูล',
@@ -45,7 +45,7 @@ export const th = {
   },
 
   login: {
-    title: 'Boonma Farm',
+    title: 'Farm OS',
     tagline: 'ระบบจัดการฟาร์ม',
     welcomeBack: 'ยินดีต้อนรับกลับ',
     username: 'ชื่อผู้ใช้',
@@ -61,7 +61,7 @@ export const th = {
   },
 
   forgotPassword: {
-    title: 'BoonmaFarm',
+    title: 'Farm OS',
     tagline: 'รีเซ็ตรหัสผ่าน',
     heading: 'ลืมรหัสผ่าน?',
     description: 'กรอกอีเมลของคุณ เราจะส่งวิธีรีเซ็ตรหัสผ่านให้',
@@ -456,7 +456,8 @@ export const th = {
   /** Admin Master Data page and EditMasterDataModal when opened from it */
   adminMasterData: {
     pageTitle: 'จัดการข้อมูลหลัก',
-    pageSubtitle: 'เฉพาะผู้ดูแลระบบ',
+    pageSubtitleSuperAdmin: 'เฉพาะผู้ดูแลระบบ',
+    pageSubtitleClientAdmin: 'จัดการฟาร์มและบ่อ',
     selectClient: 'เลือกลูกค้า',
     clientSelectorCaption: 'เลือกลูกค้า (ฟาร์ม / บ่อ)',
     loadingClients: 'กำลังโหลดรายชื่อลูกค้า...',
@@ -466,6 +467,7 @@ export const th = {
     tabClient: 'ลูกค้า',
     tabFarm: 'ฟาร์ม',
     tabPond: 'บ่อ',
+    tabUser: 'ผู้ใช้',
     clientName: 'ชื่อลูกค้า',
     contactPerson: 'ผู้ติดต่อ',
     phone: 'เบอร์โทรศัพท์',
@@ -538,6 +540,46 @@ export const th = {
     alertCreatePondsFailed: 'สร้างบ่อไม่สำเร็จ',
     alertUpdateFailed: 'อัปเดตไม่สำเร็จ',
     alertLoadClientFailed: 'โหลดข้อมูลลูกค้าไม่สำเร็จ',
+
+    // Users tab (super admin only)
+    createUser: 'สร้างผู้ใช้',
+    updateUser: 'บันทึกการแก้ไข',
+    deleteUser: 'ลบผู้ใช้',
+    userUsername: 'ชื่อผู้ใช้',
+    userEmail: 'อีเมล',
+    userPassword: 'รหัสผ่าน',
+    userFirstName: 'ชื่อจริง',
+    userLastName: 'นามสกุล',
+    userContactNumber: 'เบอร์โทร',
+    userUserLevel: 'สิทธิ์',
+    userClient: 'ลูกค้า',
+    userLevelNormal: 'Normal User',
+    userLevelClientAdmin: 'Client Admin',
+    userLevelSuperAdmin: 'Super Admin',
+    placeholderUsername: 'เช่น somchai01',
+    placeholderUserEmail: 'เช่น user@example.com',
+    placeholderUserPassword: 'อย่างน้อย 6 ตัวอักษร',
+    placeholderUserFirstName: 'เช่น สมชาย',
+    placeholderUserLastName: 'เช่น ใจดี',
+    placeholderUserContactNumber: 'เช่น 0812345678',
+    userSearchPlaceholder: 'ค้นหา ชื่อผู้ใช้/อีเมล/ชื่อ',
+    userFilterAllLevels: 'ทุกสิทธิ์',
+    userFilterAllClients: 'ทุกลูกค้า',
+    noUsersFound: 'ไม่พบผู้ใช้',
+    userActionEdit: 'แก้ไข',
+    userActionDelete: 'ลบ',
+    userDeleteConfirm: (name: string) =>
+      `ยืนยันการลบผู้ใช้ "${name}" ? (ไม่สามารถกู้คืนได้)`,
+    userErrorCreateFailed: 'สร้างผู้ใช้ไม่สำเร็จ',
+    userErrorUpdateFailed: 'แก้ไขผู้ใช้ไม่สำเร็จ',
+    userErrorDeleteFailed: 'ลบผู้ใช้ไม่สำเร็จ',
+    userSuccessCreated: (name: string) => `สร้างผู้ใช้ "${name}" สำเร็จ`,
+    userSuccessUpdated: (name: string) => `แก้ไขผู้ใช้ "${name}" สำเร็จ`,
+    userSuccessDeleted: (name: string) => `ลบผู้ใช้ "${name}" สำเร็จ`,
+    userErrorFillRequired: 'กรุณากรอกข้อมูลให้ครบ',
+    userErrorInvalidEmail: 'รูปแบบอีเมลไม่ถูกต้อง',
+    userErrorClientRequired: 'กรุณาเลือกลูกค้าสำหรับผู้ดูแลลูกค้า',
+    editUserTitle: 'แก้ไขผู้ใช้',
   },
 
   workers: {

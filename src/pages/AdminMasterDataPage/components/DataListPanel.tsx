@@ -14,7 +14,7 @@ type T = AdminMasterDataLocale
 
 type Props = {
   t: T
-  activeTab: 'clients' | 'farms' | 'ponds'
+  activeTab: 'clients' | 'farms' | 'ponds' | 'users'
   clientList: DropdownItem[]
   clientListLoading: boolean
   selectedClientId: string

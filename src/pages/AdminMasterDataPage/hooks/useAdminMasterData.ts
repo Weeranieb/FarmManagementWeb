@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import {
   clientApi,
   type ClientResponse,
@@ -20,12 +20,19 @@ import {
 } from '../../../utils/masterDataName'
 import { filterDigitsOnly, isDigitsOnly } from '../../../utils/phoneInput'
 import { th } from '../../../locales/th'
+import { useAuthQuery } from '../../../hooks/useAuth'
+import { UserLevel } from '../../../constants/userLevel'
 import type { EditingItem } from '../types'
 
 const t = th.adminMasterData
 
 export function useAdminMasterData() {
-  const [selectedClientId, setSelectedClientId] = useState<string>('')
+  const { data: user } = useAuthQuery()
+  const isSuperAdmin = user?.userLevel === UserLevel.SuperAdmin
+  const isClientAdmin = user?.userLevel === UserLevel.ClientAdmin
+  const [selectedClientId, setSelectedClientId] = useState<string>(
+    isClientAdmin && user?.clientId ? String(user.clientId) : '',
+  )
   const { data: clientList = [], isLoading: clientListLoading } =
     useClientListQuery()
   const invalidateClientList = useInvalidateClientList()
@@ -39,9 +46,9 @@ export function useAdminMasterData() {
       ? selectedClientIdNum
       : undefined,
   )
-  const [activeTab, setActiveTab] = useState<'clients' | 'farms' | 'ponds'>(
-    'clients',
-  )
+  const [activeTab, setActiveTab] = useState<
+    'clients' | 'farms' | 'ponds' | 'users'
+  >(isSuperAdmin ? 'clients' : 'farms')
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const [expandedFarms, setExpandedFarms] = useState<string[]>([])
@@ -64,6 +71,16 @@ export function useAdminMasterData() {
   const [isSavingPondForm, setIsSavingPondForm] = useState(false)
   const [isEditSaving, setIsEditSaving] = useState(false)
   const farmList = farmListData?.farms ?? []
+
+  useEffect(() => {
+    if (!isClientAdmin || !user?.clientId) return
+    if (!selectedClientId) {
+      setSelectedClientId(String(user.clientId))
+    }
+    if (activeTab === 'clients' || activeTab === 'users') {
+      setActiveTab('farms')
+    }
+  }, [activeTab, isClientAdmin, selectedClientId, user?.clientId])
 
   const pondQueries = useQueries({
     queries: expandedFarms.map((farmIdStr) => ({
@@ -373,6 +390,7 @@ export function useAdminMasterData() {
 
   return {
     t,
+    isSuperAdmin,
     selectedClientId,
     setSelectedClientId: onClientSelectChange,
     clientList,
