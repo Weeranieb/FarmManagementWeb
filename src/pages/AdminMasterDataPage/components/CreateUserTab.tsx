@@ -2,7 +2,12 @@ import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { th, type AdminMasterDataLocale } from '../../../locales/th'
 import { UserLevel } from '../../../constants/userLevel'
-import { filterDigitsOnly, isDigitsOnly } from '../../../utils/phoneInput'
+import {
+  filterPhoneInput,
+  isDigitsOnly,
+  THAI_PHONE_MAX_LENGTH,
+} from '../../../utils/phoneInput'
+import { filterEmailInput, isValidEmail } from '../../../utils/emailInput'
 import { useCreateUserMutation } from '../../../hooks/useUser'
 import { useAppToast } from '../../../contexts/AppToastContext'
 import type { DropdownItem } from '../../../api/client'
@@ -37,7 +42,11 @@ const EMPTY_FORM: FormState = {
   clientId: '',
 }
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const PASSWORD_RE = /^[A-Za-z0-9]{8,}$/
+
+function isValidPassword(password: string): boolean {
+  return PASSWORD_RE.test(password)
+}
 
 export function CreateUserTab({ t, clientList, clientListLoading }: Props) {
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
@@ -51,9 +60,9 @@ export function CreateUserTab({ t, clientList, clientListLoading }: Props) {
 
   const isValid =
     form.username.trim().length > 0 &&
-    form.password.length >= 6 &&
+    isValidPassword(form.password) &&
     form.firstName.trim().length > 0 &&
-    (!form.email || EMAIL_RE.test(form.email)) &&
+    (!form.email || isValidEmail(form.email)) &&
     (!form.contactNumber || isDigitsOnly(form.contactNumber)) &&
     (!requiresClient || form.clientId !== '')
 
@@ -62,7 +71,9 @@ export function CreateUserTab({ t, clientList, clientListLoading }: Props) {
     if (!isValid) {
       if (requiresClient && form.clientId === '') {
         showToast('error', t.userErrorClientRequired)
-      } else if (form.email && !EMAIL_RE.test(form.email)) {
+      } else if (!isValidPassword(form.password)) {
+        showToast('error', t.userErrorInvalidPassword)
+      } else if (form.email && !isValidEmail(form.email)) {
         showToast('error', t.userErrorInvalidEmail)
       } else {
         showToast('error', t.userErrorFillRequired)
@@ -145,12 +156,19 @@ export function CreateUserTab({ t, clientList, clientListLoading }: Props) {
           autoComplete='off'
           value={form.email}
           onChange={(e) =>
-            setForm({ ...form, email: e.target.value.toLowerCase() })
+            setForm({ ...form, email: filterEmailInput(e.target.value) })
           }
           disabled={isSubmitting}
           placeholder={t.placeholderUserEmail}
-          className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100 disabled:text-gray-500'
+          className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent outline-none disabled:bg-gray-100 disabled:text-gray-500 ${
+            form.email && !isValidEmail(form.email)
+              ? 'border-red-400 focus:ring-red-500'
+              : 'border-gray-300 focus:ring-blue-500'
+          }`}
         />
+        {form.email && !isValidEmail(form.email) && (
+          <p className='mt-1 text-xs text-red-600'>{t.userErrorInvalidEmail}</p>
+        )}
       </div>
 
       <div className='grid grid-cols-2 gap-3'>
@@ -190,11 +208,12 @@ export function CreateUserTab({ t, clientList, clientListLoading }: Props) {
           type='tel'
           inputMode='numeric'
           pattern='[0-9]*'
+          maxLength={THAI_PHONE_MAX_LENGTH}
           value={form.contactNumber}
           onChange={(e) =>
             setForm({
               ...form,
-              contactNumber: filterDigitsOnly(e.target.value),
+              contactNumber: filterPhoneInput(e.target.value),
             })
           }
           disabled={isSubmitting}

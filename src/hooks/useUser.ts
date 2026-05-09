@@ -43,6 +43,13 @@ export function useAdminUpdateUserMutation() {
   })
 }
 
+export function useAdminResetPasswordMutation() {
+  return useMutation({
+    mutationFn: ({ id, password }: { id: number; password: string }) =>
+      userApi.adminResetPassword(id, password),
+  })
+}
+
 export function useDeleteUserMutation() {
   const invalidate = useInvalidateUserList()
   return useMutation({

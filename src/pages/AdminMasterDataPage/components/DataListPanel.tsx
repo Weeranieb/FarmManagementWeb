@@ -1,6 +1,6 @@
 import { Edit2 } from 'lucide-react'
 import type { UseQueryResult } from '@tanstack/react-query'
-import type { DropdownItem } from '../../../api/client'
+import type { ClientSummary, DropdownItem } from '../../../api/client'
 import type { FarmResponse } from '../../../api/farm'
 import type { PondResponse } from '../../../api/pond'
 import {
@@ -17,6 +17,8 @@ type Props = {
   activeTab: 'clients' | 'farms' | 'ponds' | 'users'
   clientList: DropdownItem[]
   clientListLoading: boolean
+  clientSummaries: ClientSummary[]
+  clientSummariesLoading: boolean
   selectedClientId: string
   selectedClient: DropdownItem | undefined
   clientFarms: FarmResponse[]
@@ -37,6 +39,8 @@ export function DataListPanel({
   activeTab,
   clientList,
   clientListLoading,
+  clientSummaries,
+  clientSummariesLoading,
   selectedClientId,
   selectedClient,
   clientFarms,
@@ -48,6 +52,10 @@ export function DataListPanel({
   onEditPond,
   onToggleFarmExpansion,
 }: Props) {
+  const summaryById = new Map(
+    clientSummaries.map((summary) => [summary.id, summary]),
+  )
+  const clientsLoading = clientListLoading || clientSummariesLoading
   return (
     <div className='col-span-1 bg-white rounded-lg shadow-md flex flex-col overflow-hidden'>
       <div className='p-4 border-b border-gray-200 bg-gray-50'>
@@ -65,7 +73,7 @@ export function DataListPanel({
       <div className='flex-1 overflow-y-auto p-4 space-y-3'>
         {activeTab === 'clients' && (
           <>
-            {clientListLoading ? (
+            {clientsLoading ? (
               <div className='text-center py-8 text-gray-500 text-sm'>
                 {t.loading}
               </div>
@@ -74,25 +82,60 @@ export function DataListPanel({
                 {t.noClientsFound}
               </div>
             ) : (
-              clientList.map((client) => (
-                <div
-                  key={client.key}
-                  className='border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors'
-                >
-                  <div className='flex items-start justify-between gap-2'>
-                    <h4 className='text-sm text-gray-800'>{client.value}</h4>
-                    <button
-                      type='button'
-                      onClick={(e) => onEditClient(client, e)}
-                      className='shrink-0 rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-50'
-                      title={t.editClientName}
-                      aria-label={t.editClientName}
-                    >
-                      <Edit2 size={14} aria-hidden />
-                    </button>
+              clientList.map((client) => {
+                const summary = summaryById.get(client.key)
+                const contactLine = summary
+                  ? [summary.ownerName, summary.contactNumber]
+                      .filter(Boolean)
+                      .join(' · ')
+                  : ''
+                return (
+                  <div
+                    key={client.key}
+                    className='border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors'
+                  >
+                    <div className='flex items-start justify-between gap-2'>
+                      <div className='min-w-0 flex-1'>
+                        <div className='flex items-center gap-2'>
+                          <h4 className='truncate text-sm font-medium text-gray-800'>
+                            {client.value}
+                          </h4>
+                          {summary && !summary.isActive && (
+                            <span className='shrink-0 rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-600'>
+                              {t.clientInactiveBadge}
+                            </span>
+                          )}
+                        </div>
+                        {contactLine && (
+                          <p className='mt-0.5 truncate text-xs text-gray-500'>
+                            {contactLine}
+                          </p>
+                        )}
+                        <div className='mt-2 flex flex-wrap items-center gap-1.5'>
+                          <span className='whitespace-nowrap rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-800'>
+                            {t.clientFarmCountLabel(summary?.farmCount ?? 0)}
+                          </span>
+                          <span className='whitespace-nowrap rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-800'>
+                            {t.clientPondCountLabel(summary?.pondCount ?? 0)}
+                          </span>
+                          <span className='whitespace-nowrap rounded-full bg-violet-50 px-2 py-0.5 text-xs text-violet-800'>
+                            {t.clientUserCountLabel(summary?.userCount ?? 0)}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type='button'
+                        onClick={(e) => onEditClient(client, e)}
+                        className='shrink-0 rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-50'
+                        title={t.editClientName}
+                        aria-label={t.editClientName}
+                      >
+                        <Edit2 size={14} aria-hidden />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))
+                )
+              })
             )}
           </>
         )}

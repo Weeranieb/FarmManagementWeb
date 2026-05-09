@@ -2,7 +2,12 @@ import { useState } from 'react'
 import { Loader2, X } from 'lucide-react'
 import { th, type AdminMasterDataLocale } from '../../../locales/th'
 import { UserLevel } from '../../../constants/userLevel'
-import { filterDigitsOnly, isDigitsOnly } from '../../../utils/phoneInput'
+import {
+  filterPhoneInput,
+  isDigitsOnly,
+  THAI_PHONE_MAX_LENGTH,
+} from '../../../utils/phoneInput'
+import { filterEmailInput, isValidEmail } from '../../../utils/emailInput'
 import { useAdminUpdateUserMutation } from '../../../hooks/useUser'
 import { useAppToast } from '../../../contexts/AppToastContext'
 import type { DropdownItem } from '../../../api/client'
@@ -17,8 +22,6 @@ type Props = {
   isOpen: boolean
   onClose: () => void
 }
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export function EditUserModal({ t, user, clientList, isOpen, onClose }: Props) {
   const [username, setUsername] = useState(user.username)
@@ -38,7 +41,7 @@ export function EditUserModal({ t, user, clientList, isOpen, onClose }: Props) {
   const isValid =
     username.trim().length > 0 &&
     firstName.trim().length > 0 &&
-    (!email || EMAIL_RE.test(email)) &&
+    (!email || isValidEmail(email)) &&
     (!contactNumber || isDigitsOnly(contactNumber)) &&
     (!requiresClient || clientId !== '')
 
@@ -48,7 +51,7 @@ export function EditUserModal({ t, user, clientList, isOpen, onClose }: Props) {
     if (!isValid) {
       if (requiresClient && clientId === '') {
         showToast('error', t.userErrorClientRequired)
-      } else if (email && !EMAIL_RE.test(email)) {
+      } else if (email && !isValidEmail(email)) {
         showToast('error', t.userErrorInvalidEmail)
       } else {
         showToast('error', t.userErrorFillRequired)
@@ -117,11 +120,21 @@ export function EditUserModal({ t, user, clientList, isOpen, onClose }: Props) {
             </label>
             <input
               type='email'
+              autoComplete='email'
               value={email}
-              onChange={(e) => setEmail(e.target.value.toLowerCase())}
+              onChange={(e) => setEmail(filterEmailInput(e.target.value))}
               disabled={isSaving}
-              className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100'
+              className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:border-transparent outline-none disabled:bg-gray-100 ${
+                email && !isValidEmail(email)
+                  ? 'border-red-400 focus:ring-red-500'
+                  : 'border-gray-300 focus:ring-blue-500'
+              }`}
             />
+            {email && !isValidEmail(email) && (
+              <p className='mt-1 text-xs text-red-600'>
+                {t.userErrorInvalidEmail}
+              </p>
+            )}
           </div>
           <div className='grid grid-cols-2 gap-3'>
             <div>
@@ -158,8 +171,9 @@ export function EditUserModal({ t, user, clientList, isOpen, onClose }: Props) {
               type='tel'
               inputMode='numeric'
               pattern='[0-9]*'
+              maxLength={THAI_PHONE_MAX_LENGTH}
               value={contactNumber}
-              onChange={(e) => setContactNumber(filterDigitsOnly(e.target.value))}
+              onChange={(e) => setContactNumber(filterPhoneInput(e.target.value))}
               disabled={isSaving}
               className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100'
             />

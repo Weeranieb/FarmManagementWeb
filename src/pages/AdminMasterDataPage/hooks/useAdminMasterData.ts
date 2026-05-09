@@ -7,6 +7,7 @@ import {
 import { useQueries, useQueryClient } from '@tanstack/react-query'
 import {
   useClientListQuery,
+  useClientSummariesQuery,
   useInvalidateClientList,
 } from '../../../hooks/useClient'
 import { farmApi, type FarmResponse } from '../../../api/farm'
@@ -19,6 +20,7 @@ import {
   normalizeFarmNameForStore,
 } from '../../../utils/masterDataName'
 import { filterDigitsOnly, isDigitsOnly } from '../../../utils/phoneInput'
+import { isValidEmail } from '../../../utils/emailInput'
 import { th } from '../../../locales/th'
 import { useAuthQuery } from '../../../hooks/useAuth'
 import { UserLevel } from '../../../constants/userLevel'
@@ -36,6 +38,13 @@ export function useAdminMasterData() {
   const { data: clientList = [], isLoading: clientListLoading } =
     useClientListQuery()
   const invalidateClientList = useInvalidateClientList()
+  const [activeTab, setActiveTab] = useState<
+    'clients' | 'farms' | 'ponds' | 'users'
+  >(isSuperAdmin ? 'clients' : 'farms')
+  const {
+    data: clientSummaries = [],
+    isLoading: clientSummariesLoading,
+  } = useClientSummariesQuery(isSuperAdmin && activeTab === 'clients')
   const { showToast } = useAppToast()
   const queryClient = useQueryClient()
   const selectedClientIdNum = selectedClientId
@@ -46,9 +55,6 @@ export function useAdminMasterData() {
       ? selectedClientIdNum
       : undefined,
   )
-  const [activeTab, setActiveTab] = useState<
-    'clients' | 'farms' | 'ponds' | 'users'
-  >(isSuperAdmin ? 'clients' : 'farms')
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const [expandedFarms, setExpandedFarms] = useState<string[]>([])
@@ -144,9 +150,19 @@ export function useAdminMasterData() {
       showToast('error', t.phoneDigitsOnly)
       return
     }
+    const email = clientForm.email.trim()
+    if (email && !isValidEmail(email)) {
+      showToast('error', t.userErrorInvalidEmail)
+      return
+    }
     setIsSavingClientForm(true)
     try {
-      await clientApi.createClient({ name, ownerName, contactNumber })
+      await clientApi.createClient({
+        name,
+        ownerName,
+        contactNumber,
+        email: email ? email : null,
+      })
       setSuccessMessage(t.successClientCreated(name))
       setShowSuccessMessage(true)
       setTimeout(() => setShowSuccessMessage(false), 5000)
@@ -336,11 +352,17 @@ export function useAdminMasterData() {
           showToast('error', t.phoneDigitsOnly)
           return
         }
+        const emailTrimmed = snap.email?.trim() ?? ''
+        if (emailTrimmed && !isValidEmail(emailTrimmed)) {
+          showToast('error', t.userErrorInvalidEmail)
+          return
+        }
         await clientApi.updateClient({
           id: snap.id,
           name: raw,
           ownerName: snap.ownerName.trim(),
           contactNumber: contactNum,
+          email: emailTrimmed ? emailTrimmed : null,
           isActive: snap.isActive,
           isTouristFishingEnabled: snap.isTouristFishingEnabled,
         })
@@ -380,7 +402,8 @@ export function useAdminMasterData() {
   const isClientFormValid =
     clientForm.name.trim() !== '' &&
     clientForm.contactPerson.trim() !== '' &&
-    isDigitsOnly(clientForm.phone)
+    isDigitsOnly(clientForm.phone) &&
+    (!clientForm.email.trim() || isValidEmail(clientForm.email))
 
   const onClientSelectChange = (value: string) => {
     setSelectedClientId(value)
@@ -395,6 +418,8 @@ export function useAdminMasterData() {
     setSelectedClientId: onClientSelectChange,
     clientList,
     clientListLoading,
+    clientSummaries,
+    clientSummariesLoading,
     selectedClient,
     selectedClientIdNum,
     farmListLoading,

@@ -9,6 +9,7 @@ export interface CreateClientRequest {
   name: string
   ownerName: string
   contactNumber: string
+  email?: string | null
 }
 
 export interface ClientResponse {
@@ -16,6 +17,7 @@ export interface ClientResponse {
   name: string
   ownerName: string
   contactNumber: string
+  email?: string | null
   isActive: boolean
   isTouristFishingEnabled: boolean
   createdAt: string
@@ -29,13 +31,29 @@ export interface UpdateClientRequest {
   name: string
   ownerName: string
   contactNumber: string
+  email?: string | null
   isActive: boolean
   isTouristFishingEnabled: boolean
+}
+
+export interface ClientSummary {
+  id: number
+  name: string
+  ownerName: string
+  contactNumber: string
+  isActive: boolean
+  farmCount: number
+  pondCount: number
+  userCount: number
 }
 
 export const clientApi = {
   getClientList: async (): Promise<DropdownItem[]> => {
     return apiClient.get<DropdownItem[]>('/client/list')
+  },
+
+  getClientSummaries: async (): Promise<ClientSummary[]> => {
+    return apiClient.get<ClientSummary[]>('/client/summaries')
   },
 
   getClient: async (id: number): Promise<ClientResponse> => {

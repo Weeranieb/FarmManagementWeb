@@ -182,6 +182,8 @@ export function AdminMasterDataPage() {
             activeTab={ctx.activeTab}
             clientList={ctx.clientList}
             clientListLoading={ctx.clientListLoading}
+            clientSummaries={ctx.clientSummaries}
+            clientSummariesLoading={ctx.clientSummariesLoading}
             selectedClientId={ctx.selectedClientId}
             selectedClient={ctx.selectedClient}
             clientFarms={ctx.clientFarms}
@@ -221,6 +223,9 @@ export function AdminMasterDataPage() {
               ? {
                   ownerName: ctx.editingClientSnapshot.ownerName,
                   contactNumber: ctx.editingClientSnapshot.contactNumber,
+                  email:
+                    (ctx.editingClientSnapshot as { email?: string | null })
+                      .email ?? '',
                   onOwnerNameChange: (value) =>
                     ctx.setEditingClientSnapshot((prev) =>
                       prev ? { ...prev, ownerName: value } : null,
@@ -228,6 +233,10 @@ export function AdminMasterDataPage() {
                   onContactNumberChange: (value) =>
                     ctx.setEditingClientSnapshot((prev) =>
                       prev ? { ...prev, contactNumber: value } : null,
+                    ),
+                  onEmailChange: (value) =>
+                    ctx.setEditingClientSnapshot((prev) =>
+                      prev ? { ...prev, email: value } : null,
                     ),
                   isTouristFishingEnabled:
                     ctx.editingClientSnapshot.isTouristFishingEnabled,
@@ -238,11 +247,14 @@ export function AdminMasterDataPage() {
                   touristFishingLabel: t.clientTouristFishingEnabled,
                   labelOwnerName: t.contactPerson,
                   labelContactNumber: t.phone,
+                  labelEmail: t.email,
                   placeholderOwnerName: t.placeholderContactPerson,
                   placeholderContactNumber: t.placeholderPhone,
+                  placeholderEmail: t.placeholderEmail,
                   errorOwnerRequired: t.modalErrorOwnerRequired,
                   errorContactRequired: t.modalErrorContactRequired,
                   errorContactDigitsOnly: t.phoneDigitsOnly,
+                  errorEmailInvalid: t.userErrorInvalidEmail,
                 }
               : undefined
           }

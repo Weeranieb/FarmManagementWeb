@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { KeyRound, Pencil, Trash2 } from 'lucide-react'
 import { th, type AdminMasterDataLocale } from '../../../locales/th'
 import { UserLevel } from '../../../constants/userLevel'
 import {
@@ -15,6 +16,7 @@ type Props = {
   t: T
   clientList: DropdownItem[]
   onEdit: (user: UserResponse) => void
+  onResetPassword: (user: UserResponse) => void
 }
 
 function levelLabel(t: T, level: number): string {
@@ -32,7 +34,7 @@ function useDebounced<T>(value: T, delayMs = 250): T {
   return debounced
 }
 
-export function UserListPanel({ t, clientList, onEdit }: Props) {
+export function UserListPanel({ t, clientList, onEdit, onResetPassword }: Props) {
   const [search, setSearch] = useState('')
   const [levelFilter, setLevelFilter] = useState<string>('')
   const [clientFilter, setClientFilter] = useState<string>('')
@@ -144,25 +146,41 @@ export function UserListPanel({ t, clientList, onEdit }: Props) {
                       : '-'}
                   </td>
                   <td className='px-3 py-2 text-right whitespace-nowrap'>
-                    <button
-                      type='button'
-                      onClick={() => onEdit(u)}
-                      disabled={u.userLevel === UserLevel.SuperAdmin}
-                      className='text-xs text-blue-600 hover:text-blue-800 disabled:text-gray-300 disabled:cursor-not-allowed mr-3'
-                    >
-                      {t.userActionEdit}
-                    </button>
-                    <button
-                      type='button'
-                      onClick={() => handleDelete(u)}
-                      disabled={
-                        u.userLevel === UserLevel.SuperAdmin ||
-                        deleteMutation.isPending
-                      }
-                      className='text-xs text-red-600 hover:text-red-800 disabled:text-gray-300 disabled:cursor-not-allowed'
-                    >
-                      {t.userActionDelete}
-                    </button>
+                    <div className='inline-flex items-center gap-1'>
+                      <button
+                        type='button'
+                        onClick={() => onResetPassword(u)}
+                        disabled={u.userLevel === UserLevel.SuperAdmin}
+                        title={t.userActionResetPassword}
+                        aria-label={t.userActionResetPassword}
+                        className='p-1.5 rounded text-gray-500 hover:text-gray-800 hover:bg-gray-100 disabled:text-gray-300 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors'
+                      >
+                        <KeyRound size={16} />
+                      </button>
+                      <button
+                        type='button'
+                        onClick={() => onEdit(u)}
+                        disabled={u.userLevel === UserLevel.SuperAdmin}
+                        title={t.userActionEdit}
+                        aria-label={t.userActionEdit}
+                        className='p-1.5 rounded text-blue-600 hover:text-blue-800 hover:bg-blue-50 disabled:text-gray-300 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors'
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button
+                        type='button'
+                        onClick={() => handleDelete(u)}
+                        disabled={
+                          u.userLevel === UserLevel.SuperAdmin ||
+                          deleteMutation.isPending
+                        }
+                        title={t.userActionDelete}
+                        aria-label={t.userActionDelete}
+                        className='p-1.5 rounded text-red-600 hover:text-red-800 hover:bg-red-50 disabled:text-gray-300 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors'
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

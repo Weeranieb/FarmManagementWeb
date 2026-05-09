@@ -56,6 +56,10 @@ export const userApi = {
     return apiClient.put<void>(`/user/${id}`, body)
   },
 
+  adminResetPassword: async (id: number, password: string): Promise<void> => {
+    return apiClient.put<void>(`/user/${id}/password`, { password })
+  },
+
   delete: async (id: number): Promise<void> => {
     return apiClient.delete<void>(`/user/${id}`)
   },
