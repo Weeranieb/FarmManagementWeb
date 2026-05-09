@@ -34,7 +34,6 @@ export function MainLayout() {
   const { data: clientList = [] } = useClientListQuery()
   const { selectedClientId, setSelectedClientId } = useClient()
 
-  const isSuperAdmin = user?.userLevel === UserLevel.SuperAdmin
   const isAdminUser =
     user?.userLevel === UserLevel.SuperAdmin ||
     user?.userLevel === UserLevel.ClientAdmin
@@ -197,7 +196,7 @@ export function MainLayout() {
             })}
           </nav>
 
-          {isSuperAdmin && (
+          {isAdminUser && (
             <div className='mt-2 border-t border-slate-100 px-2 pt-3'>
               {sidebarWide && (
                 <p className='mb-2 px-2 text-[10px] font-medium uppercase tracking-wider text-slate-500'>

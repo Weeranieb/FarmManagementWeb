@@ -4,6 +4,7 @@ import { clientApi } from '../api/client'
 export const clientKeys = {
   all: ['clients'] as const,
   list: () => [...clientKeys.all, 'list'] as const,
+  summaries: () => [...clientKeys.all, 'summaries'] as const,
   detail: (id: number) => [...clientKeys.all, 'detail', id] as const,
 }
 
@@ -28,9 +29,22 @@ export function useClientDetailQuery(clientId: number, enabled = true) {
 }
 
 /**
+ * Hook to get client summaries (id, name, owner, contact, farm/pond/user counts).
+ * Used by the master-data clients tab. Super admin only — server returns 403 otherwise.
+ */
+export function useClientSummariesQuery(enabled = true) {
+  return useQuery({
+    queryKey: clientKeys.summaries(),
+    queryFn: () => clientApi.getClientSummaries(),
+    enabled,
+    staleTime: 60 * 1000, // 1 minute — counts can drift as users edit
+  })
+}
+
+/**
  * Invalidate client list cache (e.g. after create/update client).
  */
 export function useInvalidateClientList() {
   const queryClient = useQueryClient()
-  return () => queryClient.invalidateQueries({ queryKey: clientKeys.list() })
+  return () => queryClient.invalidateQueries({ queryKey: clientKeys.all })
 }

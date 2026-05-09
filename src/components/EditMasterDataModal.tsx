@@ -1,6 +1,11 @@
 import { useState } from 'react'
 import { X, Loader2 } from 'lucide-react'
-import { filterDigitsOnly, isDigitsOnly } from '../utils/phoneInput'
+import {
+  filterPhoneInput,
+  isDigitsOnly,
+  THAI_PHONE_MAX_LENGTH,
+} from '../utils/phoneInput'
+import { filterEmailInput, isValidEmail } from '../utils/emailInput'
 import { th } from '../locales/th'
 
 export interface EditMasterDataModalLocale {
@@ -25,18 +30,23 @@ const defaultLocale: EditMasterDataModalLocale = {
 export interface EditMasterDataModalClientExtras {
   ownerName: string
   contactNumber: string
+  email: string
   onOwnerNameChange: (value: string) => void
   onContactNumberChange: (value: string) => void
+  onEmailChange: (value: string) => void
   isTouristFishingEnabled: boolean
   onTouristFishingEnabledChange: (value: boolean) => void
   touristFishingLabel: string
   labelOwnerName: string
   labelContactNumber: string
+  labelEmail: string
   placeholderOwnerName: string
   placeholderContactNumber: string
+  placeholderEmail: string
   errorOwnerRequired: string
   errorContactRequired: string
   errorContactDigitsOnly: string
+  errorEmailInvalid: string
 }
 
 interface EditMasterDataModalProps {
@@ -88,6 +98,11 @@ export function EditMasterDataModal({
         setError(clientEditExtras.errorContactDigitsOnly)
         return
       }
+      const emailTrimmed = clientEditExtras.email.trim()
+      if (emailTrimmed && !isValidEmail(emailTrimmed)) {
+        setError(clientEditExtras.errorEmailInvalid)
+        return
+      }
     }
     onSave(trimmed)
     // Parent closes modal on success; don't close here so errors keep modal open
@@ -96,7 +111,8 @@ export function EditMasterDataModal({
   const formCanSubmit = clientEditExtras
     ? Boolean(name.trim()) &&
       Boolean(clientEditExtras.ownerName.trim()) &&
-      isDigitsOnly(clientEditExtras.contactNumber)
+      isDigitsOnly(clientEditExtras.contactNumber) &&
+      (!clientEditExtras.email.trim() || isValidEmail(clientEditExtras.email))
     : Boolean(name.trim())
 
   if (!isOpen) return null
@@ -189,16 +205,38 @@ export function EditMasterDataModal({
                   type='tel'
                   inputMode='numeric'
                   pattern='[0-9]*'
+                  maxLength={THAI_PHONE_MAX_LENGTH}
                   value={clientEditExtras.contactNumber}
                   onChange={(e) => {
                     clientEditExtras.onContactNumberChange(
-                      filterDigitsOnly(e.target.value),
+                      filterPhoneInput(e.target.value),
                     )
                     if (error) setError('')
                   }}
                   disabled={isSaving}
                   className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500'
                   placeholder={clientEditExtras.placeholderContactNumber}
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  {clientEditExtras.labelEmail}
+                </label>
+                <input
+                  type='email'
+                  autoComplete='email'
+                  value={clientEditExtras.email}
+                  onChange={(e) => {
+                    clientEditExtras.onEmailChange(filterEmailInput(e.target.value))
+                    if (error) setError('')
+                  }}
+                  disabled={isSaving}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500 ${
+                    clientEditExtras.email && !isValidEmail(clientEditExtras.email)
+                      ? 'border-red-400 focus:ring-red-500'
+                      : 'border-gray-300 focus:ring-blue-500'
+                  }`}
+                  placeholder={clientEditExtras.placeholderEmail}
                 />
               </div>
               <div className='flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-3'>

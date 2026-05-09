@@ -86,7 +86,7 @@ export function LoginPage() {
               </div>
             </div>
 
-            <div className='flex items-center justify-between'>
+            <div className='flex items-center'>
               <label className='flex items-center gap-2 cursor-pointer'>
                 <input
                   type='checkbox'
@@ -96,12 +96,6 @@ export function LoginPage() {
                 />
                 <span className='text-sm text-gray-600'>{L.rememberMe}</span>
               </label>
-              <a
-                href='/forgot-password'
-                className='text-sm text-blue-600 hover:text-blue-700'
-              >
-                {L.forgotPassword}
-              </a>
             </div>
 
             {loginMutation.isError && (

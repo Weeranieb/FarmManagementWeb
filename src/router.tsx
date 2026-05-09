@@ -17,7 +17,7 @@ import { WorkerFormPage } from './pages/WorkerFormPage'
 import { FeedCollectionsPage } from './pages/FeedCollectionsPage'
 import { ProtectedRoute } from './components/guards/ProtectedRoute'
 import { GuestRoute } from './components/guards/GuestRoute'
-import { SuperAdminRoute } from './components/guards/SuperAdminRoute'
+import { AdminRoute } from './components/guards/AdminRoute'
 import { th } from './locales/th'
 
 const FeedPriceHistoryPage = lazy(() =>
@@ -129,9 +129,9 @@ export const router = createBrowserRouter([
       {
         path: '/admin/master-data',
         element: (
-          <SuperAdminRoute>
+          <AdminRoute>
             <AdminMasterDataPage />
-          </SuperAdminRoute>
+          </AdminRoute>
         ),
       },
     ],
