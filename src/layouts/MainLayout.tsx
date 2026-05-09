@@ -34,7 +34,6 @@ export function MainLayout() {
   const { data: clientList = [] } = useClientListQuery()
   const { selectedClientId, setSelectedClientId } = useClient()
 
-  const isSuperAdmin = user?.userLevel === UserLevel.SuperAdmin
   const isAdminUser =
     user?.userLevel === UserLevel.SuperAdmin ||
     user?.userLevel === UserLevel.ClientAdmin
