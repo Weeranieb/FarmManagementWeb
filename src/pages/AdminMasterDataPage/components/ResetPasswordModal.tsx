@@ -3,6 +3,7 @@ import { Eye, EyeOff, Loader2, X } from 'lucide-react'
 import { th, type AdminMasterDataLocale } from '../../../locales/th'
 import { useAdminResetPasswordMutation } from '../../../hooks/useUser'
 import { useAppToast } from '../../../contexts/AppToastContext'
+import { isValidPassword } from '../../../utils/password'
 import type { UserResponse } from '../../../api/user'
 
 type T = AdminMasterDataLocale
@@ -14,8 +15,6 @@ type Props = {
   onClose: () => void
 }
 
-const PASSWORD_RE = /^[A-Za-z0-9]{8,}$/
-
 export function ResetPasswordModal({ t, user, isOpen, onClose }: Props) {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -25,7 +24,7 @@ export function ResetPasswordModal({ t, user, isOpen, onClose }: Props) {
   const mutation = useAdminResetPasswordMutation()
   const { showToast } = useAppToast()
 
-  const isPasswordValid = PASSWORD_RE.test(password)
+  const isPasswordValid = isValidPassword(password)
   const isMatch = password.length > 0 && password === confirmPassword
   const isValid = isPasswordValid && isMatch
   const isSaving = mutation.isPending

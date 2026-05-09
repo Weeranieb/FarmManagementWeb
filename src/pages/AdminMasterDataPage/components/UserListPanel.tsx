@@ -9,6 +9,7 @@ import {
 import { useAppToast } from '../../../contexts/AppToastContext'
 import type { DropdownItem } from '../../../api/client'
 import type { UserResponse } from '../../../api/user'
+import { UserDeleteConfirm } from './UserDeleteConfirm'
 
 type T = AdminMasterDataLocale
 
@@ -53,6 +54,7 @@ export function UserListPanel({ t, clientList, onEdit, onResetPassword }: Props)
   const { data: users = [], isLoading } = useUserListQuery(filters)
   const deleteMutation = useDeleteUserMutation()
   const { showToast } = useAppToast()
+  const [userToDelete, setUserToDelete] = useState<UserResponse | null>(null)
 
   const clientNameById = useMemo(() => {
     const m: Record<number, string> = {}
@@ -62,11 +64,13 @@ export function UserListPanel({ t, clientList, onEdit, onResetPassword }: Props)
     return m
   }, [clientList])
 
-  const handleDelete = async (user: UserResponse) => {
-    if (!window.confirm(t.userDeleteConfirm(user.username))) return
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return
+    const user = userToDelete
     try {
       await deleteMutation.mutateAsync(user.id)
       showToast('success', t.userSuccessDeleted(user.username))
+      setUserToDelete(null)
     } catch (err) {
       showToast(
         'error',
@@ -169,7 +173,7 @@ export function UserListPanel({ t, clientList, onEdit, onResetPassword }: Props)
                       </button>
                       <button
                         type='button'
-                        onClick={() => handleDelete(u)}
+                        onClick={() => setUserToDelete(u)}
                         disabled={
                           u.userLevel === UserLevel.SuperAdmin ||
                           deleteMutation.isPending
@@ -188,6 +192,16 @@ export function UserListPanel({ t, clientList, onEdit, onResetPassword }: Props)
           </table>
         )}
       </div>
+
+      {userToDelete && (
+        <UserDeleteConfirm
+          t={t}
+          username={userToDelete.username}
+          onCancel={() => setUserToDelete(null)}
+          onConfirm={handleDeleteConfirm}
+          isPending={deleteMutation.isPending}
+        />
+      )}
     </div>
   )
 }

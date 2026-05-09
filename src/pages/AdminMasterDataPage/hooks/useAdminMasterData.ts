@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import {
   clientApi,
   type ClientResponse,
@@ -6,10 +6,12 @@ import {
 } from '../../../api/client'
 import { useQueries, useQueryClient } from '@tanstack/react-query'
 import {
+  clientKeys,
   useClientListQuery,
   useClientSummariesQuery,
   useInvalidateClientList,
 } from '../../../hooks/useClient'
+import type { ClientSummary } from '../../../api/client'
 import { farmApi, type FarmResponse } from '../../../api/farm'
 import { pondApi, type PondResponse } from '../../../api/pond'
 import { farmKeys, useFarmListQuery } from '../../../hooks/useFarm'
@@ -58,6 +60,7 @@ export function useAdminMasterData() {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const [expandedFarms, setExpandedFarms] = useState<string[]>([])
+  const autoExpandedClientRef = useRef<string | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingClientSnapshot, setEditingClientSnapshot] =
     useState<ClientResponse | null>(null)
@@ -77,6 +80,13 @@ export function useAdminMasterData() {
   const [isSavingPondForm, setIsSavingPondForm] = useState(false)
   const [isEditSaving, setIsEditSaving] = useState(false)
   const farmList = farmListData?.farms ?? []
+
+  useEffect(() => {
+    if (farmList.length > 0 && selectedClientId && autoExpandedClientRef.current !== selectedClientId) {
+      setExpandedFarms(farmList.map((f) => String(f.id)))
+      autoExpandedClientRef.current = selectedClientId
+    }
+  }, [farmList, selectedClientId])
 
   useEffect(() => {
     if (!isClientAdmin || !user?.clientId) return
@@ -157,12 +167,36 @@ export function useAdminMasterData() {
     }
     setIsSavingClientForm(true)
     try {
-      await clientApi.createClient({
+      const newClient = await clientApi.createClient({
         name,
         ownerName,
         contactNumber,
         email: email ? email : null,
       })
+      queryClient.setQueriesData<DropdownItem[]>(
+        { queryKey: clientKeys.list() },
+        (old) =>
+          old ? [...old, { key: newClient.id, value: newClient.name }] : old,
+      )
+      queryClient.setQueriesData<ClientSummary[]>(
+        { queryKey: clientKeys.summaries() },
+        (old) =>
+          old
+            ? [
+                ...old,
+                {
+                  id: newClient.id,
+                  name: newClient.name,
+                  ownerName: newClient.ownerName,
+                  contactNumber: newClient.contactNumber,
+                  isActive: newClient.isActive,
+                  farmCount: 0,
+                  pondCount: 0,
+                  userCount: 0,
+                },
+              ]
+            : old,
+      )
       setSuccessMessage(t.successClientCreated(name))
       setShowSuccessMessage(true)
       setTimeout(() => setShowSuccessMessage(false), 5000)
@@ -366,10 +400,26 @@ export function useAdminMasterData() {
           isActive: snap.isActive,
           isTouristFishingEnabled: snap.isTouristFishingEnabled,
         })
+        queryClient.setQueriesData<DropdownItem[]>(
+          { queryKey: clientKeys.list() },
+          (old) =>
+            old?.map((c) => (c.key === snap.id ? { ...c, value: raw } : c)),
+        )
+        queryClient.setQueriesData<ClientSummary[]>(
+          { queryKey: clientKeys.summaries() },
+          (old) =>
+            old?.map((c) => (c.id === snap.id ? { ...c, name: raw } : c)),
+        )
         invalidateClientList()
       } else if (editingItem.type === 'farm') {
         const name = normalizeFarmNameForStore(raw)
-        await farmApi.updateFarm(Number(editingItem.id), { name })
+        const farmId = Number(editingItem.id)
+        await farmApi.updateFarm(farmId, { name })
+        queryClient.setQueriesData<FarmResponse[]>(
+          { queryKey: farmKeys.list() },
+          (old) =>
+            old?.map((f) => (f.id === farmId ? { ...f, name } : f)),
+        )
         refetchHierarchy()
       } else {
         await pondApi.updatePond(Number(editingItem.id), { name: raw })

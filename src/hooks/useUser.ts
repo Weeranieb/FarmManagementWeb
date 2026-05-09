@@ -4,6 +4,7 @@ import {
   type AdminUpdateUserRequest,
   type CreateUserRequest,
   type UserListFilters,
+  type UserResponse,
 } from '../api/user'
 
 export const userKeys = {
@@ -51,9 +52,15 @@ export function useAdminResetPasswordMutation() {
 }
 
 export function useDeleteUserMutation() {
-  const invalidate = useInvalidateUserList()
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (id: number) => userApi.delete(id),
-    onSuccess: () => invalidate(),
+    onSuccess: (_data, deletedId) => {
+      queryClient.setQueriesData<UserResponse[]>(
+        { queryKey: userKeys.all },
+        (old) => old?.filter((u) => u.id !== deletedId),
+      )
+      return queryClient.invalidateQueries({ queryKey: userKeys.all })
+    },
   })
 }
