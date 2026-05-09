@@ -562,7 +562,7 @@ export const th = {
     userLevelSuperAdmin: 'Super Admin',
     placeholderUsername: 'เช่น somchai01',
     placeholderUserEmail: 'เช่น user@example.com',
-    placeholderUserPassword: 'อย่างน้อย 8 ตัวอักษร (A-Z, a-z, 0-9)',
+    placeholderUserPassword: 'อย่างน้อย 8 ตัวอักษร และต้องมีตัวพิมพ์ใหญ่และเล็ก',
     placeholderUserFirstName: 'เช่น สมชาย',
     placeholderUserLastName: 'เช่น ใจดี',
     placeholderUserContactNumber: 'เช่น 0812345678',
@@ -573,8 +573,12 @@ export const th = {
     userActionEdit: 'แก้ไข',
     userActionDelete: 'ลบ',
     userActionResetPassword: 'ตั้งรหัสผ่าน',
-    userDeleteConfirm: (name: string) =>
-      `ยืนยันการลบผู้ใช้ "${name}" ? (ไม่สามารถกู้คืนได้)`,
+    userDeleteConfirmTitle: 'ยืนยันการลบผู้ใช้',
+    userDeleteConfirmMessage: (name: string) =>
+      `ต้องการลบผู้ใช้ "${name}" หรือไม่?`,
+    userDeleteConfirmWarning: 'การกระทำนี้ไม่สามารถกู้คืนได้',
+    userDeleteConfirmCancel: 'ยกเลิก',
+    userDeleteConfirmSubmit: 'ลบผู้ใช้',
     userErrorCreateFailed: 'สร้างผู้ใช้ไม่สำเร็จ',
     userErrorUpdateFailed: 'แก้ไขผู้ใช้ไม่สำเร็จ',
     userErrorDeleteFailed: 'ลบผู้ใช้ไม่สำเร็จ',
@@ -583,7 +587,7 @@ export const th = {
     userSuccessDeleted: (name: string) => `ลบผู้ใช้ "${name}" สำเร็จ`,
     userErrorFillRequired: 'กรุณากรอกข้อมูลให้ครบ',
     userErrorInvalidPassword:
-      'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร และใช้ได้เฉพาะตัวอักษรอังกฤษและตัวเลข',
+      'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร มีทั้งตัวพิมพ์ใหญ่และตัวพิมพ์เล็ก และใช้ได้เฉพาะตัวอักษรอังกฤษและตัวเลข',
     userErrorInvalidEmail: 'รูปแบบอีเมลไม่ถูกต้อง',
     userErrorClientRequired: 'กรุณาเลือกลูกค้าสำหรับผู้ดูแลลูกค้า',
     editUserTitle: 'แก้ไขผู้ใช้',

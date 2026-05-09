@@ -8,6 +8,7 @@ import {
   THAI_PHONE_MAX_LENGTH,
 } from '../../../utils/phoneInput'
 import { filterEmailInput, isValidEmail } from '../../../utils/emailInput'
+import { isValidPassword } from '../../../utils/password'
 import { useCreateUserMutation } from '../../../hooks/useUser'
 import { useAppToast } from '../../../contexts/AppToastContext'
 import type { DropdownItem } from '../../../api/client'
@@ -40,12 +41,6 @@ const EMPTY_FORM: FormState = {
   contactNumber: '',
   userLevel: UserLevel.Normal,
   clientId: '',
-}
-
-const PASSWORD_RE = /^[A-Za-z0-9]{8,}$/
-
-function isValidPassword(password: string): boolean {
-  return PASSWORD_RE.test(password)
 }
 
 export function CreateUserTab({ t, clientList, clientListLoading }: Props) {

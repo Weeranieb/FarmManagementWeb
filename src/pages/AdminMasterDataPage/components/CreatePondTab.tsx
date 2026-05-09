@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import type { FarmResponse } from '../../../api/farm'
 import { formatFarmDisplayNameTH } from '../../../utils/masterDataName'
 import { th, type AdminMasterDataLocale } from '../../../locales/th'
@@ -41,6 +42,16 @@ export function CreatePondTab({
   onResetPonds,
   isSubmitting = false,
 }: Props) {
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+  const prevLengthRef = useRef(pondForms.length)
+
+  useEffect(() => {
+    if (pondForms.length > prevLengthRef.current) {
+      inputRefs.current[pondForms.length - 1]?.focus()
+    }
+    prevLengthRef.current = pondForms.length
+  }, [pondForms.length])
+
   if (!selectedClientId) {
     return (
       <div className='rounded-lg border border-dashed border-gray-200 bg-gray-50 px-4 py-10 text-center text-gray-600'>
@@ -105,6 +116,7 @@ export function CreatePondTab({
               </label>
               <input
                 type='text'
+                ref={(el) => { inputRefs.current[index] = el }}
                 value={pondForm.name}
                 onChange={(e) => updatePondForm(index, 'name', e.target.value)}
                 disabled={isSubmitting}
