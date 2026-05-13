@@ -8,7 +8,7 @@ import {
   formatPondDisplayNameTH,
 } from '../../../utils/masterDataName'
 import { StatusBadge } from '../../../components/StatusBadge'
-import type { AdminMasterDataLocale } from '../../../locales/th'
+import { th, type AdminMasterDataLocale } from '../../../locales/th'
 
 type T = AdminMasterDataLocale
 
@@ -218,9 +218,16 @@ export function DataListPanel({
                                 className='bg-white border border-gray-200 rounded p-2'
                               >
                                 <div className='mb-1 flex items-center justify-between gap-2'>
-                                  <span className='min-w-0 flex-1 text-xs text-gray-800'>
-                                    {formatPondDisplayNameTH(pond.name)}
-                                  </span>
+                                  <div className='min-w-0 flex-1'>
+                                    <span className='block text-xs text-gray-800'>
+                                      {formatPondDisplayNameTH(pond.name)}
+                                    </span>
+                                    {pond.area != null && (
+                                      <span className='block text-[10px] text-gray-500 mt-0.5'>
+                                        {th.ponds.areaRai}: {Number(pond.area).toLocaleString()}
+                                      </span>
+                                    )}
+                                  </div>
                                   <div className='flex shrink-0 items-center gap-2'>
                                     <button
                                       type='button'

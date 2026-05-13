@@ -38,7 +38,9 @@ export function useMasterDataPage() {
     null,
   )
   const [farmForm, setFarmForm] = useState({ name: '' })
-  const [pondForms, setPondForms] = useState([{ name: '' }])
+  const [pondForms, setPondForms] = useState<{ name: string; area: string }[]>(
+    [{ name: '', area: '' }],
+  )
   const [selectedFarmId, setSelectedFarmId] = useState('')
   const [isSavingFarmForm, setIsSavingFarmForm] = useState(false)
   const [isSavingPondForm, setIsSavingPondForm] = useState(false)
@@ -98,8 +100,19 @@ export function useMasterDataPage() {
       showToast('error', L.alertSelectFarm)
       return
     }
-    const names = pondForms.map((f) => f.name.trim()).filter(Boolean)
-    if (names.length === 0) {
+    const ponds = pondForms
+      .map((f) => {
+        const name = f.name.trim()
+        if (!name) return null
+        const areaStr = f.area.trim()
+        const areaNum = areaStr === '' ? undefined : Number(areaStr)
+        if (areaNum !== undefined && (Number.isNaN(areaNum) || areaNum < 0)) {
+          return null
+        }
+        return { name, ...(areaNum !== undefined ? { area: areaNum } : {}) }
+      })
+      .filter((p): p is { name: string; area?: number } => p !== null)
+    if (ponds.length === 0) {
       showToast('error', L.alertAtLeastOnePondName)
       return
     }
@@ -108,14 +121,14 @@ export function useMasterDataPage() {
     )
     setIsSavingPondForm(true)
     try {
-      await pondApi.createPonds({ farmId: Number(selectedFarmId), names })
-      const pondCount = names.length
+      await pondApi.createPonds({ farmId: Number(selectedFarmId), ponds })
+      const pondCount = ponds.length
       setSuccessMessage(
         L.successPondsCreated(pondCount, selectedFarm?.name ?? ''),
       )
       setShowSuccessMessage(true)
       setTimeout(() => setShowSuccessMessage(false), 5000)
-      setPondForms([{ name: '' }])
+      setPondForms([{ name: '', area: '' }])
       setSelectedFarmId('')
       refetchHierarchy()
     } catch (err) {
@@ -129,7 +142,7 @@ export function useMasterDataPage() {
   }
 
   const addPondForm = () => {
-    setPondForms([...pondForms, { name: '' }])
+    setPondForms([...pondForms, { name: '', area: '' }])
   }
 
   const removePondForm = (index: number) => {
@@ -146,6 +159,8 @@ export function useMasterDataPage() {
     const newForms = [...pondForms]
     if (field === 'name') {
       newForms[index] = { ...newForms[index], name: value as string }
+    } else if (field === 'area') {
+      newForms[index] = { ...newForms[index], area: value as string }
     }
     setPondForms(newForms)
   }

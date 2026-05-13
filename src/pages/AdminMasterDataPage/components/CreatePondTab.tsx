@@ -5,7 +5,7 @@ import { th, type AdminMasterDataLocale } from '../../../locales/th'
 
 type T = AdminMasterDataLocale
 
-type PondFormRow = { name: string }
+type PondFormRow = { name: string; area: string }
 
 type Props = {
   t: T
@@ -121,6 +121,22 @@ export function CreatePondTab({
                 onChange={(e) => updatePondForm(index, 'name', e.target.value)}
                 disabled={isSubmitting}
                 placeholder={t.placeholderPondName}
+                className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100 disabled:text-gray-500'
+              />
+            </div>
+            <div>
+              <label className='block text-xs text-gray-700 mb-1'>
+                {th.ponds.areaRai}
+              </label>
+              <input
+                type='number'
+                step='0.01'
+                min='0'
+                inputMode='decimal'
+                value={pondForm.area}
+                onChange={(e) => updatePondForm(index, 'area', e.target.value)}
+                disabled={isSubmitting}
+                placeholder={th.ponds.areaRaiPlaceholder}
                 className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100 disabled:text-gray-500'
               />
             </div>
