@@ -6,6 +6,7 @@ export interface PondResponse {
   name: string
   totalFish: number | null
   status: string
+  area?: number | null
   fishTypes: string[]
   ageDays: number | null
   startDate: string | null
@@ -17,15 +18,21 @@ export interface PondResponse {
   updatedBy?: string
 }
 
+export interface CreatePondItem {
+  name: string
+  area?: number
+}
+
 export interface CreatePondsRequest {
   farmId: number
-  names: string[]
+  ponds: CreatePondItem[]
 }
 
 export interface UpdatePondBody {
   farmId?: number
   name?: string
   status?: string
+  area?: number
 }
 
 export interface PondFillRequest {

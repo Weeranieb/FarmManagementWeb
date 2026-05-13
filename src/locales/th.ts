@@ -185,6 +185,8 @@ export const th = {
     farm: 'ฟาร์ม',
     farmWithName: (name: string) => `ฟาร์ม ${name}`,
     areaHa: 'พื้นที่ (เฮกตาร์)',
+    areaRai: 'พื้นที่ (ไร่)',
+    areaRaiPlaceholder: 'เช่น 2.5',
     depthM: 'ความลึก (ม.)',
     stock: 'จำนวนปลา',
     currentStock: 'จำนวนปลาปัจจุบัน',

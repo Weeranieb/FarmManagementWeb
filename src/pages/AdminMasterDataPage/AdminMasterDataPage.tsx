@@ -1,5 +1,6 @@
 import { EditMasterDataModal } from '../../components/EditMasterDataModal'
 import { PageHeader } from '../../components/PageHeader'
+import { th } from '../../locales/th'
 import { useAdminMasterData } from './hooks'
 import { CreateClientTab } from './components/CreateClientTab'
 import { CreateFarmTab } from './components/CreateFarmTab'
@@ -168,7 +169,7 @@ export function AdminMasterDataPage() {
                   updatePondForm={ctx.updatePondForm}
                   onSubmit={ctx.handlePondSubmit}
                   onResetPonds={() => {
-                    ctx.setPondForms([{ name: '' }])
+                    ctx.setPondForms([{ name: '', area: '' }])
                     ctx.setSelectedFarmId('')
                   }}
                   isSubmitting={ctx.isSavingPondForm}
@@ -208,6 +209,7 @@ export function AdminMasterDataPage() {
             ctx.setIsEditModalOpen(false)
             ctx.setEditingItem(null)
             ctx.setEditingClientSnapshot(null)
+            ctx.setEditingPondArea('')
           }}
           currentName={ctx.editingItem.name}
           title={
@@ -218,6 +220,16 @@ export function AdminMasterDataPage() {
                 : t.editPondTitle
           }
           onSave={ctx.handleSaveEdit}
+          pondEditExtras={
+            ctx.editingItem.type === 'pond'
+              ? {
+                  area: ctx.editingPondArea,
+                  onAreaChange: ctx.setEditingPondArea,
+                  labelArea: th.ponds.areaRai,
+                  placeholderArea: th.ponds.areaRaiPlaceholder,
+                }
+              : undefined
+          }
           clientEditExtras={
             ctx.editingItem.type === 'client' && ctx.editingClientSnapshot
               ? {
