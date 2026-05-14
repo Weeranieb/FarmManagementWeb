@@ -564,7 +564,8 @@ export const th = {
     userLevelSuperAdmin: 'Super Admin',
     placeholderUsername: 'เช่น somchai01',
     placeholderUserEmail: 'เช่น user@example.com',
-    placeholderUserPassword: 'อย่างน้อย 8 ตัวอักษร และต้องมีตัวพิมพ์ใหญ่และเล็ก',
+    placeholderUserPassword:
+      'อย่างน้อย 8 ตัวอักษร และต้องมีตัวพิมพ์ใหญ่และเล็ก',
     placeholderUserFirstName: 'เช่น สมชาย',
     placeholderUserLastName: 'เช่น ใจดี',
     placeholderUserContactNumber: 'เช่น 0812345678',
@@ -602,6 +603,60 @@ export const th = {
     userErrorResetPasswordFailed: 'ตั้งรหัสผ่านใหม่ไม่สำเร็จ',
     userSuccessPasswordReset: (name: string) =>
       `ตั้งรหัสผ่านใหม่ให้ "${name}" สำเร็จ`,
+
+    // Bulk import (Excel)
+    bulkImportButton: 'นำเข้าจาก Excel',
+    bulkImportTitle: 'นำเข้าฟาร์ม/บ่อจาก Excel',
+    bulkImportSubtitle: (clientName: string) => `ลูกค้า: ${clientName}`,
+    bulkImportInstructions:
+      'ดาวน์โหลดเทมเพลต กรอกชื่อฟาร์ม 1 ฟาร์ม พร้อมรายการบ่อและขนาดบ่อ (ไร่) แล้วอัปโหลดไฟล์ .xlsx (1 ครั้งต่อ 1 ฟาร์ม)',
+    bulkImportDownloadTemplate: 'ดาวน์โหลดเทมเพลต',
+    bulkImportUploadLabel: 'อัปโหลดไฟล์ Excel',
+    bulkImportClickToUpload: 'คลิกเพื่อเลือกไฟล์ .xlsx',
+    bulkImportTapToChangeFile: 'คลิกเพื่อเปลี่ยนไฟล์',
+    bulkImportFormatHint: 'รองรับเฉพาะไฟล์ .xlsx',
+    bulkImportParsing: 'กำลังอ่านไฟล์...',
+    bulkImportPreviewTitle: 'ตรวจสอบข้อมูลก่อนนำเข้า',
+    bulkImportPreviewBack: 'เลือกไฟล์ใหม่',
+    bulkImportConfirm: 'ยืนยันการนำเข้า',
+    bulkImportSubmitting: 'กำลังนำเข้า...',
+    bulkImportStatNewFarms: 'ฟาร์มใหม่',
+    bulkImportStatExistingFarms: 'ฟาร์มที่มีอยู่',
+    bulkImportStatNewPonds: 'บ่อใหม่',
+    bulkImportStatDuplicatePonds: 'บ่อซ้ำ (จะข้าม)',
+    bulkImportBadgeNew: 'ใหม่',
+    bulkImportBadgeExisting: 'มีอยู่แล้ว',
+    bulkImportBadgeDuplicate: 'ซ้ำ - จะข้าม',
+    bulkImportRowErrorsTitle: 'พบข้อผิดพลาดในบางแถว',
+    bulkImportRowErrorPrefix: (n: number) => `แถวที่ ${n}`,
+    bulkImportSuccessTitle: 'จำลองการนำเข้าสำเร็จ',
+    bulkImportSuccessSummary: (farms: number, ponds: number) =>
+      `จะสร้าง ${farms} ฟาร์ม และ ${ponds} บ่อ`,
+    bulkImportSuccessDisclaimer:
+      'หมายเหตุ: ยังไม่ได้บันทึกข้อมูลจริง — รออัปเดต backend',
+    bulkImportEmptyHint: 'ไม่มีรายการใหม่ที่จะนำเข้า',
+    bulkImportTemplateInstructionsTitle: 'คำแนะนำการกรอกข้อมูล',
+    bulkImportTemplateInstructionsLines: [
+      '1. กรอกชื่อฟาร์มในคอลัมน์ A และชื่อบ่อในคอลัมน์ B',
+      '2. หากฟาร์มเดียวกันมีหลายบ่อ ให้ใส่ชื่อฟาร์มซ้ำในทุกแถวของบ่อนั้น',
+      '3. หากชื่อฟาร์มมีอยู่แล้ว ระบบจะเพิ่มบ่อใหม่เข้าฟาร์มเดิม',
+      '4. ชื่อบ่อที่ซ้ำกับบ่อที่มีอยู่จะถูกข้าม',
+      '5. แถวว่างจะถูกข้ามอัตโนมัติ',
+    ],
+
+    // Bulk import parse errors
+    bulkImportErrorEmptyFile: 'ไฟล์ว่าง',
+    bulkImportErrorBadHeaders:
+      'คอลัมน์ไม่ถูกต้อง ต้องมี "Farm Name" และ "Pond Name" ในแถวแรก',
+    bulkImportErrorMissingFarm: 'กรุณากรอกชื่อฟาร์ม',
+    bulkImportErrorMissingPond: 'กรุณากรอกชื่อบ่อ',
+    bulkImportErrorFarmTooLong: 'ชื่อฟาร์มยาวเกิน 100 ตัวอักษร',
+    bulkImportErrorPondTooLong: 'ชื่อบ่อยาวเกิน 100 ตัวอักษร',
+    bulkImportErrorTooManyRows: 'ไฟล์มีจำนวนแถวมากเกินไป (สูงสุด 5,000)',
+    bulkImportErrorParseFailed: 'อ่านไฟล์ Excel ไม่สำเร็จ',
+    bulkImportErrorBadExtension: 'รองรับเฉพาะไฟล์ .xlsx เท่านั้น',
+    bulkImportErrorImportFailed: 'นำเข้าไม่สำเร็จ',
+    bulkImportErrorDownloadTemplate: 'ดาวน์โหลดเทมเพลตไม่สำเร็จ',
   },
 
   workers: {

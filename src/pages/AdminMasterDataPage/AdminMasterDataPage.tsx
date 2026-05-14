@@ -1,3 +1,6 @@
+import { useMemo, useState } from 'react'
+import { Upload } from 'lucide-react'
+import { BulkImportFarmPondModal } from '../../components/BulkImportFarmPondModal'
 import { EditMasterDataModal } from '../../components/EditMasterDataModal'
 import { PageHeader } from '../../components/PageHeader'
 import { th } from '../../locales/th'
@@ -11,6 +14,19 @@ import { UserManagementPanel } from './components/UserManagementPanel'
 export function AdminMasterDataPage() {
   const ctx = useAdminMasterData()
   const { t } = ctx
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false)
+
+  const existingPondsByFarmName = useMemo(() => {
+    const out: Record<string, string[]> = {}
+    for (const farm of ctx.clientFarms) {
+      const data = ctx.pondQueryByFarmId[String(farm.id)]?.data
+      out[farm.name] = data ? data.map((p) => p.name) : []
+    }
+    return out
+  }, [ctx.clientFarms, ctx.pondQueryByFarmId])
+
+  const canBulkImport =
+    ctx.activeTab === 'farms' || ctx.activeTab === 'ponds'
   const pageSubtitle = ctx.isSuperAdmin
     ? t.pageSubtitleSuperAdmin
     : t.pageSubtitleClientAdmin
@@ -129,8 +145,24 @@ export function AdminMasterDataPage() {
       ) : (
         <div className='flex-1 grid grid-cols-2 gap-4 overflow-hidden'>
           <div className='bg-white rounded-lg shadow-md flex flex-col overflow-hidden'>
-            <div className='p-4 bg-gradient-to-r from-blue-800 to-blue-600 text-white'>
+            <div className='p-4 bg-gradient-to-r from-blue-800 to-blue-600 text-white flex items-center justify-between gap-3'>
               <h2 className='text-lg font-semibold'>{t.createNew}</h2>
+              {canBulkImport && (
+                <button
+                  type='button'
+                  onClick={() => setIsBulkImportOpen(true)}
+                  disabled={!ctx.selectedClientId}
+                  title={
+                    !ctx.selectedClientId
+                      ? t.pleaseSelectClientFirst
+                      : undefined
+                  }
+                  className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-xs font-medium border border-white/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors'
+                >
+                  <Upload size={14} />
+                  {t.bulkImportButton}
+                </button>
+              )}
             </div>
 
             <div className='flex-1 overflow-y-auto p-4'>
@@ -197,6 +229,17 @@ export function AdminMasterDataPage() {
             onToggleFarmExpansion={ctx.toggleFarmExpansion}
           />
         </div>
+      )}
+
+      {isBulkImportOpen && (
+        <BulkImportFarmPondModal
+          isOpen={isBulkImportOpen}
+          onClose={() => setIsBulkImportOpen(false)}
+          selectedClientId={ctx.selectedClientId}
+          selectedClientName={ctx.selectedClient?.value ?? ''}
+          existingFarms={ctx.clientFarms}
+          existingPondsByFarmName={existingPondsByFarmName}
+        />
       )}
 
       {ctx.isEditModalOpen && ctx.editingItem && (
