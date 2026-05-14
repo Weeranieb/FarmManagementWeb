@@ -217,4 +217,8 @@ export const pondApi = {
       body,
     )
   },
+
+  downloadTemplate: async (): Promise<void> => {
+    return apiClient.downloadBlob('/pond/template', 'pond_template.xlsx')
+  },
 }
