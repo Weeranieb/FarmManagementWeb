@@ -9,6 +9,18 @@ Linear issue references use the `FAR-N` format and link to https://linear.app/fa
 
 ---
 
+## [0.1.1](https://github.com/Weeranieb/FarmManagementWeb/compare/v0.1.0...v0.1.1) (2026-05-15)
+
+
+### Features
+
+* **bulk-import:** wire pond template download to backend (FAR-76) ([#18](https://github.com/Weeranieb/FarmManagementWeb/issues/18)) ([fbe9a74](https://github.com/Weeranieb/FarmManagementWeb/commit/fbe9a74dc8d655242e62785fd55fe9a329a22148))
+
+
+### Bug Fixes
+
+* **layout:** auto-apply client scope for ClientAdmin and Normal users ([#20](https://github.com/Weeranieb/FarmManagementWeb/issues/20)) ([2f78fbc](https://github.com/Weeranieb/FarmManagementWeb/commit/2f78fbcc862f058ae04c596cab42a9d20f3d7bf9))
+
 ## 0.1.0 (2026-05-13)
 
 
