@@ -1,6 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { authApi, type LoginRequest } from '../api/auth'
+import {
+  authApi,
+  type ChangeMyPasswordRequest,
+  type LoginRequest,
+  type UpdateMeRequest,
+  type User,
+} from '../api/auth'
 
 // Query key factory
 export const authKeys = {
@@ -42,6 +48,29 @@ export function useLoginMutation() {
 
 export function getRememberedUsername(): string | null {
   return localStorage.getItem(REMEMBERED_USERNAME_KEY)
+}
+
+/**
+ * Hook to update the current user's own profile.
+ */
+export function useUpdateMeMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: UpdateMeRequest) => authApi.updateMe(body),
+    onSuccess: (updated: User) => {
+      queryClient.setQueryData(authKeys.user(), updated)
+      queryClient.invalidateQueries({ queryKey: authKeys.user() })
+    },
+  })
+}
+
+/**
+ * Hook to change the current user's own password.
+ */
+export function useChangeMyPasswordMutation() {
+  return useMutation({
+    mutationFn: (body: ChangeMyPasswordRequest) => authApi.changeMyPassword(body),
+  })
 }
 
 /**
