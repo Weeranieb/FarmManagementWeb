@@ -9,6 +9,13 @@ Linear issue references use the `FAR-N` format and link to https://linear.app/fa
 
 ---
 
+## [0.1.2](https://github.com/Weeranieb/FarmManagementWeb/compare/v0.1.1...v0.1.2) (2026-05-15)
+
+
+### Features
+
+* **settings:** add settings page mirroring mobile (FAR-10) ([#22](https://github.com/Weeranieb/FarmManagementWeb/issues/22)) ([2f444f4](https://github.com/Weeranieb/FarmManagementWeb/commit/2f444f4c45b430224bec52d7b1a469a93456085d))
+
 ## [0.1.1](https://github.com/Weeranieb/FarmManagementWeb/compare/v0.1.0...v0.1.1) (2026-05-15)
 
 
