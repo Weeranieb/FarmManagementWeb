@@ -144,6 +144,39 @@ export interface PondSellPreviewResponse {
   validationError?: string
 }
 
+// --- Bulk import (farm + pond) ---
+
+export interface BulkImportPondItem {
+  name: string
+  area?: number | null
+}
+
+export interface BulkImportFarmItem {
+  name: string
+  ponds: BulkImportPondItem[]
+}
+
+export interface BulkImportFarmPondRequest {
+  farms: BulkImportFarmItem[]
+}
+
+export interface BulkImportFarmResult {
+  name: string
+  isNew: boolean
+  pondsCreated: number
+  pondsUpdated: number
+  pondsUnchanged: number
+}
+
+export interface BulkImportFarmPondResponse {
+  farmsCreated: number
+  farmsExisting: number
+  pondsCreated: number
+  pondsUpdated: number
+  pondsUnchanged: number
+  farms: BulkImportFarmResult[]
+}
+
 export const pondApi = {
   getPond: async (id: number): Promise<PondResponse> => {
     return apiClient.get<PondResponse>(`/pond/${id}`)
@@ -220,5 +253,15 @@ export const pondApi = {
 
   downloadTemplate: async (): Promise<void> => {
     return apiClient.downloadBlob('/pond/template', 'pond_template.xlsx')
+  },
+
+  bulkImportFarmPond: async (
+    clientId: number,
+    body: BulkImportFarmPondRequest,
+  ): Promise<BulkImportFarmPondResponse> => {
+    return apiClient.post<BulkImportFarmPondResponse>(
+      `/pond/bulk-import/${clientId}`,
+      body,
+    )
   },
 }
