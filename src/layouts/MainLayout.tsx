@@ -52,7 +52,7 @@ export function MainLayout() {
 
   const isActive = (path: string) => location.pathname.startsWith(path)
 
-  const clientFreeRoutes = ['/admin', '/profile']
+  const clientFreeRoutes = ['/admin', '/settings']
   const requiresClient = !clientFreeRoutes.some((prefix) =>
     location.pathname.startsWith(prefix),
   )
@@ -263,13 +263,13 @@ export function MainLayout() {
             </div>
 
             <Link
-              to='/profile'
+              to='/settings'
               title={!sidebarWide ? L.settings : undefined}
-              className={navLinkClass(isActive('/profile'), !sidebarWide)}
+              className={navLinkClass(isActive('/settings'), !sidebarWide)}
             >
               <Settings
                 size={19}
-                className={`shrink-0 ${isActive('/profile') ? 'text-blue-600' : 'text-slate-500'}`}
+                className={`shrink-0 ${isActive('/settings') ? 'text-blue-600' : 'text-slate-500'}`}
               />
               {sidebarWide && <span className='truncate'>{L.settings}</span>}
             </Link>
@@ -319,7 +319,7 @@ export function MainLayout() {
                   </div>
                   <div className='py-1'>
                     <Link
-                      to='/profile'
+                      to='/settings'
                       onClick={() => setIsProfileDropdownOpen(false)}
                       className='flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-blue-50'
                     >
@@ -327,7 +327,7 @@ export function MainLayout() {
                       <span>{L.myProfile}</span>
                     </Link>
                     <Link
-                      to='/profile'
+                      to='/settings'
                       onClick={() => setIsProfileDropdownOpen(false)}
                       className='flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-blue-50'
                     >

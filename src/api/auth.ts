@@ -30,6 +30,19 @@ export interface LogoutResponse {
   message?: string
 }
 
+export interface UpdateMeRequest {
+  username: string
+  email: string | null
+  firstName: string
+  lastName: string | null
+  contactNumber: string
+}
+
+export interface ChangeMyPasswordRequest {
+  currentPassword: string
+  newPassword: string
+}
+
 export const authApi = {
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
     return apiClient.post<LoginResponse>('/auth/login', credentials)
@@ -41,5 +54,13 @@ export const authApi = {
 
   getCurrentUser: async (): Promise<User> => {
     return apiClient.get<User>('/user')
+  },
+
+  updateMe: async (body: UpdateMeRequest): Promise<User> => {
+    return apiClient.put<User>('/user', body)
+  },
+
+  changeMyPassword: async (body: ChangeMyPasswordRequest): Promise<void> => {
+    return apiClient.put<void>('/user/password', body)
   },
 }
