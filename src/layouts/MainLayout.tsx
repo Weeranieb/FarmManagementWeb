@@ -37,6 +37,7 @@ export function MainLayout() {
   const isAdminUser =
     user?.userLevel === UserLevel.SuperAdmin ||
     user?.userLevel === UserLevel.ClientAdmin
+  const isSuperAdmin = user?.userLevel === UserLevel.SuperAdmin
   const L = th.layout
 
   const navItems = [
@@ -80,10 +81,15 @@ export function MainLayout() {
   }, [])
 
   useEffect(() => {
-    if (isAdminUser && clientList.length > 0 && !selectedClientId) {
+    if (!user || selectedClientId) return
+    if (user.clientId != null) {
+      setSelectedClientId(String(user.clientId))
+      return
+    }
+    if (isSuperAdmin && clientList.length > 0) {
       setSelectedClientId(String(clientList[0].key))
     }
-  }, [isAdminUser, clientList, selectedClientId, setSelectedClientId])
+  }, [user, isSuperAdmin, clientList, selectedClientId, setSelectedClientId])
 
   const displayName =
     user?.firstName && user?.lastName
@@ -142,7 +148,7 @@ export function MainLayout() {
         </div>
 
         <div className='flex min-h-0 flex-1 flex-col overflow-hidden py-3'>
-          {isAdminUser && sidebarWide && (
+          {isSuperAdmin && sidebarWide && (
             <div className='mb-3 border-b border-slate-100 px-3 pb-3'>
               <select
                 value={selectedClientId}
@@ -162,7 +168,7 @@ export function MainLayout() {
             </div>
           )}
 
-          {isAdminUser && !sidebarWide && (
+          {isSuperAdmin && !sidebarWide && (
             <div className='mb-3 flex justify-center border-b border-slate-100 px-2 pb-3'>
               <div
                 className='flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100'
@@ -356,7 +362,7 @@ export function MainLayout() {
 
       <main className='min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden'>
         <div className='p-6 lg:p-8'>
-          {isAdminUser && !selectedClientId && requiresClient ? (
+          {isSuperAdmin && !selectedClientId && requiresClient ? (
             <div className='flex min-h-[50vh] items-center justify-center'>
               <p className='text-slate-500'>{L.selectClientToView}</p>
             </div>
