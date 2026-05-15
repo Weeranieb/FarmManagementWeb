@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Upload } from 'lucide-react'
 import { BulkImportFarmPondModal } from '../../components/BulkImportFarmPondModal'
 import { EditMasterDataModal } from '../../components/EditMasterDataModal'
@@ -15,15 +15,6 @@ export function AdminMasterDataPage() {
   const ctx = useAdminMasterData()
   const { t } = ctx
   const [isBulkImportOpen, setIsBulkImportOpen] = useState(false)
-
-  const existingPondsByFarmName = useMemo(() => {
-    const out: Record<string, string[]> = {}
-    for (const farm of ctx.clientFarms) {
-      const data = ctx.pondQueryByFarmId[String(farm.id)]?.data
-      out[farm.name] = data ? data.map((p) => p.name) : []
-    }
-    return out
-  }, [ctx.clientFarms, ctx.pondQueryByFarmId])
 
   const canBulkImport =
     ctx.activeTab === 'farms' || ctx.activeTab === 'ponds'
@@ -227,6 +218,8 @@ export function AdminMasterDataPage() {
             onEditFarm={ctx.handleEditFarm}
             onEditPond={ctx.handleEditPond}
             onToggleFarmExpansion={ctx.toggleFarmExpansion}
+            areAllFarmsExpanded={ctx.areAllFarmsExpanded}
+            onToggleAllFarms={ctx.toggleAllFarms}
           />
         </div>
       )}
@@ -237,8 +230,7 @@ export function AdminMasterDataPage() {
           onClose={() => setIsBulkImportOpen(false)}
           selectedClientId={ctx.selectedClientId}
           selectedClientName={ctx.selectedClient?.value ?? ''}
-          existingFarms={ctx.clientFarms}
-          existingPondsByFarmName={existingPondsByFarmName}
+          onImported={ctx.refetchHierarchy}
         />
       )}
 

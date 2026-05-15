@@ -89,7 +89,11 @@ class ApiClient {
     payload: ApiPayload,
     status: number,
   ): void {
-    if (payload.success === false) {
+    // Backend convention (utils/http/response.go ResponseModel) wraps logical
+    // errors as `{result: false, error: {code, message}}` and still returns
+    // HTTP 200. Surface those as real errors so callers don't silently see
+    // `undefined`.
+    if (payload.result === false || payload.success === false) {
       const err = isRecord(payload.error)
         ? (payload.error as Partial<ApiError>)
         : undefined
