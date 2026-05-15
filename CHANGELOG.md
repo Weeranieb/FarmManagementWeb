@@ -9,6 +9,13 @@ Linear issue references use the `FAR-N` format and link to https://linear.app/fa
 
 ---
 
+## [0.1.3](https://github.com/Weeranieb/FarmManagementWeb/compare/v0.1.2...v0.1.3) (2026-05-15)
+
+
+### Features
+
+* **admin:** bulk-import farms+ponds modal with localized errors and panel polish ([#24](https://github.com/Weeranieb/FarmManagementWeb/issues/24)) ([e01bd37](https://github.com/Weeranieb/FarmManagementWeb/commit/e01bd3774e3bea693460f0c565a0cf90bc6e664b))
+
 ## [0.1.2](https://github.com/Weeranieb/FarmManagementWeb/compare/v0.1.1...v0.1.2) (2026-05-15)
 
 
