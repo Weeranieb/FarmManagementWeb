@@ -166,6 +166,45 @@ export function StockActionModal({
                     />
                   )}
 
+                  <div>
+                    <label className='block text-sm font-medium text-gray-700 mb-2'>
+                      {actionType === 'add'
+                        ? L.stockDate
+                        : actionType === 'transfer'
+                          ? L.transferDate
+                          : L.saleDate}{' '}
+                      *
+                    </label>
+                    <DatePicker
+                      value={activityDate}
+                      max={new Date().toISOString().split('T')[0]}
+                      onChange={(date) => {
+                        setActivityDate(date)
+                        clearFieldError('activityDate')
+                      }}
+                      className={
+                        fieldErrors.activityDate
+                          ? 'border-red-500 ring-2 ring-red-200'
+                          : ''
+                      }
+                      aria-invalid={!!fieldErrors.activityDate}
+                      aria-describedby={
+                        fieldErrors.activityDate
+                          ? 'activityDate-error'
+                          : undefined
+                      }
+                    />
+                    {fieldErrors.activityDate && (
+                      <p
+                        id='activityDate-error'
+                        className='text-sm text-red-600 mt-1'
+                        role='alert'
+                      >
+                        {fieldErrors.activityDate}
+                      </p>
+                    )}
+                  </div>
+
                   {actionType !== 'sell' && (
                     <div>
                       <label className='block text-sm font-medium text-gray-700 mb-2'>
@@ -837,45 +876,6 @@ export function StockActionModal({
                       variant='purple'
                     />
                   )}
-
-                  <div>
-                    <label className='block text-sm font-medium text-gray-700 mb-2'>
-                      {actionType === 'add'
-                        ? L.stockDate
-                        : actionType === 'transfer'
-                          ? L.transferDate
-                          : L.saleDate}{' '}
-                      *
-                    </label>
-                    <DatePicker
-                      value={activityDate}
-                      max={new Date().toISOString().split('T')[0]}
-                      onChange={(date) => {
-                        setActivityDate(date)
-                        clearFieldError('activityDate')
-                      }}
-                      className={
-                        fieldErrors.activityDate
-                          ? 'border-red-500 ring-2 ring-red-200'
-                          : ''
-                      }
-                      aria-invalid={!!fieldErrors.activityDate}
-                      aria-describedby={
-                        fieldErrors.activityDate
-                          ? 'activityDate-error'
-                          : undefined
-                      }
-                    />
-                    {fieldErrors.activityDate && (
-                      <p
-                        id='activityDate-error'
-                        className='text-sm text-red-600 mt-1'
-                        role='alert'
-                      >
-                        {fieldErrors.activityDate}
-                      </p>
-                    )}
-                  </div>
 
                   {quantity > 0 &&
                     (actionType === 'transfer' ||

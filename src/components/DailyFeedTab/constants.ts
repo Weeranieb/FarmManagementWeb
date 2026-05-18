@@ -1,4 +1,4 @@
-/** Fixed width for sticky date column (thead/tbody/tfoot) to avoid covering fresh-morning under border-collapse + sticky. */
+/** Fixed width for sticky date column (thead/tbody/tfoot) to avoid covering the fresh column under border-collapse + sticky. */
 export const DATE_COL_DIM = 'w-16 min-w-16 max-w-16'
 
 /** Body row height + type; compact so a full month scrolls less. */

@@ -33,6 +33,15 @@ import {
 
 const L = th.stockActionModal
 
+function useDebounced<T>(value: T, delayMs: number): T {
+  const [debounced, setDebounced] = useState(value)
+  useEffect(() => {
+    const id = window.setTimeout(() => setDebounced(value), delayMs)
+    return () => window.clearTimeout(id)
+  }, [value, delayMs])
+  return debounced
+}
+
 export function useStockActionModal({
   pond: pondProp,
   isOpen,
@@ -241,8 +250,118 @@ export function useStockActionModal({
     )
   }, [destinationPondId, availablePondsForTransfer])
 
-  const totalCost = quantity * (pricePerUnitNum ?? 0) * (avgWeightNum ?? 0)
-  const totalWeight = quantity * (avgWeightNum ?? 0)
+  // Live totals come from backend `/pond/{fill,move,sell}/calc` so the form
+  // matches the confirmation summary exactly (one source of truth for math).
+  // Inputs are debounced ~250ms so we don't fire a request per keystroke.
+  const debouncedQuantity = useDebounced(quantity, 250)
+  const debouncedAvgWeight = useDebounced(avgWeightNum, 250)
+  const debouncedPricePerUnit = useDebounced(pricePerUnitNum, 250)
+  const debouncedAdditionalCosts = useDebounced(additionalCosts, 250)
+  const debouncedSellGradeRows = useDebounced(sellGradeRows, 250)
+
+  const calcAdditionalCosts = useMemo(
+    () =>
+      debouncedAdditionalCosts
+        .filter((c) => c.cost > 0 || c.category.trim() !== '')
+        .map((c) => ({ title: c.category, cost: c.cost })),
+    [debouncedAdditionalCosts],
+  )
+
+  const fillCalcBody = useMemo(
+    () => ({
+      amount: debouncedQuantity,
+      ...(debouncedAvgWeight != null && debouncedAvgWeight > 0
+        ? { fishWeight: debouncedAvgWeight }
+        : {}),
+      ...(debouncedPricePerUnit != null && debouncedPricePerUnit > 0
+        ? { pricePerUnit: debouncedPricePerUnit }
+        : {}),
+      ...(calcAdditionalCosts.length > 0
+        ? { additionalCosts: calcAdditionalCosts }
+        : {}),
+    }),
+    [
+      debouncedQuantity,
+      debouncedAvgWeight,
+      debouncedPricePerUnit,
+      calcAdditionalCosts,
+    ],
+  )
+
+  // Only hit /calc once all three inputs are positive — otherwise the result
+  // is trivially zero and not worth a network roundtrip per keystroke.
+  const fillMoveInputsReady =
+    debouncedQuantity > 0 &&
+    debouncedAvgWeight != null &&
+    debouncedAvgWeight > 0 &&
+    debouncedPricePerUnit != null &&
+    debouncedPricePerUnit > 0
+
+  const { data: fillCalc } = useQuery({
+    queryKey: ['pondCalc', 'fill', fillCalcBody],
+    queryFn: () => pondApi.fillPondCalc(fillCalcBody),
+    enabled: isOpen && actionType === 'add' && fillMoveInputsReady,
+    staleTime: 0,
+    gcTime: 0,
+    placeholderData: (previous) => previous,
+  })
+
+  const { data: moveCalc } = useQuery({
+    queryKey: ['pondCalc', 'move', fillCalcBody],
+    queryFn: () => pondApi.movePondCalc(fillCalcBody),
+    enabled: isOpen && actionType === 'transfer' && fillMoveInputsReady,
+    staleTime: 0,
+    gcTime: 0,
+    placeholderData: (previous) => previous,
+  })
+
+  const sellCalcBody = useMemo(
+    () => ({
+      details: debouncedSellGradeRows.map((row) => ({
+        ...(row.gradeId > 0 ? { fishSizeGradeId: row.gradeId } : {}),
+        ...(row.weight > 0 ? { weight: row.weight } : {}),
+        ...(row.pricePerKg > 0 ? { pricePerUnit: row.pricePerKg } : {}),
+        ...(row.fishCount != null &&
+        Number.isInteger(row.fishCount) &&
+        row.fishCount > 0
+          ? { fishCount: row.fishCount }
+          : {}),
+      })),
+      ...(calcAdditionalCosts.length > 0
+        ? { additionalCosts: calcAdditionalCosts }
+        : {}),
+    }),
+    [debouncedSellGradeRows, calcAdditionalCosts],
+  )
+
+  // Only call /sell/calc when at least one row has both weight and price > 0.
+  const sellInputsReady = useMemo(
+    () =>
+      debouncedSellGradeRows.some(
+        (row) => row.weight > 0 && row.pricePerKg > 0,
+      ),
+    [debouncedSellGradeRows],
+  )
+
+  const { data: sellCalc } = useQuery({
+    queryKey: ['pondCalc', 'sell', sellCalcBody],
+    queryFn: () => pondApi.sellPondCalc(sellCalcBody),
+    enabled: isOpen && actionType === 'sell' && sellInputsReady,
+    staleTime: 0,
+    gcTime: 0,
+    placeholderData: (previous) => previous,
+  })
+
+  const totalCost = !fillMoveInputsReady
+    ? 0
+    : actionType === 'transfer'
+      ? (moveCalc?.totalCost ?? 0)
+      : (fillCalc?.totalCost ?? 0)
+  const totalWeight = !fillMoveInputsReady
+    ? 0
+    : actionType === 'transfer'
+      ? (moveCalc?.totalWeight ?? 0)
+      : (fillCalc?.totalWeight ?? 0)
 
   const remainingStock = useMemo(() => {
     if (!pond) return 0
@@ -257,17 +376,13 @@ export function useStockActionModal({
     return (quantity / pond.currentStock) * 100
   }, [quantity, pond])
 
-  const sellTotals = useMemo(() => {
-    const totalWeight = sellGradeRows.reduce(
-      (sum, row) => sum + (row.weight || 0),
-      0,
-    )
-    const totalRevenue = sellGradeRows.reduce(
-      (sum, row) => sum + (row.weight || 0) * (row.pricePerKg || 0),
-      0,
-    )
-    return { totalWeight, totalRevenue }
-  }, [sellGradeRows])
+  const sellTotals = useMemo(
+    () => ({
+      totalWeight: sellInputsReady ? (sellCalc?.totalWeight ?? 0) : 0,
+      totalRevenue: sellInputsReady ? (sellCalc?.totalRevenue ?? 0) : 0,
+    }),
+    [sellCalc, sellInputsReady],
+  )
 
   const showWarning =
     (actionType === 'transfer' || actionType === 'sell') && stockPercentage > 50
