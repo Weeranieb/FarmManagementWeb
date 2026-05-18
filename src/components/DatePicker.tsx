@@ -1,29 +1,12 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
-
-const THAI_MONTHS = [
-  'ม.ค.',
-  'ก.พ.',
-  'มี.ค.',
-  'เม.ย.',
-  'พ.ค.',
-  'มิ.ย.',
-  'ก.ค.',
-  'ส.ค.',
-  'ก.ย.',
-  'ต.ค.',
-  'พ.ย.',
-  'ธ.ค.',
-]
+import {
+  TH_MONTHS_SHORT,
+  TH_WEEKDAYS_SHORT,
+  formatYmdThaiShort,
+} from '../locale/thaiDate'
 
 const YEAR_RANGE = 20 // years before/after for dropdown
-
-function formatDisplayDate(ymd: string): string {
-  if (!ymd) return '—'
-  const [y, m, d] = ymd.split('-').map(Number)
-  if (!y || !m || !d) return ymd
-  return `${d} ${THAI_MONTHS[m - 1]} ${y + 543}`
-}
 
 interface DatePickerProps {
   value: string
@@ -185,7 +168,7 @@ export function DatePicker({
         aria-label='เลือกวันที่'
       >
         <span className='tabular-nums'>
-          {formatDisplayDate(value || initial)}
+          {formatYmdThaiShort(value || initial)}
         </span>
         <Calendar size={18} className='text-gray-400 shrink-0' />
       </div>
@@ -217,7 +200,7 @@ export function DatePicker({
                 className='flex-1 min-w-0 px-3 py-2 text-base font-medium text-gray-800 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none cursor-pointer'
                 aria-label='เลือกเดือน'
               >
-                {THAI_MONTHS.map((label, idx) => (
+                {TH_MONTHS_SHORT.map((label, idx) => (
                   <option key={label} value={idx}>
                     {label}
                   </option>
@@ -248,7 +231,7 @@ export function DatePicker({
           </div>
           <div className='p-4'>
             <div className='grid grid-cols-7 gap-1 text-center text-sm text-gray-500 font-medium mb-2'>
-              {['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'].map((w) => (
+              {TH_WEEKDAYS_SHORT.map((w) => (
                 <div key={w} className='py-1.5'>
                   {w}
                 </div>
@@ -272,7 +255,7 @@ export function DatePicker({
                       ${todayCell && !disabled ? 'ring-2 ring-blue-500 ring-inset bg-blue-50' : ''}
                       ${value === toYMD(date) ? 'bg-blue-600 text-white hover:bg-blue-700' : ''}
                     `}
-                    aria-label={`${day} ${THAI_MONTHS[viewDate.month]} ${viewDate.year + 543}`}
+                    aria-label={`${day} ${TH_MONTHS_SHORT[viewDate.month]} ${viewDate.year + 543}`}
                     aria-pressed={value === toYMD(date)}
                   >
                     {day}
