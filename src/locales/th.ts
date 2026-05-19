@@ -2,6 +2,8 @@
  * Thai locale for the entire app (layout, login, dashboard, farms, ponds, etc.)
  */
 
+import { TH_MONTHS_SHORT } from '../locale/thaiDate'
+
 export const th = {
   common: {
     loading: 'กำลังโหลด...',
@@ -378,20 +380,7 @@ export const th = {
     close: 'ปิด',
     done: 'เสร็จแล้ว',
     formatXlsx: 'Excel (.xlsx)',
-    monthsShort: [
-      'ม.ค.',
-      'ก.พ.',
-      'มี.ค.',
-      'เม.ย.',
-      'พ.ค.',
-      'มิ.ย.',
-      'ก.ค.',
-      'ส.ค.',
-      'ก.ย.',
-      'ต.ค.',
-      'พ.ย.',
-      'ธ.ค.',
-    ] as readonly string[],
+    monthsShort: TH_MONTHS_SHORT,
   },
 
   masterData: {

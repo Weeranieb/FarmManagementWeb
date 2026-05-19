@@ -144,6 +144,73 @@ export interface PondSellPreviewResponse {
   validationError?: string
 }
 
+// --- Calc (live form totals) request/response types ---
+
+export interface PondFillCalcRequest {
+  amount?: number
+  fishWeight?: number
+  pricePerUnit?: number
+  additionalCosts?: { title: string; cost: number }[]
+}
+
+export interface PondFillCalcResponse {
+  quantity: number
+  avgWeightKg: number
+  totalWeight: number
+  costPerUnit: number
+  baseStockCost: number
+  additionalCosts: AdditionalCostLine[]
+  additionalCostsTotal: number
+  totalCost: number
+}
+
+export interface PondMoveCalcRequest {
+  amount?: number
+  fishWeight?: number
+  pricePerUnit?: number
+  additionalCosts?: { title: string; cost: number }[]
+}
+
+export interface PondMoveCalcResponse {
+  quantity: number
+  avgWeightKg: number
+  totalWeight: number
+  costPerUnit: number
+  baseTransferCost: number
+  additionalCosts: AdditionalCostLine[]
+  additionalCostsTotal: number
+  totalCost: number
+}
+
+export interface PondSellCalcDetailItem {
+  fishSizeGradeId?: number
+  weight?: number
+  pricePerUnit?: number
+  fishCount?: number
+}
+
+export interface PondSellCalcRequest {
+  details?: PondSellCalcDetailItem[]
+  additionalCosts?: { title: string; cost: number }[]
+}
+
+export interface PondSellCalcLine {
+  fishSizeGradeId: number
+  weight: number
+  pricePerKg: number
+  subtotal: number
+  fishCount?: number
+}
+
+export interface PondSellCalcResponse {
+  items: PondSellCalcLine[]
+  totalWeight: number
+  totalRevenue: number
+  additionalCosts: AdditionalCostLine[]
+  additionalCostsTotal: number
+  netTotal: number
+}
+
 // --- Bulk import (farm + pond) ---
 
 export interface BulkImportPondItem {
@@ -249,6 +316,34 @@ export const pondApi = {
       `/pond/${pondId}/sell/preview`,
       body,
     )
+  },
+
+  /**
+   * Live form totals for the fill (add stock) action. Pure math, no DB lookup.
+   * Use with debouncing while the user types.
+   */
+  fillPondCalc: async (
+    body: PondFillCalcRequest,
+  ): Promise<PondFillCalcResponse> => {
+    return apiClient.post<PondFillCalcResponse>('/pond/fill/calc', body)
+  },
+
+  /**
+   * Live form totals for the move (transfer) action. Pure math.
+   */
+  movePondCalc: async (
+    body: PondMoveCalcRequest,
+  ): Promise<PondMoveCalcResponse> => {
+    return apiClient.post<PondMoveCalcResponse>('/pond/move/calc', body)
+  },
+
+  /**
+   * Live form totals for the sell action. Pure math.
+   */
+  sellPondCalc: async (
+    body: PondSellCalcRequest,
+  ): Promise<PondSellCalcResponse> => {
+    return apiClient.post<PondSellCalcResponse>('/pond/sell/calc', body)
   },
 
   downloadTemplate: async (): Promise<void> => {
