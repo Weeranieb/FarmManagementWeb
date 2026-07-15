@@ -16,7 +16,6 @@ import type { DailyFeedTabProps, DayRow } from './types'
 import { DATE_COL_DIM, DAY_BODY_ROW, DAY_BODY_TEXT } from './constants'
 import {
   emptyRow,
-  errorMessageForToast,
   fmt,
   fmtOrEmpty,
   abbrevThaiKgUnit,
@@ -27,6 +26,7 @@ import {
   isRowNonEmpty,
   viewCellDisplay,
 } from './utils'
+import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 import { SummaryCard } from './components/SummaryCard'
 import { useDailyFeedTab } from './useDailyFeedTab'
 
@@ -174,7 +174,7 @@ export function DailyFeedTab({
       <div className='text-center py-12 space-y-4 px-4'>
         <p className='text-red-600 font-medium'>{L.loadMonthError}</p>
         <p className='text-sm text-gray-600 max-w-md mx-auto'>
-          {errorMessageForToast(monthQueryError)}
+          {getApiErrorMessage(monthQueryError)}
         </p>
         <button
           type='button'
@@ -235,7 +235,7 @@ export function DailyFeedTab({
                 className='flex items-center gap-1.5 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm'
               >
                 <X size={15} />
-                {th.masterData.modalCancel}
+                {th.common.modalCancel}
               </button>
               <button
                 type='button'
@@ -654,7 +654,7 @@ export function DailyFeedTab({
                 onClick={dismissPendingMonth}
                 className='rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50'
               >
-                {th.masterData.modalCancel}
+                {th.common.modalCancel}
               </button>
               <button
                 type='button'

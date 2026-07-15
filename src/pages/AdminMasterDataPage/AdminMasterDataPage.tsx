@@ -4,7 +4,7 @@ import { BulkImportFarmPondModal } from '../../components/BulkImportFarmPondModa
 import { EditMasterDataModal } from '../../components/EditMasterDataModal'
 import { PageHeader } from '../../components/PageHeader'
 import { th } from '../../locales/th'
-import { useAdminMasterData } from './hooks'
+import { useAdminMasterData } from './hooks/useAdminMasterData'
 import { CreateClientTab } from './components/CreateClientTab'
 import { CreateFarmTab } from './components/CreateFarmTab'
 import { CreatePondTab } from './components/CreatePondTab'
@@ -16,8 +16,7 @@ export function AdminMasterDataPage() {
   const { t } = ctx
   const [isBulkImportOpen, setIsBulkImportOpen] = useState(false)
 
-  const canBulkImport =
-    ctx.activeTab === 'farms' || ctx.activeTab === 'ponds'
+  const canBulkImport = ctx.activeTab === 'farms' || ctx.activeTab === 'ponds'
   const pageSubtitle = ctx.isSuperAdmin
     ? t.pageSubtitleSuperAdmin
     : t.pageSubtitleClientAdmin
@@ -25,12 +24,6 @@ export function AdminMasterDataPage() {
   return (
     <div className='flex min-h-0 flex-col space-y-3'>
       <PageHeader title={t.pageTitle} subtitle={pageSubtitle} />
-
-      {ctx.showSuccessMessage && (
-        <div className='bg-green-50 border-l-4 border-green-500 p-3 rounded-lg shadow-md animate-fade-in'>
-          <p className='text-sm text-green-800'>{ctx.successMessage}</p>
-        </div>
-      )}
 
       {ctx.isSuperAdmin &&
         ctx.activeTab !== 'clients' &&

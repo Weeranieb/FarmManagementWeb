@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { th } from '../../locales/th'
-import { useClient } from '../../contexts/ClientContext'
+import { useSelectedClientIdNum } from '../../contexts/ClientContext'
 import { useFarmGroupQuery } from '../../hooks/useFarmGroup'
 import { useFarmListQuery } from '../../hooks/useFarm'
 import { FarmGroupFormFields } from './components/FarmGroupFormFields'
@@ -12,8 +12,7 @@ export function FarmGroupFormPage() {
   const navigate = useNavigate()
   const { id } = useParams()
   const isEdit = !!id
-  const { selectedClientId } = useClient()
-  const clientId = selectedClientId ? Number(selectedClientId) : undefined
+  const clientId = useSelectedClientIdNum()
 
   const {
     data: existing,

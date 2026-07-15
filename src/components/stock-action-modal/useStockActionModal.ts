@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query'
 import { FISH_TYPE_VALUES } from '../../constants/fishType'
 import { th } from '../../locales/th'
 import { pondApi } from '../../api/pond'
+import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 import type {
   PondFillPreviewResponse,
   PondMovePreviewResponse,
@@ -472,7 +473,7 @@ export function useStockActionModal({
         setPreviewResult(preview)
         setShowConfirmation(true)
       } catch (err) {
-        setSubmitError(err instanceof Error ? err.message : L.previewError)
+        setSubmitError(getApiErrorMessage(err, L.previewError))
       } finally {
         setIsSubmitting(false)
       }
@@ -493,7 +494,7 @@ export function useStockActionModal({
         setPreviewResult(preview)
         setShowConfirmation(true)
       } catch (err) {
-        setSubmitError(err instanceof Error ? err.message : L.previewError)
+        setSubmitError(getApiErrorMessage(err, L.previewError))
       } finally {
         setIsSubmitting(false)
       }
@@ -518,7 +519,7 @@ export function useStockActionModal({
         setPreviewResult(preview)
         setShowConfirmation(true)
       } catch (err) {
-        setSubmitError(err instanceof Error ? err.message : L.previewError)
+        setSubmitError(getApiErrorMessage(err, L.previewError))
       } finally {
         setIsSubmitting(false)
       }
@@ -542,7 +543,7 @@ export function useStockActionModal({
       onClose()
       onFillSuccess?.()
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Request failed')
+      setSubmitError(getApiErrorMessage(err, 'Request failed'))
     } finally {
       setIsSubmitting(false)
     }

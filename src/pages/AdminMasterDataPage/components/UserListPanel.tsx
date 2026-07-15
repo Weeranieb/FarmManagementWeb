@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { KeyRound, Pencil, Trash2 } from 'lucide-react'
 import { th, type AdminMasterDataLocale } from '../../../locales/th'
 import { UserLevel } from '../../../constants/userLevel'
+import { getApiErrorMessage } from '../../../utils/apiErrorMessage'
 import {
   useDeleteUserMutation,
   useUserListQuery,
@@ -74,7 +75,7 @@ export function UserListPanel({ t, clientList, onEdit, onResetPassword }: Props)
     } catch (err) {
       showToast(
         'error',
-        err instanceof Error ? err.message : t.userErrorDeleteFailed,
+        getApiErrorMessage(err, t.userErrorDeleteFailed),
       )
     }
   }

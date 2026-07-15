@@ -7,6 +7,7 @@ import { filterEmailInput, isValidEmail } from '../../utils/emailInput'
 import { filterPhoneInput, THAI_PHONE_MAX_LENGTH } from '../../utils/phoneInput'
 import type { User } from '../../api/auth'
 import { ChangePasswordModal } from './ChangePasswordModal'
+import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 
 const L = th.settings
 
@@ -88,7 +89,7 @@ export function EditProfileModal({ user, onClose }: Props) {
     } catch (err) {
       showToast(
         'error',
-        err instanceof Error ? err.message : L.profileSaveFailed,
+        getApiErrorMessage(err, L.profileSaveFailed),
       )
     }
   }

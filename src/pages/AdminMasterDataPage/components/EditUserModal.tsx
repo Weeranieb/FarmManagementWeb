@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Loader2, X } from 'lucide-react'
 import { th, type AdminMasterDataLocale } from '../../../locales/th'
 import { UserLevel } from '../../../constants/userLevel'
+import { getApiErrorMessage } from '../../../utils/apiErrorMessage'
 import {
   filterPhoneInput,
   isDigitsOnly,
@@ -76,7 +77,7 @@ export function EditUserModal({ t, user, clientList, isOpen, onClose }: Props) {
     } catch (err) {
       showToast(
         'error',
-        err instanceof Error ? err.message : t.userErrorUpdateFailed,
+        getApiErrorMessage(err, t.userErrorUpdateFailed),
       )
     }
   }

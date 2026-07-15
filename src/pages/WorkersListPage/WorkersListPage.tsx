@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Search, Plus, Pencil, Users as UsersIcon, Phone } from 'lucide-react'
 import { PageHeader } from '../../components/PageHeader'
 import { th } from '../../locales/th'
-import { useWorkersListPage } from './hooks'
+import { useWorkersListPage } from './hooks/useWorkersListPage'
 
 const L = th.workers
 

@@ -160,10 +160,3 @@ export function viewCellDisplay(val: number): string | number {
   if (!Number.isFinite(val) || val <= 0) return ''
   return val
 }
-
-const TOAST_ERR_MAX = 280
-export function errorMessageForToast(err: unknown): string {
-  const raw = err instanceof Error ? err.message : String(err)
-  if (raw.length <= TOAST_ERR_MAX) return raw
-  return `${raw.slice(0, TOAST_ERR_MAX - 1)}…`
-}

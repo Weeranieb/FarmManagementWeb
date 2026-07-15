@@ -21,8 +21,8 @@ import {
   monthNavigationBounds,
   todayYearMonth,
   abbrevThaiKgUnit,
-  errorMessageForToast,
 } from './utils'
+import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 
 const L = th.dailyFeed
 
@@ -279,7 +279,7 @@ export function useDailyFeedTab({
           setIsEditing(false)
         },
         onError: (err) => {
-          showToast('error', errorMessageForToast(err))
+          showToast('error', getApiErrorMessage(err))
         },
       },
     )

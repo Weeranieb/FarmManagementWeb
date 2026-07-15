@@ -33,3 +33,11 @@ export function useClient(): ClientContextValue {
   }
   return ctx
 }
+
+/** Parsed positive client id from ClientContext, or undefined. */
+// eslint-disable-next-line react-refresh/only-export-components
+export function useSelectedClientIdNum(): number | undefined {
+  const { selectedClientId } = useClient()
+  const n = Number(selectedClientId)
+  return selectedClientId && Number.isFinite(n) && n > 0 ? n : undefined
+}

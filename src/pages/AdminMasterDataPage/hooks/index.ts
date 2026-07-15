@@ -1,1 +1,0 @@
-export { useAdminMasterData } from './useAdminMasterData'

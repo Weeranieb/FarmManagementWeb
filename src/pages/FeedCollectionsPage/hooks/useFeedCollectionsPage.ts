@@ -1,6 +1,5 @@
 import { useState, useEffect, type FormEvent } from 'react'
-import { useAuthQuery } from '../../../hooks/useAuth'
-import { UserLevel } from '../../../constants/userLevel'
+import { useIsClientAdmin } from '../../../hooks/useAuth'
 import {
   useFeedCollectionListQuery,
   useCreateFeedCollectionMutation,
@@ -18,8 +17,7 @@ import {
 } from '../../../components/feedCollections/formUtils'
 
 export function useFeedCollectionsPage() {
-  const { data: user } = useAuthQuery()
-  const isAdmin = user != null && user.userLevel >= UserLevel.ClientAdmin
+  const isAdmin = useIsClientAdmin()
   const [searchTerm, setSearchTerm] = useState('')
 
   const { data, isLoading } = useFeedCollectionListQuery(

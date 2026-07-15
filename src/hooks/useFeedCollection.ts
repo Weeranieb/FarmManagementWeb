@@ -5,7 +5,7 @@ import {
   type UpdateFeedCollectionRequest,
 } from '../api/feedCollection'
 import { useAuthQuery } from './useAuth'
-import { useClient } from '../contexts/ClientContext'
+import { useSelectedClientIdNum } from '../contexts/ClientContext'
 import {
   feedPriceHistoryApi,
   type CreateFeedPriceHistoryRequest,
@@ -29,16 +29,12 @@ export const feedPriceHistoryKeys = {
 
 export function useFeedCollectionListQuery(keyword?: string) {
   const { data: user } = useAuthQuery()
-  const { selectedClientId } = useClient()
+  const clientId = useSelectedClientIdNum()
   const jwtClientId = user?.clientId ?? null
-  const selectedNum = selectedClientId ? Number(selectedClientId) : NaN
   const queryClientId =
-    jwtClientId == null && !Number.isNaN(selectedNum) && selectedNum > 0
-      ? selectedNum
-      : undefined
+    jwtClientId == null && clientId != null ? clientId : undefined
 
-  const enabled =
-    jwtClientId != null || (!Number.isNaN(selectedNum) && selectedNum > 0)
+  const enabled = jwtClientId != null || clientId != null
 
   return useQuery({
     queryKey: [
@@ -77,15 +73,13 @@ export function useFeedPriceHistoryQuery(
 export function useCreateFeedCollectionMutation() {
   const qc = useQueryClient()
   const { data: user } = useAuthQuery()
-  const { selectedClientId } = useClient()
+  const clientId = useSelectedClientIdNum()
   return useMutation({
     mutationFn: (body: CreateFeedCollectionRequest) => {
       const jwtClientId = user?.clientId ?? null
       if (jwtClientId != null) {
         return feedCollectionApi.create(body)
       }
-      const sid = selectedClientId ? Number(selectedClientId) : NaN
-      const clientId = !Number.isNaN(sid) && sid > 0 ? sid : undefined
       return feedCollectionApi.create(
         clientId != null ? { ...body, clientId } : body,
       )

@@ -1,18 +1,17 @@
 import { useState, useMemo } from 'react'
-import { useAuthQuery } from '../../../hooks/useAuth'
-import { useClient } from '../../../contexts/ClientContext'
-import { UserLevel } from '../../../constants/userLevel'
+import { useIsClientAdmin } from '../../../hooks/useAuth'
+import { useSelectedClientIdNum } from '../../../contexts/ClientContext'
 import { useWorkerListQuery } from '../../../hooks/useWorker'
 import { useFarmGroupListQuery } from '../../../hooks/useFarmGroup'
 import { th } from '../../../locales/th'
 
 const L = th.workers
 
+const NATIONALITY_FILTER_OPTIONS = ['all', 'Thai', 'Cambodian'] as const
+
 export function useWorkersListPage() {
-  const { data: user } = useAuthQuery()
-  const { selectedClientId } = useClient()
-  const clientId = selectedClientId ? Number(selectedClientId) : undefined
-  const isAdmin = user != null && user.userLevel >= UserLevel.ClientAdmin
+  const clientId = useSelectedClientIdNum()
+  const isAdmin = useIsClientAdmin()
   const [searchTerm, setSearchTerm] = useState('')
   const [nationalityFilter, setNationalityFilter] = useState('all')
 
@@ -28,11 +27,6 @@ export function useWorkersListPage() {
     }
     return map
   }, [farmGroups])
-
-  const nationalityFilterOptions = useMemo(
-    () => ['all', 'Thai', 'Cambodian'] as const,
-    [],
-  )
 
   const nationalityLabel = (code: string) => {
     if (code === 'all') return L.allNationalities
@@ -60,7 +54,7 @@ export function useWorkersListPage() {
     isLoading,
     filtered,
     farmGroupMap,
-    nationalityFilterOptions,
+    nationalityFilterOptions: NATIONALITY_FILTER_OPTIONS,
     nationalityLabel,
   }
 }

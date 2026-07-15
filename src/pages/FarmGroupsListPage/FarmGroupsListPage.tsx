@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Search, Plus, Pencil, Building, Layers } from 'lucide-react'
 import { PageHeader } from '../../components/PageHeader'
 import { th } from '../../locales/th'
-import { useFarmGroupsListPage } from './hooks'
+import { useFarmGroupsListPage } from './hooks/useFarmGroupsListPage'
 
 const L = th.farmGroups
 
