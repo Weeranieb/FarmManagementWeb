@@ -7,6 +7,7 @@ import {
   type UpdateMeRequest,
   type User,
 } from '../api/auth'
+import { UserLevel } from '../constants/userLevel'
 
 // Query key factory
 export const authKeys = {
@@ -24,6 +25,18 @@ export function useAuthQuery() {
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
+}
+
+/** Client admin or above (userLevel >= ClientAdmin). */
+export function useIsClientAdmin(): boolean {
+  const { data: user } = useAuthQuery()
+  return user != null && user.userLevel >= UserLevel.ClientAdmin
+}
+
+/** Super admin only. */
+export function useIsSuperAdmin(): boolean {
+  const { data: user } = useAuthQuery()
+  return user?.userLevel === UserLevel.SuperAdmin
 }
 
 const REMEMBERED_USERNAME_KEY = 'boonmafarm_remembered_username'
@@ -69,7 +82,8 @@ export function useUpdateMeMutation() {
  */
 export function useChangeMyPasswordMutation() {
   return useMutation({
-    mutationFn: (body: ChangeMyPasswordRequest) => authApi.changeMyPassword(body),
+    mutationFn: (body: ChangeMyPasswordRequest) =>
+      authApi.changeMyPassword(body),
   })
 }
 

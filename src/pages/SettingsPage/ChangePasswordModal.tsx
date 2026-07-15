@@ -4,6 +4,7 @@ import { th } from '../../locales/th'
 import { useAppToast } from '../../contexts/AppToastContext'
 import { useChangeMyPasswordMutation } from '../../hooks/useAuth'
 import { isValidPassword } from '../../utils/password'
+import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 
 const L = th.settings
 
@@ -48,7 +49,7 @@ export function ChangePasswordModal({ onClose }: Props) {
     } catch (err) {
       showToast(
         'error',
-        err instanceof Error ? err.message : L.passwordChangeFailed,
+        getApiErrorMessage(err, L.passwordChangeFailed),
       )
     }
   }

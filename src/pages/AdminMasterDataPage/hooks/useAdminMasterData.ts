@@ -21,7 +21,7 @@ import {
   formatFarmDisplayNameTH,
   normalizeFarmNameForStore,
 } from '../../../utils/masterDataName'
-import { filterDigitsOnly, isDigitsOnly } from '../../../utils/phoneInput'
+import { filterPhoneInput, isDigitsOnly } from '../../../utils/phoneInput'
 import { isValidEmail } from '../../../utils/emailInput'
 import { getApiErrorMessage } from '../../../utils/apiErrorMessage'
 import { th } from '../../../locales/th'
@@ -44,10 +44,8 @@ export function useAdminMasterData() {
   const [activeTab, setActiveTab] = useState<
     'clients' | 'farms' | 'ponds' | 'users'
   >(isSuperAdmin ? 'clients' : 'farms')
-  const {
-    data: clientSummaries = [],
-    isLoading: clientSummariesLoading,
-  } = useClientSummariesQuery(isSuperAdmin && activeTab === 'clients')
+  const { data: clientSummaries = [], isLoading: clientSummariesLoading } =
+    useClientSummariesQuery(isSuperAdmin && activeTab === 'clients')
   const { showToast } = useAppToast()
   const queryClient = useQueryClient()
   const selectedClientIdNum = selectedClientId
@@ -58,8 +56,6 @@ export function useAdminMasterData() {
       ? selectedClientIdNum
       : undefined,
   )
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
-  const [successMessage, setSuccessMessage] = useState('')
   const [expandedFarms, setExpandedFarms] = useState<string[]>([])
   const autoExpandedClientRef = useRef<string | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -75,21 +71,22 @@ export function useAdminMasterData() {
     email: '',
   })
   const [farmForm, setFarmForm] = useState({ name: '' })
-  const [pondForms, setPondForms] = useState<{ name: string; area: string }[]>(
-    [{ name: '', area: '' }],
-  )
+  const [pondForms, setPondForms] = useState<{ name: string; area: string }[]>([
+    { name: '', area: '' },
+  ])
   const [selectedFarmId, setSelectedFarmId] = useState('')
   const [isSavingClientForm, setIsSavingClientForm] = useState(false)
   const [isSavingFarmForm, setIsSavingFarmForm] = useState(false)
   const [isSavingPondForm, setIsSavingPondForm] = useState(false)
   const [isEditSaving, setIsEditSaving] = useState(false)
-  const farmList = useMemo(
-    () => farmListData?.farms ?? [],
-    [farmListData],
-  )
+  const farmList = useMemo(() => farmListData?.farms ?? [], [farmListData])
 
   useEffect(() => {
-    if (farmList.length > 0 && selectedClientId && autoExpandedClientRef.current !== selectedClientId) {
+    if (
+      farmList.length > 0 &&
+      selectedClientId &&
+      autoExpandedClientRef.current !== selectedClientId
+    ) {
       setExpandedFarms(farmList.map((f) => String(f.id)))
       autoExpandedClientRef.current = selectedClientId
     }
@@ -201,9 +198,7 @@ export function useAdminMasterData() {
               ]
             : old,
       )
-      setSuccessMessage(t.successClientCreated(name))
-      setShowSuccessMessage(true)
-      setTimeout(() => setShowSuccessMessage(false), 5000)
+      showToast('success', t.successClientCreated(name))
       setClientForm({
         name: '',
         contactPerson: '',
@@ -232,14 +227,13 @@ export function useAdminMasterData() {
         clientId: Number(selectedClientId),
         name,
       })
-      setSuccessMessage(
+      showToast(
+        'success',
         t.successFarmCreated(
           formatFarmDisplayNameTH(name),
           selectedClient?.value ?? '',
         ),
       )
-      setShowSuccessMessage(true)
-      setTimeout(() => setShowSuccessMessage(false), 5000)
       setFarmForm({ name: '' })
       refetchHierarchy()
     } catch (err) {
@@ -278,14 +272,13 @@ export function useAdminMasterData() {
     try {
       await pondApi.createPonds({ farmId: Number(selectedFarmId), ponds })
       const pondCount = ponds.length
-      setSuccessMessage(
+      showToast(
+        'success',
         t.successPondsCreated(
           pondCount,
           formatFarmDisplayNameTH(selectedFarm?.name ?? ''),
         ),
       )
-      setShowSuccessMessage(true)
-      setTimeout(() => setShowSuccessMessage(false), 5000)
       setPondForms([{ name: '', area: '' }])
       // Force-refetch farm list + every per-farm pond cache (not just the
       // observed ones), matching the bulk-import + create-farm paths. The
@@ -364,7 +357,7 @@ export function useAdminMasterData() {
       const full = await clientApi.getClient(Number(client.key))
       setEditingClientSnapshot({
         ...full,
-        contactNumber: filterDigitsOnly(full.contactNumber ?? ''),
+        contactNumber: filterPhoneInput(full.contactNumber ?? ''),
       })
       setEditingItem({
         id: String(client.key),
@@ -446,15 +439,16 @@ export function useAdminMasterData() {
         await farmApi.updateFarm(farmId, { name })
         queryClient.setQueriesData<FarmResponse[]>(
           { queryKey: farmKeys.list() },
-          (old) =>
-            old?.map((f) => (f.id === farmId ? { ...f, name } : f)),
+          (old) => old?.map((f) => (f.id === farmId ? { ...f, name } : f)),
         )
         refetchHierarchy()
       } else {
         const areaTrimmed = editingPondArea.trim()
-        const areaValue =
-          areaTrimmed === '' ? undefined : Number(areaTrimmed)
-        if (areaValue !== undefined && (Number.isNaN(areaValue) || areaValue < 0)) {
+        const areaValue = areaTrimmed === '' ? undefined : Number(areaTrimmed)
+        if (
+          areaValue !== undefined &&
+          (Number.isNaN(areaValue) || areaValue < 0)
+        ) {
           showToast('error', t.alertUpdateFailed)
           return
         }
@@ -472,9 +466,7 @@ export function useAdminMasterData() {
             : 'บ่อ'
       const displayName =
         editingItem.type === 'farm' ? normalizeFarmNameForStore(raw) : raw
-      setSuccessMessage(t.successUpdated(typeLabel, displayName))
-      setShowSuccessMessage(true)
-      setTimeout(() => setShowSuccessMessage(false), 5000)
+      showToast('success', t.successUpdated(typeLabel, displayName))
       setIsEditModalOpen(false)
       setEditingItem(null)
       setEditingClientSnapshot(null)
@@ -512,8 +504,6 @@ export function useAdminMasterData() {
     farmListLoading,
     activeTab,
     setActiveTab,
-    showSuccessMessage,
-    successMessage,
     expandedFarms,
     isEditModalOpen,
     setIsEditModalOpen,

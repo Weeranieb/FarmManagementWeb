@@ -1,14 +1,11 @@
 import { useState } from 'react'
-import { useAuthQuery } from '../../../hooks/useAuth'
-import { useClient } from '../../../contexts/ClientContext'
-import { UserLevel } from '../../../constants/userLevel'
+import { useIsClientAdmin } from '../../../hooks/useAuth'
+import { useSelectedClientIdNum } from '../../../contexts/ClientContext'
 import { useFarmGroupListQuery } from '../../../hooks/useFarmGroup'
 
 export function useFarmGroupsListPage() {
-  const { data: user } = useAuthQuery()
-  const { selectedClientId } = useClient()
-  const clientId = selectedClientId ? Number(selectedClientId) : undefined
-  const isAdmin = user != null && user.userLevel >= UserLevel.ClientAdmin
+  const clientId = useSelectedClientIdNum()
+  const isAdmin = useIsClientAdmin()
   const [searchTerm, setSearchTerm] = useState('')
 
   const { data: farmGroups = [], isLoading } = useFarmGroupListQuery(clientId)

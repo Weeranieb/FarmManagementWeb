@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { th, type AdminMasterDataLocale } from '../../../locales/th'
 import { UserLevel } from '../../../constants/userLevel'
+import { getApiErrorMessage } from '../../../utils/apiErrorMessage'
 import {
   filterPhoneInput,
   isDigitsOnly,
@@ -92,7 +93,7 @@ export function CreateUserTab({ t, clientList, clientListLoading }: Props) {
     } catch (err) {
       showToast(
         'error',
-        err instanceof Error ? err.message : t.userErrorCreateFailed,
+        getApiErrorMessage(err, t.userErrorCreateFailed),
       )
     }
   }

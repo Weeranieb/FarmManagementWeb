@@ -4,7 +4,8 @@ import { formatFarmDisplayNameTH } from '../../utils/masterDataName'
 import { StatusBadge } from '../../components/StatusBadge'
 import { PageHeader } from '../../components/PageHeader'
 import { th } from '../../locales/th'
-import { useFarmsListPage } from './hooks'
+import { useFarmsListPage } from './hooks/useFarmsListPage'
+import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 
 const L = th.farms
 
@@ -74,8 +75,7 @@ export function FarmsListPage() {
       {error && (
         <div className='bg-red-50 border border-red-200 rounded-xl shadow-md p-6'>
           <p className='text-red-800'>
-            {L.errorLoading}{' '}
-            {error instanceof Error ? error.message : L.unknownError}
+            {L.errorLoading} {getApiErrorMessage(error, L.unknownError)}
           </p>
         </div>
       )}

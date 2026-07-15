@@ -5,6 +5,7 @@ import { useAdminResetPasswordMutation } from '../../../hooks/useUser'
 import { useAppToast } from '../../../contexts/AppToastContext'
 import { isValidPassword } from '../../../utils/password'
 import type { UserResponse } from '../../../api/user'
+import { getApiErrorMessage } from '../../../utils/apiErrorMessage'
 
 type T = AdminMasterDataLocale
 
@@ -48,7 +49,7 @@ export function ResetPasswordModal({ t, user, isOpen, onClose }: Props) {
     } catch (err) {
       showToast(
         'error',
-        err instanceof Error ? err.message : t.userErrorResetPasswordFailed,
+        getApiErrorMessage(err, t.userErrorResetPasswordFailed),
       )
     }
   }

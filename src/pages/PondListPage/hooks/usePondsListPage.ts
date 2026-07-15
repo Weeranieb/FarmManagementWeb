@@ -3,7 +3,10 @@ import {
   usePondListWithDetails,
   type PondWithFarmName,
 } from '../../../hooks/usePond'
-import { useClient } from '../../../contexts/ClientContext'
+import {
+  useClient,
+  useSelectedClientIdNum,
+} from '../../../contexts/ClientContext'
 
 export function usePondsListPage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -14,7 +17,7 @@ export function usePondsListPage() {
   )
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { selectedClientId } = useClient()
-  const clientId = selectedClientId ? Number(selectedClientId) : undefined
+  const clientId = useSelectedClientIdNum()
   const { ponds, isLoading, error, refetch } = usePondListWithDetails(clientId)
 
   const farms = useMemo(() => {

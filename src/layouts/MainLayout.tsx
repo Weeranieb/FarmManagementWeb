@@ -16,10 +16,14 @@ import {
   Database,
   Layers,
 } from 'lucide-react'
-import { useAuthQuery, useLogoutMutation } from '../hooks/useAuth'
+import {
+  useAuthQuery,
+  useLogoutMutation,
+  useIsClientAdmin,
+  useIsSuperAdmin,
+} from '../hooks/useAuth'
 import { useClientListQuery } from '../hooks/useClient'
 import { useClient } from '../contexts/ClientContext'
-import { UserLevel } from '../constants/userLevel'
 import { th } from '../locales/th'
 
 export function MainLayout() {
@@ -34,10 +38,8 @@ export function MainLayout() {
   const { data: clientList = [] } = useClientListQuery()
   const { selectedClientId, setSelectedClientId } = useClient()
 
-  const isAdminUser =
-    user?.userLevel === UserLevel.SuperAdmin ||
-    user?.userLevel === UserLevel.ClientAdmin
-  const isSuperAdmin = user?.userLevel === UserLevel.SuperAdmin
+  const isAdminUser = useIsClientAdmin()
+  const isSuperAdmin = useIsSuperAdmin()
   const L = th.layout
 
   const navItems = [

@@ -1,12 +1,11 @@
 import { useState, useMemo } from 'react'
 import { useFarmListQuery } from '../../../hooks/useFarm'
-import { useClient } from '../../../contexts/ClientContext'
+import { useSelectedClientIdNum } from '../../../contexts/ClientContext'
 
 export function useFarmsListPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
-  const { selectedClientId } = useClient()
-  const clientId = selectedClientId ? Number(selectedClientId) : undefined
+  const clientId = useSelectedClientIdNum()
   const { data, isLoading, error } = useFarmListQuery(clientId)
   const farms = useMemo(() => data?.farms ?? [], [data?.farms])
 

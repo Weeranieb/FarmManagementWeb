@@ -15,12 +15,6 @@ export interface ApiError {
   status?: number
 }
 
-export interface ApiResponse<T> {
-  success: boolean
-  data?: T
-  error?: ApiError
-}
-
 type ApiPayload = Record<string, unknown>
 
 function isRecord(value: unknown): value is Record<string, unknown> {

@@ -22,7 +22,7 @@ import { PageHeader } from '../../components/PageHeader'
 import { th } from '../../locales/th'
 import { formatFarmDisplayNameTH } from '../../utils/masterDataName'
 import { formatDateThai } from '../../utils/thaiTime'
-import { fishTypeDisplayLabel } from './utils'
+import { fishTypeDisplayLabel } from '../../utils/fishTypeLabel'
 import { usePondDetailPage } from './hooks'
 
 const L = th.pondDetail

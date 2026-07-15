@@ -381,7 +381,7 @@ export function BulkImportFarmPondModal({
       setPhase('preview')
     } catch (e) {
       setError(
-        e instanceof Error ? e.message : L.bulkImportErrorParseFailed,
+        getApiErrorMessage(e, L.bulkImportErrorParseFailed),
       )
       setSelectedFile(null)
     } finally {

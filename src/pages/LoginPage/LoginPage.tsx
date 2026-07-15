@@ -1,22 +1,23 @@
 import { Fish, Lock, User, Eye, EyeOff } from 'lucide-react'
+import { useState, type FormEvent } from 'react'
 import { th } from '../../locales/th'
-import { useLoginPage } from './hooks'
+import { useLoginMutation, getRememberedUsername } from '../../hooks/useAuth'
+import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 
 const L = th.login
 
 export function LoginPage() {
-  const {
-    username,
-    setUsername,
-    password,
-    setPassword,
-    rememberMe,
-    setRememberMe,
-    showPassword,
-    setShowPassword,
-    loginMutation,
-    handleSubmit,
-  } = useLoginPage()
+  const remembered = getRememberedUsername()
+  const [username, setUsername] = useState(remembered || '')
+  const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(!!remembered)
+  const [showPassword, setShowPassword] = useState(false)
+  const loginMutation = useLoginMutation()
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    loginMutation.mutate({ username, password, rememberMe })
+  }
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-blue-900 via-blue-700 to-slate-900 flex items-center justify-center p-4'>
@@ -100,9 +101,7 @@ export function LoginPage() {
 
             {loginMutation.isError && (
               <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm'>
-                {loginMutation.error instanceof Error
-                  ? loginMutation.error.message
-                  : L.loginFailed}
+                {getApiErrorMessage(loginMutation.error, L.loginFailed)}
               </div>
             )}
 

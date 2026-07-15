@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 import {
   X,
   Download,
@@ -52,7 +53,7 @@ export function ExportModal({
       await apiClient.downloadBlob(path, fallbackName)
       setDone(true)
     } catch (e) {
-      const msg = e instanceof Error ? e.message : EL.exportFailed
+      const msg = getApiErrorMessage(e, EL.exportFailed)
       setError(msg)
     } finally {
       setExporting(false)

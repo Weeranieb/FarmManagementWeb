@@ -58,10 +58,6 @@ export const farmApi = {
     return apiClient.get<FarmListResponse>(`/farm${query}`)
   },
 
-  getFarms: async (): Promise<Farm[]> => {
-    return apiClient.get<Farm[]>('/farm?clientId=1')
-  },
-
   getFarmHierarchy: async (clientId?: number): Promise<FarmHierarchyItem[]> => {
     const query = clientId != null ? `?clientId=${clientId}` : ''
     return apiClient.get<FarmHierarchyItem[]>(`/farm/hierarchy${query}`)

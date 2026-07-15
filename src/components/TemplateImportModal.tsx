@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { getApiErrorMessage } from '../utils/apiErrorMessage'
 import {
   X,
   Upload,
@@ -115,7 +116,7 @@ export function TemplateImportModal({
       await onImport(selectedFile, activeSelectedIds)
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : L.excelParseError)
+      setError(getApiErrorMessage(err, L.excelParseError))
     }
   }
 
@@ -137,7 +138,7 @@ export function TemplateImportModal({
             onClick={handleClose}
             className='mt-4 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-100'
           >
-            {th.masterData.modalClose}
+            {th.common.modalClose}
           </button>
         </div>
       </div>
@@ -269,7 +270,7 @@ export function TemplateImportModal({
             onClick={handleClose}
             className='rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50'
           >
-            {th.masterData.modalCancel}
+            {th.common.modalCancel}
           </button>
           <button
             type='button'

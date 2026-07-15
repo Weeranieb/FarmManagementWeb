@@ -2,6 +2,7 @@ import type { Dispatch, FormEvent, SetStateAction } from 'react'
 import { X } from 'lucide-react'
 import { th } from '../../locales/th'
 import { FEED_TYPE_OPTIONS, type FeedTypeValue } from '../../constants/feedType'
+import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 
 const L = th.feedCollections
 
@@ -141,7 +142,7 @@ export function FeedCollectionAddModal({
           {isError && (
             <p className='mb-3 text-sm text-red-600' role='alert'>
               {L.saveFailed}
-              {error instanceof Error ? `: ${error.message}` : ''}
+              {error ? `: ${getApiErrorMessage(error)}` : ''}
             </p>
           )}
           <button
