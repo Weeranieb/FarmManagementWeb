@@ -9,6 +9,13 @@ Linear issue references use the `FAR-N` format and link to https://linear.app/fa
 
 ---
 
+## [0.1.4](https://github.com/Weeranieb/FarmManagementWeb/compare/v0.1.3...v0.1.4) (2026-08-10)
+
+
+### Bug Fixes
+
+* stop hard-redirect loop on /login when session check 401s ([#28](https://github.com/Weeranieb/FarmManagementWeb/issues/28)) ([98705f9](https://github.com/Weeranieb/FarmManagementWeb/commit/98705f94cc21d1247454063c4afe238003c506e0))
+
 ## [0.1.3](https://github.com/Weeranieb/FarmManagementWeb/compare/v0.1.2...v0.1.3) (2026-05-15)
 
 
