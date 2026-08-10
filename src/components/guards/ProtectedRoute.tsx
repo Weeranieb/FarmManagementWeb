@@ -7,13 +7,13 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { data: user, isLoading, isError } = useAuthQuery()
+  const { data: user, isLoading } = useAuthQuery()
 
   if (isLoading) {
     return <AuthLoadingScreen />
   }
 
-  if (isError || !user) {
+  if (!user) {
     return <Navigate to='/login' replace />
   }
 
