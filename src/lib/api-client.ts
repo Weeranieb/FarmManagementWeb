@@ -70,12 +70,16 @@ class ApiClient {
     return isRecord(json) ? json : {}
   }
 
+  private static readonly PUBLIC_PATHS = ['/login', '/forgot-password', '/']
+
   private handleUnauthorized(response: Response): void {
     if (response.status !== 401) {
       return
     }
 
-    window.location.href = '/login'
+    if (!ApiClient.PUBLIC_PATHS.includes(window.location.pathname)) {
+      window.location.href = '/login'
+    }
     throw new HttpError('Unauthorized', 'UNAUTHORIZED', 401)
   }
 
