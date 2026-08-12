@@ -6,6 +6,7 @@ export interface PondResponse {
   name: string
   totalFish: number | null
   status: string
+  area?: number | null
   fishTypes: string[]
   ageDays: number | null
   startDate: string | null
@@ -17,15 +18,21 @@ export interface PondResponse {
   updatedBy?: string
 }
 
+export interface CreatePondItem {
+  name: string
+  area?: number
+}
+
 export interface CreatePondsRequest {
   farmId: number
-  names: string[]
+  ponds: CreatePondItem[]
 }
 
 export interface UpdatePondBody {
   farmId?: number
   name?: string
   status?: string
+  area?: number
 }
 
 export interface PondFillRequest {
@@ -137,6 +144,106 @@ export interface PondSellPreviewResponse {
   validationError?: string
 }
 
+// --- Calc (live form totals) request/response types ---
+
+export interface PondFillCalcRequest {
+  amount?: number
+  fishWeight?: number
+  pricePerUnit?: number
+  additionalCosts?: { title: string; cost: number }[]
+}
+
+export interface PondFillCalcResponse {
+  quantity: number
+  avgWeightKg: number
+  totalWeight: number
+  costPerUnit: number
+  baseStockCost: number
+  additionalCosts: AdditionalCostLine[]
+  additionalCostsTotal: number
+  totalCost: number
+}
+
+export interface PondMoveCalcRequest {
+  amount?: number
+  fishWeight?: number
+  pricePerUnit?: number
+  additionalCosts?: { title: string; cost: number }[]
+}
+
+export interface PondMoveCalcResponse {
+  quantity: number
+  avgWeightKg: number
+  totalWeight: number
+  costPerUnit: number
+  baseTransferCost: number
+  additionalCosts: AdditionalCostLine[]
+  additionalCostsTotal: number
+  totalCost: number
+}
+
+export interface PondSellCalcDetailItem {
+  fishSizeGradeId?: number
+  weight?: number
+  pricePerUnit?: number
+  fishCount?: number
+}
+
+export interface PondSellCalcRequest {
+  details?: PondSellCalcDetailItem[]
+  additionalCosts?: { title: string; cost: number }[]
+}
+
+export interface PondSellCalcLine {
+  fishSizeGradeId: number
+  weight: number
+  pricePerKg: number
+  subtotal: number
+  fishCount?: number
+}
+
+export interface PondSellCalcResponse {
+  items: PondSellCalcLine[]
+  totalWeight: number
+  totalRevenue: number
+  additionalCosts: AdditionalCostLine[]
+  additionalCostsTotal: number
+  netTotal: number
+}
+
+// --- Bulk import (farm + pond) ---
+
+export interface BulkImportPondItem {
+  name: string
+  area?: number | null
+}
+
+export interface BulkImportFarmItem {
+  name: string
+  ponds: BulkImportPondItem[]
+}
+
+export interface BulkImportFarmPondRequest {
+  farms: BulkImportFarmItem[]
+}
+
+export interface BulkImportFarmResult {
+  name: string
+  isNew: boolean
+  pondsCreated: number
+  pondsUpdated: number
+  pondsUnchanged: number
+}
+
+export interface BulkImportFarmPondResponse {
+  farmsCreated: number
+  farmsExisting: number
+  pondsCreated: number
+  pondsUpdated: number
+  pondsUnchanged: number
+  farms: BulkImportFarmResult[]
+}
+
 export const pondApi = {
   getPond: async (id: number): Promise<PondResponse> => {
     return apiClient.get<PondResponse>(`/pond/${id}`)
@@ -207,6 +314,48 @@ export const pondApi = {
   ): Promise<PondSellPreviewResponse> => {
     return apiClient.post<PondSellPreviewResponse>(
       `/pond/${pondId}/sell/preview`,
+      body,
+    )
+  },
+
+  /**
+   * Live form totals for the fill (add stock) action. Pure math, no DB lookup.
+   * Use with debouncing while the user types.
+   */
+  fillPondCalc: async (
+    body: PondFillCalcRequest,
+  ): Promise<PondFillCalcResponse> => {
+    return apiClient.post<PondFillCalcResponse>('/pond/fill/calc', body)
+  },
+
+  /**
+   * Live form totals for the move (transfer) action. Pure math.
+   */
+  movePondCalc: async (
+    body: PondMoveCalcRequest,
+  ): Promise<PondMoveCalcResponse> => {
+    return apiClient.post<PondMoveCalcResponse>('/pond/move/calc', body)
+  },
+
+  /**
+   * Live form totals for the sell action. Pure math.
+   */
+  sellPondCalc: async (
+    body: PondSellCalcRequest,
+  ): Promise<PondSellCalcResponse> => {
+    return apiClient.post<PondSellCalcResponse>('/pond/sell/calc', body)
+  },
+
+  downloadTemplate: async (): Promise<void> => {
+    return apiClient.downloadBlob('/pond/template', 'pond_template.xlsx')
+  },
+
+  bulkImportFarmPond: async (
+    clientId: number,
+    body: BulkImportFarmPondRequest,
+  ): Promise<BulkImportFarmPondResponse> => {
+    return apiClient.post<BulkImportFarmPondResponse>(
+      `/pond/bulk-import/${clientId}`,
       body,
     )
   },

@@ -1,4 +1,4 @@
-import { th } from '../../locales/th'
+import { th } from '../locales/th'
 
 const fishTypeLabels = th.fishType as Record<string, string>
 

@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import {
   clientApi,
   type ClientResponse,
@@ -6,10 +6,12 @@ import {
 } from '../../../api/client'
 import { useQueries, useQueryClient } from '@tanstack/react-query'
 import {
+  clientKeys,
   useClientListQuery,
   useClientSummariesQuery,
   useInvalidateClientList,
 } from '../../../hooks/useClient'
+import type { ClientSummary } from '../../../api/client'
 import { farmApi, type FarmResponse } from '../../../api/farm'
 import { pondApi, type PondResponse } from '../../../api/pond'
 import { farmKeys, useFarmListQuery } from '../../../hooks/useFarm'
@@ -19,8 +21,9 @@ import {
   formatFarmDisplayNameTH,
   normalizeFarmNameForStore,
 } from '../../../utils/masterDataName'
-import { filterDigitsOnly, isDigitsOnly } from '../../../utils/phoneInput'
+import { filterPhoneInput, isDigitsOnly } from '../../../utils/phoneInput'
 import { isValidEmail } from '../../../utils/emailInput'
+import { getApiErrorMessage } from '../../../utils/apiErrorMessage'
 import { th } from '../../../locales/th'
 import { useAuthQuery } from '../../../hooks/useAuth'
 import { UserLevel } from '../../../constants/userLevel'
@@ -41,10 +44,8 @@ export function useAdminMasterData() {
   const [activeTab, setActiveTab] = useState<
     'clients' | 'farms' | 'ponds' | 'users'
   >(isSuperAdmin ? 'clients' : 'farms')
-  const {
-    data: clientSummaries = [],
-    isLoading: clientSummariesLoading,
-  } = useClientSummariesQuery(isSuperAdmin && activeTab === 'clients')
+  const { data: clientSummaries = [], isLoading: clientSummariesLoading } =
+    useClientSummariesQuery(isSuperAdmin && activeTab === 'clients')
   const { showToast } = useAppToast()
   const queryClient = useQueryClient()
   const selectedClientIdNum = selectedClientId
@@ -55,13 +56,13 @@ export function useAdminMasterData() {
       ? selectedClientIdNum
       : undefined,
   )
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
-  const [successMessage, setSuccessMessage] = useState('')
   const [expandedFarms, setExpandedFarms] = useState<string[]>([])
+  const autoExpandedClientRef = useRef<string | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingClientSnapshot, setEditingClientSnapshot] =
     useState<ClientResponse | null>(null)
   const [editingItem, setEditingItem] = useState<EditingItem | null>(null)
+  const [editingPondArea, setEditingPondArea] = useState<string>('')
 
   const [clientForm, setClientForm] = useState({
     name: '',
@@ -70,13 +71,26 @@ export function useAdminMasterData() {
     email: '',
   })
   const [farmForm, setFarmForm] = useState({ name: '' })
-  const [pondForms, setPondForms] = useState([{ name: '' }])
+  const [pondForms, setPondForms] = useState<{ name: string; area: string }[]>([
+    { name: '', area: '' },
+  ])
   const [selectedFarmId, setSelectedFarmId] = useState('')
   const [isSavingClientForm, setIsSavingClientForm] = useState(false)
   const [isSavingFarmForm, setIsSavingFarmForm] = useState(false)
   const [isSavingPondForm, setIsSavingPondForm] = useState(false)
   const [isEditSaving, setIsEditSaving] = useState(false)
-  const farmList = farmListData?.farms ?? []
+  const farmList = useMemo(() => farmListData?.farms ?? [], [farmListData])
+
+  useEffect(() => {
+    if (
+      farmList.length > 0 &&
+      selectedClientId &&
+      autoExpandedClientRef.current !== selectedClientId
+    ) {
+      setExpandedFarms(farmList.map((f) => String(f.id)))
+      autoExpandedClientRef.current = selectedClientId
+    }
+  }, [farmList, selectedClientId])
 
   useEffect(() => {
     if (!isClientAdmin || !user?.clientId) return
@@ -108,34 +122,31 @@ export function useAdminMasterData() {
   const selectedClient = clientList.find(
     (c) => String(c.key) === selectedClientId,
   )
-  const clientFarms: FarmResponse[] =
-    selectedClientId && activeTab !== 'clients' ? farmList : []
+  const clientFarms: FarmResponse[] = useMemo(
+    () => (selectedClientId && activeTab !== 'clients' ? farmList : []),
+    [selectedClientId, activeTab, farmList],
+  )
   const totalPondCount = clientFarms.reduce(
     (sum, f) => sum + (f.pondCount ?? 0),
     0,
   )
 
-  const refetchFarmList = useCallback(() => {
+  const refetchHierarchy = useCallback(async () => {
     const id = selectedClientIdNum
-    if (!id) return
-    void queryClient.invalidateQueries({
-      queryKey: [...farmKeys.list(), id],
-    })
+    // Use refetchQueries (not invalidate) so React Query actually pulls
+    // fresh data from the server right now, regardless of staleTime or
+    // whether the per-farm pond query has any active observers. Awaiting
+    // both ensures the panel re-renders with the new data before any
+    // follow-on logic runs.
+    await Promise.all([
+      id
+        ? queryClient.refetchQueries({
+            queryKey: [...farmKeys.list(), id],
+          })
+        : Promise.resolve(),
+      queryClient.refetchQueries({ queryKey: pondKeys.lists() }),
+    ])
   }, [queryClient, selectedClientIdNum])
-
-  const refetchPondsForFarm = useCallback(
-    (farmId: number) => {
-      void queryClient.invalidateQueries({
-        queryKey: pondKeys.list(farmId),
-      })
-    },
-    [queryClient],
-  )
-
-  const refetchHierarchy = useCallback(() => {
-    refetchFarmList()
-    expandedFarms.forEach((farmId) => refetchPondsForFarm(Number(farmId)))
-  }, [refetchFarmList, refetchPondsForFarm, expandedFarms])
 
   const handleClientSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -157,15 +168,37 @@ export function useAdminMasterData() {
     }
     setIsSavingClientForm(true)
     try {
-      await clientApi.createClient({
+      const newClient = await clientApi.createClient({
         name,
         ownerName,
         contactNumber,
         email: email ? email : null,
       })
-      setSuccessMessage(t.successClientCreated(name))
-      setShowSuccessMessage(true)
-      setTimeout(() => setShowSuccessMessage(false), 5000)
+      queryClient.setQueriesData<DropdownItem[]>(
+        { queryKey: clientKeys.list() },
+        (old) =>
+          old ? [...old, { key: newClient.id, value: newClient.name }] : old,
+      )
+      queryClient.setQueriesData<ClientSummary[]>(
+        { queryKey: clientKeys.summaries() },
+        (old) =>
+          old
+            ? [
+                ...old,
+                {
+                  id: newClient.id,
+                  name: newClient.name,
+                  ownerName: newClient.ownerName,
+                  contactNumber: newClient.contactNumber,
+                  isActive: newClient.isActive,
+                  farmCount: 0,
+                  pondCount: 0,
+                  userCount: 0,
+                },
+              ]
+            : old,
+      )
+      showToast('success', t.successClientCreated(name))
       setClientForm({
         name: '',
         contactPerson: '',
@@ -174,10 +207,7 @@ export function useAdminMasterData() {
       })
       invalidateClientList()
     } catch (err) {
-      showToast(
-        'error',
-        err instanceof Error ? err.message : t.alertCreateClientFailed,
-      )
+      showToast('error', getApiErrorMessage(err, t.alertCreateClientFailed))
     } finally {
       setIsSavingClientForm(false)
     }
@@ -197,21 +227,17 @@ export function useAdminMasterData() {
         clientId: Number(selectedClientId),
         name,
       })
-      setSuccessMessage(
+      showToast(
+        'success',
         t.successFarmCreated(
           formatFarmDisplayNameTH(name),
           selectedClient?.value ?? '',
         ),
       )
-      setShowSuccessMessage(true)
-      setTimeout(() => setShowSuccessMessage(false), 5000)
       setFarmForm({ name: '' })
       refetchHierarchy()
     } catch (err) {
-      showToast(
-        'error',
-        err instanceof Error ? err.message : t.alertCreateFarmFailed,
-      )
+      showToast('error', getApiErrorMessage(err, t.alertCreateFarmFailed))
     } finally {
       setIsSavingFarmForm(false)
     }
@@ -223,8 +249,19 @@ export function useAdminMasterData() {
       showToast('error', t.alertSelectFarm)
       return
     }
-    const names = pondForms.map((f) => f.name.trim()).filter(Boolean)
-    if (names.length === 0) {
+    const ponds = pondForms
+      .map((f) => {
+        const name = f.name.trim()
+        if (!name) return null
+        const areaStr = f.area.trim()
+        const areaNum = areaStr === '' ? undefined : Number(areaStr)
+        if (areaNum !== undefined && (Number.isNaN(areaNum) || areaNum < 0)) {
+          return null
+        }
+        return { name, ...(areaNum !== undefined ? { area: areaNum } : {}) }
+      })
+      .filter((p): p is { name: string; area?: number } => p !== null)
+    if (ponds.length === 0) {
       showToast('error', t.alertAtLeastOnePondName)
       return
     }
@@ -233,31 +270,31 @@ export function useAdminMasterData() {
     )
     setIsSavingPondForm(true)
     try {
-      await pondApi.createPonds({ farmId: Number(selectedFarmId), names })
-      const pondCount = names.length
-      setSuccessMessage(
+      await pondApi.createPonds({ farmId: Number(selectedFarmId), ponds })
+      const pondCount = ponds.length
+      showToast(
+        'success',
         t.successPondsCreated(
           pondCount,
           formatFarmDisplayNameTH(selectedFarm?.name ?? ''),
         ),
       )
-      setShowSuccessMessage(true)
-      setTimeout(() => setShowSuccessMessage(false), 5000)
-      setPondForms([{ name: '' }])
-      refetchFarmList()
-      refetchPondsForFarm(Number(selectedFarmId))
+      setPondForms([{ name: '', area: '' }])
+      // Force-refetch farm list + every per-farm pond cache (not just the
+      // observed ones), matching the bulk-import + create-farm paths. The
+      // old refetchFarmList() + refetchPondsForFarm() only invalidated, and
+      // relied on the target farm being observed — which is fragile if the
+      // user is on the "บ่อ" tab without that farm expanded in the panel.
+      await refetchHierarchy()
     } catch (err) {
-      showToast(
-        'error',
-        err instanceof Error ? err.message : t.alertCreatePondsFailed,
-      )
+      showToast('error', getApiErrorMessage(err, t.alertCreatePondsFailed))
     } finally {
       setIsSavingPondForm(false)
     }
   }
 
   const addPondForm = () => {
-    setPondForms([...pondForms, { name: '' }])
+    setPondForms([...pondForms, { name: '', area: '' }])
   }
 
   const removePondForm = (index: number) => {
@@ -274,6 +311,8 @@ export function useAdminMasterData() {
     const newForms = [...pondForms]
     if (field === 'name') {
       newForms[index] = { ...newForms[index], name: value as string }
+    } else if (field === 'area') {
+      newForms[index] = { ...newForms[index], area: value as string }
     }
     setPondForms(newForms)
   }
@@ -290,6 +329,25 @@ export function useAdminMasterData() {
     )
   }
 
+  // "Expand all / collapse all" for the farm-with-ponds panel. Considered
+  // "all expanded" only when every currently visible farm is in expandedFarms
+  // — that way newly-imported farms count toward the state correctly.
+  const areAllFarmsExpanded = useMemo(
+    () =>
+      clientFarms.length > 0 &&
+      clientFarms.every((f) => expandedFarms.includes(String(f.id))),
+    [clientFarms, expandedFarms],
+  )
+
+  const toggleAllFarms = useCallback(() => {
+    setExpandedFarms((prev) => {
+      const allIds = clientFarms.map((f) => String(f.id))
+      const allExpanded =
+        allIds.length > 0 && allIds.every((id) => prev.includes(id))
+      return allExpanded ? [] : allIds
+    })
+  }, [clientFarms])
+
   const handleEditClient = async (
     client: DropdownItem,
     e: React.MouseEvent,
@@ -299,7 +357,7 @@ export function useAdminMasterData() {
       const full = await clientApi.getClient(Number(client.key))
       setEditingClientSnapshot({
         ...full,
-        contactNumber: filterDigitsOnly(full.contactNumber ?? ''),
+        contactNumber: filterPhoneInput(full.contactNumber ?? ''),
       })
       setEditingItem({
         id: String(client.key),
@@ -308,10 +366,7 @@ export function useAdminMasterData() {
       })
       setIsEditModalOpen(true)
     } catch (err) {
-      showToast(
-        'error',
-        err instanceof Error ? err.message : t.alertLoadClientFailed,
-      )
+      showToast('error', getApiErrorMessage(err, t.alertLoadClientFailed))
     }
   }
 
@@ -332,6 +387,7 @@ export function useAdminMasterData() {
       name: pond.name,
       type: 'pond',
     })
+    setEditingPondArea(pond.area != null ? String(pond.area) : '')
     setIsEditModalOpen(true)
   }
 
@@ -366,13 +422,40 @@ export function useAdminMasterData() {
           isActive: snap.isActive,
           isTouristFishingEnabled: snap.isTouristFishingEnabled,
         })
+        queryClient.setQueriesData<DropdownItem[]>(
+          { queryKey: clientKeys.list() },
+          (old) =>
+            old?.map((c) => (c.key === snap.id ? { ...c, value: raw } : c)),
+        )
+        queryClient.setQueriesData<ClientSummary[]>(
+          { queryKey: clientKeys.summaries() },
+          (old) =>
+            old?.map((c) => (c.id === snap.id ? { ...c, name: raw } : c)),
+        )
         invalidateClientList()
       } else if (editingItem.type === 'farm') {
         const name = normalizeFarmNameForStore(raw)
-        await farmApi.updateFarm(Number(editingItem.id), { name })
+        const farmId = Number(editingItem.id)
+        await farmApi.updateFarm(farmId, { name })
+        queryClient.setQueriesData<FarmResponse[]>(
+          { queryKey: farmKeys.list() },
+          (old) => old?.map((f) => (f.id === farmId ? { ...f, name } : f)),
+        )
         refetchHierarchy()
       } else {
-        await pondApi.updatePond(Number(editingItem.id), { name: raw })
+        const areaTrimmed = editingPondArea.trim()
+        const areaValue = areaTrimmed === '' ? undefined : Number(areaTrimmed)
+        if (
+          areaValue !== undefined &&
+          (Number.isNaN(areaValue) || areaValue < 0)
+        ) {
+          showToast('error', t.alertUpdateFailed)
+          return
+        }
+        await pondApi.updatePond(Number(editingItem.id), {
+          name: raw,
+          ...(areaValue !== undefined ? { area: areaValue } : {}),
+        })
         refetchHierarchy()
       }
       const typeLabel =
@@ -383,17 +466,13 @@ export function useAdminMasterData() {
             : 'บ่อ'
       const displayName =
         editingItem.type === 'farm' ? normalizeFarmNameForStore(raw) : raw
-      setSuccessMessage(t.successUpdated(typeLabel, displayName))
-      setShowSuccessMessage(true)
-      setTimeout(() => setShowSuccessMessage(false), 5000)
+      showToast('success', t.successUpdated(typeLabel, displayName))
       setIsEditModalOpen(false)
       setEditingItem(null)
       setEditingClientSnapshot(null)
+      setEditingPondArea('')
     } catch (err) {
-      showToast(
-        'error',
-        err instanceof Error ? err.message : t.alertUpdateFailed,
-      )
+      showToast('error', getApiErrorMessage(err, t.alertUpdateFailed))
     } finally {
       setIsEditSaving(false)
     }
@@ -425,8 +504,6 @@ export function useAdminMasterData() {
     farmListLoading,
     activeTab,
     setActiveTab,
-    showSuccessMessage,
-    successMessage,
     expandedFarms,
     isEditModalOpen,
     setIsEditModalOpen,
@@ -434,6 +511,8 @@ export function useAdminMasterData() {
     setEditingClientSnapshot,
     editingItem,
     setEditingItem,
+    editingPondArea,
+    setEditingPondArea,
     clientForm,
     setClientForm,
     farmForm,
@@ -454,6 +533,8 @@ export function useAdminMasterData() {
     updatePondForm,
     handleFarmNameChange,
     toggleFarmExpansion,
+    areAllFarmsExpanded,
+    toggleAllFarms,
     handleEditClient,
     handleEditFarm,
     handleEditPond,
@@ -463,5 +544,6 @@ export function useAdminMasterData() {
     isSavingFarmForm,
     isSavingPondForm,
     isEditSaving,
+    refetchHierarchy,
   }
 }

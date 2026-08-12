@@ -13,6 +13,7 @@ import {
   Plus,
   ArrowRight,
   Download,
+  Maximize2,
 } from 'lucide-react'
 import { DailyFeedTab } from '../../components/DailyFeedTab'
 import { StockActionModal } from '../../components/stock-action-modal'
@@ -21,7 +22,7 @@ import { PageHeader } from '../../components/PageHeader'
 import { th } from '../../locales/th'
 import { formatFarmDisplayNameTH } from '../../utils/masterDataName'
 import { formatDateThai } from '../../utils/thaiTime'
-import { fishTypeDisplayLabel } from './utils'
+import { fishTypeDisplayLabel } from '../../utils/fishTypeLabel'
 import { usePondDetailPage } from './hooks'
 
 const L = th.pondDetail
@@ -169,7 +170,7 @@ export function PondDetailPage() {
 
       <div className='grid grid-cols-1 lg:grid-cols-4 gap-6'>
         <div className='lg:col-span-3 space-y-6'>
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
             <div className='bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-lg p-4 border border-blue-200'>
               <div className='flex items-center gap-2 mb-1'>
                 <Fish size={16} className='text-blue-600' />
@@ -195,6 +196,15 @@ export function PondDetailPage() {
               </div>
               <p className='text-lg text-green-600 font-semibold'>
                 {formatDateThai(pond.startDate ?? undefined)}
+              </p>
+            </div>
+            <div className='bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-lg p-4 border border-amber-200'>
+              <div className='flex items-center gap-2 mb-1'>
+                <Maximize2 size={16} className='text-amber-600' />
+                <p className='text-gray-600 text-xs'>{PondsL.areaRai}</p>
+              </div>
+              <p className='text-xl text-amber-600 font-semibold'>
+                {pond.area != null ? Number(pond.area).toLocaleString() : '—'}
               </p>
             </div>
           </div>

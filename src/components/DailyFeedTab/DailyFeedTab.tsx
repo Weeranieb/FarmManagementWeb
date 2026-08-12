@@ -16,7 +16,6 @@ import type { DailyFeedTabProps, DayRow } from './types'
 import { DATE_COL_DIM, DAY_BODY_ROW, DAY_BODY_TEXT } from './constants'
 import {
   emptyRow,
-  errorMessageForToast,
   fmt,
   fmtOrEmpty,
   abbrevThaiKgUnit,
@@ -27,6 +26,7 @@ import {
   isRowNonEmpty,
   viewCellDisplay,
 } from './utils'
+import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 import { SummaryCard } from './components/SummaryCard'
 import { useDailyFeedTab } from './useDailyFeedTab'
 
@@ -174,7 +174,7 @@ export function DailyFeedTab({
       <div className='text-center py-12 space-y-4 px-4'>
         <p className='text-red-600 font-medium'>{L.loadMonthError}</p>
         <p className='text-sm text-gray-600 max-w-md mx-auto'>
-          {errorMessageForToast(monthQueryError)}
+          {getApiErrorMessage(monthQueryError)}
         </p>
         <button
           type='button'
@@ -235,7 +235,7 @@ export function DailyFeedTab({
                 className='flex items-center gap-1.5 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm'
               >
                 <X size={15} />
-                {th.masterData.modalCancel}
+                {th.common.modalCancel}
               </button>
               <button
                 type='button'
@@ -329,11 +329,10 @@ export function DailyFeedTab({
         <div className='overflow-x-auto'>
           <table
             className='w-full table-fixed text-sm border-collapse'
-            style={{ minWidth: showTouristCatch ? 580 : 480 }}
+            style={{ minWidth: showTouristCatch ? 520 : 420 }}
           >
             <colgroup>
               <col className={DATE_COL_DIM} />
-              <col className='w-[5.5rem]' />
               <col className='w-[5.5rem]' />
               <col className='w-[5.5rem]' />
               <col className='w-[5.5rem]' />
@@ -349,7 +348,7 @@ export function DailyFeedTab({
                   {th.pondDetail.date}
                 </th>
                 <th
-                  colSpan={2}
+                  rowSpan={2}
                   className='bg-green-100 border border-gray-400 border-t-0 px-2 py-1.5 text-center text-green-800 text-xs font-semibold leading-tight'
                 >
                   <span className='inline-flex flex-wrap items-baseline justify-center gap-x-1 gap-y-0.5'>
@@ -359,6 +358,7 @@ export function DailyFeedTab({
                         ({selectedFreshName})
                       </span>
                     )}
+                    <span className='font-normal'>({freshUnitLabel})</span>
                   </span>
                 </th>
                 <th
@@ -396,12 +396,6 @@ export function DailyFeedTab({
                 )}
               </tr>
               <tr>
-                <th className='bg-green-50 border border-gray-400 px-1.5 py-1 text-center text-green-700 text-xs font-medium leading-tight w-20'>
-                  {L.morning} ({freshUnitLabel})
-                </th>
-                <th className='bg-green-50 border border-gray-400 px-1.5 py-1 text-center text-green-700 text-xs font-medium leading-tight w-20'>
-                  {L.evening} ({freshUnitLabel})
-                </th>
                 <th className='bg-amber-50 border border-gray-400 px-1.5 py-1 text-center text-amber-700 text-xs font-medium leading-tight w-20'>
                   {L.morning} ({pelletUnitLabel})
                 </th>
@@ -426,8 +420,7 @@ export function DailyFeedTab({
                 const r = rowsForView[day]
                 const hasData =
                   r &&
-                  (r.freshMorning ||
-                    r.freshEvening ||
+                  (r.fresh ||
                     r.pelletMorning ||
                     r.pelletEvening ||
                     r.deathFishCount ||
@@ -486,15 +479,7 @@ export function DailyFeedTab({
                     </td>
                     {renderCell(
                       day,
-                      'freshMorning',
-                      'bg-green-50/40',
-                      'any',
-                      false,
-                      rowInactive,
-                    )}
-                    {renderCell(
-                      day,
-                      'freshEvening',
+                      'fresh',
                       'bg-green-50/40',
                       'any',
                       false,
@@ -546,10 +531,7 @@ export function DailyFeedTab({
                   {L.totalLabel}
                 </td>
                 <td className='border-r border-gray-400 px-1.5 py-1.5 text-center font-bold text-green-700 text-xs leading-tight bg-green-100'>
-                  {fmtOrEmpty(totals.freshMorning)}
-                </td>
-                <td className='border-r border-gray-400 px-1.5 py-1.5 text-center font-bold text-green-700 text-xs leading-tight bg-green-100'>
-                  {fmtOrEmpty(totals.freshEvening)}
+                  {fmtOrEmpty(totals.fresh)}
                 </td>
                 <td className='border-r border-gray-400 px-1.5 py-1.5 text-center font-bold text-amber-700 text-xs leading-tight bg-amber-100'>
                   {fmtOrEmpty(totals.pelletMorning)}
@@ -576,10 +558,7 @@ export function DailyFeedTab({
                 >
                   {L.totalAllLabel}
                 </td>
-                <td
-                  colSpan={2}
-                  className='border-r border-gray-400 px-1.5 py-1.5 text-center font-semibold text-green-700 text-xs leading-tight bg-green-50'
-                >
+                <td className='border-r border-gray-400 px-1.5 py-1.5 text-center font-semibold text-green-700 text-xs leading-tight bg-green-50'>
                   {`${fmt(totals.totalFresh)} ${freshUnitLabel}`}
                 </td>
                 <td
@@ -612,7 +591,6 @@ export function DailyFeedTab({
         <SummaryCard
           label={L.freshBaitTotal}
           value={`${fmt(totals.totalFresh)} ${freshUnitLabel}`}
-          sub={`${L.morning} ${fmt(totals.freshMorning)} / ${L.evening} ${fmt(totals.freshEvening)}`}
           color='border-green-200 bg-green-50'
           icon={<Droplets size={18} className='text-green-600' />}
         />
@@ -676,7 +654,7 @@ export function DailyFeedTab({
                 onClick={dismissPendingMonth}
                 className='rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50'
               >
-                {th.masterData.modalCancel}
+                {th.common.modalCancel}
               </button>
               <button
                 type='button'

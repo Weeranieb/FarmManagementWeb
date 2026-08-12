@@ -16,10 +16,14 @@ import {
   Database,
   Layers,
 } from 'lucide-react'
-import { useAuthQuery, useLogoutMutation } from '../hooks/useAuth'
+import {
+  useAuthQuery,
+  useLogoutMutation,
+  useIsClientAdmin,
+  useIsSuperAdmin,
+} from '../hooks/useAuth'
 import { useClientListQuery } from '../hooks/useClient'
 import { useClient } from '../contexts/ClientContext'
-import { UserLevel } from '../constants/userLevel'
 import { th } from '../locales/th'
 
 export function MainLayout() {
@@ -34,9 +38,8 @@ export function MainLayout() {
   const { data: clientList = [] } = useClientListQuery()
   const { selectedClientId, setSelectedClientId } = useClient()
 
-  const isAdminUser =
-    user?.userLevel === UserLevel.SuperAdmin ||
-    user?.userLevel === UserLevel.ClientAdmin
+  const isAdminUser = useIsClientAdmin()
+  const isSuperAdmin = useIsSuperAdmin()
   const L = th.layout
 
   const navItems = [
@@ -51,7 +54,7 @@ export function MainLayout() {
 
   const isActive = (path: string) => location.pathname.startsWith(path)
 
-  const clientFreeRoutes = ['/admin', '/profile']
+  const clientFreeRoutes = ['/admin', '/settings']
   const requiresClient = !clientFreeRoutes.some((prefix) =>
     location.pathname.startsWith(prefix),
   )
@@ -80,10 +83,15 @@ export function MainLayout() {
   }, [])
 
   useEffect(() => {
-    if (isAdminUser && clientList.length > 0 && !selectedClientId) {
+    if (!user || selectedClientId) return
+    if (user.clientId != null) {
+      setSelectedClientId(String(user.clientId))
+      return
+    }
+    if (isSuperAdmin && clientList.length > 0) {
       setSelectedClientId(String(clientList[0].key))
     }
-  }, [isAdminUser, clientList, selectedClientId, setSelectedClientId])
+  }, [user, isSuperAdmin, clientList, selectedClientId, setSelectedClientId])
 
   const displayName =
     user?.firstName && user?.lastName
@@ -142,7 +150,7 @@ export function MainLayout() {
         </div>
 
         <div className='flex min-h-0 flex-1 flex-col overflow-hidden py-3'>
-          {isAdminUser && sidebarWide && (
+          {isSuperAdmin && sidebarWide && (
             <div className='mb-3 border-b border-slate-100 px-3 pb-3'>
               <select
                 value={selectedClientId}
@@ -162,7 +170,7 @@ export function MainLayout() {
             </div>
           )}
 
-          {isAdminUser && !sidebarWide && (
+          {isSuperAdmin && !sidebarWide && (
             <div className='mb-3 flex justify-center border-b border-slate-100 px-2 pb-3'>
               <div
                 className='flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100'
@@ -257,13 +265,13 @@ export function MainLayout() {
             </div>
 
             <Link
-              to='/profile'
+              to='/settings'
               title={!sidebarWide ? L.settings : undefined}
-              className={navLinkClass(isActive('/profile'), !sidebarWide)}
+              className={navLinkClass(isActive('/settings'), !sidebarWide)}
             >
               <Settings
                 size={19}
-                className={`shrink-0 ${isActive('/profile') ? 'text-blue-600' : 'text-slate-500'}`}
+                className={`shrink-0 ${isActive('/settings') ? 'text-blue-600' : 'text-slate-500'}`}
               />
               {sidebarWide && <span className='truncate'>{L.settings}</span>}
             </Link>
@@ -313,7 +321,7 @@ export function MainLayout() {
                   </div>
                   <div className='py-1'>
                     <Link
-                      to='/profile'
+                      to='/settings'
                       onClick={() => setIsProfileDropdownOpen(false)}
                       className='flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-blue-50'
                     >
@@ -321,7 +329,7 @@ export function MainLayout() {
                       <span>{L.myProfile}</span>
                     </Link>
                     <Link
-                      to='/profile'
+                      to='/settings'
                       onClick={() => setIsProfileDropdownOpen(false)}
                       className='flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition-colors hover:bg-blue-50'
                     >
@@ -356,7 +364,7 @@ export function MainLayout() {
 
       <main className='min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden'>
         <div className='p-6 lg:p-8'>
-          {isAdminUser && !selectedClientId && requiresClient ? (
+          {isSuperAdmin && !selectedClientId && requiresClient ? (
             <div className='flex min-h-[50vh] items-center justify-center'>
               <p className='text-slate-500'>{L.selectClientToView}</p>
             </div>

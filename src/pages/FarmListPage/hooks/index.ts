@@ -1,1 +1,0 @@
-export { useFarmsListPage } from './useFarmsListPage'

@@ -3,6 +3,7 @@ import { RouterProvider } from 'react-router-dom'
 import { router } from './router'
 import { ClientProvider } from './contexts/ClientContext'
 import { AppToastProvider } from './contexts/AppToastContext'
+import { ThemeProvider } from './contexts/ThemeContext'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,11 +17,13 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AppToastProvider>
-        <ClientProvider>
-          <RouterProvider router={router} />
-        </ClientProvider>
-      </AppToastProvider>
+      <ThemeProvider>
+        <AppToastProvider>
+          <ClientProvider>
+            <RouterProvider router={router} />
+          </ClientProvider>
+        </AppToastProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   )
 }

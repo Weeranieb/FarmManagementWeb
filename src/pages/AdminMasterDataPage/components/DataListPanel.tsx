@@ -1,4 +1,4 @@
-import { Edit2 } from 'lucide-react'
+import { ChevronsDownUp, ChevronsUpDown, Edit2 } from 'lucide-react'
 import type { UseQueryResult } from '@tanstack/react-query'
 import type { ClientSummary, DropdownItem } from '../../../api/client'
 import type { FarmResponse } from '../../../api/farm'
@@ -8,7 +8,7 @@ import {
   formatPondDisplayNameTH,
 } from '../../../utils/masterDataName'
 import { StatusBadge } from '../../../components/StatusBadge'
-import type { AdminMasterDataLocale } from '../../../locales/th'
+import { th, type AdminMasterDataLocale } from '../../../locales/th'
 
 type T = AdminMasterDataLocale
 
@@ -32,6 +32,8 @@ type Props = {
   onEditFarm: (farm: FarmResponse, e: React.MouseEvent) => void
   onEditPond: (pond: PondResponse, e: React.MouseEvent) => void
   onToggleFarmExpansion: (farmId: string) => void
+  areAllFarmsExpanded: boolean
+  onToggleAllFarms: () => void
 }
 
 export function DataListPanel({
@@ -51,6 +53,8 @@ export function DataListPanel({
   onEditFarm,
   onEditPond,
   onToggleFarmExpansion,
+  areAllFarmsExpanded,
+  onToggleAllFarms,
 }: Props) {
   const summaryById = new Map(
     clientSummaries.map((summary) => [summary.id, summary]),
@@ -59,15 +63,38 @@ export function DataListPanel({
   return (
     <div className='col-span-1 bg-white rounded-lg shadow-md flex flex-col overflow-hidden'>
       <div className='p-4 border-b border-gray-200 bg-gray-50'>
-        <div className='flex items-center justify-between'>
+        <div className='flex items-center justify-between gap-3'>
           <h2 className='text-lg font-semibold text-gray-800'>
             {activeTab === 'clients' ? t.allClients : t.existingData}
           </h2>
-          {selectedClient && activeTab !== 'clients' && (
-            <span className='text-xs text-gray-600'>
-              {selectedClient.value}
-            </span>
-          )}
+          <div className='flex items-center gap-3'>
+            {activeTab !== 'clients' && clientFarms.length > 0 && (
+              <button
+                type='button'
+                onClick={onToggleAllFarms}
+                className='inline-flex items-center gap-1.5 rounded-md border border-blue-200 bg-white px-2.5 py-1 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-50'
+                title={
+                  areAllFarmsExpanded
+                    ? t.collapseAllFarms
+                    : t.expandAllFarms
+                }
+              >
+                {areAllFarmsExpanded ? (
+                  <ChevronsDownUp size={14} aria-hidden />
+                ) : (
+                  <ChevronsUpDown size={14} aria-hidden />
+                )}
+                {areAllFarmsExpanded
+                  ? t.collapseAllFarms
+                  : t.expandAllFarms}
+              </button>
+            )}
+            {selectedClient && activeTab !== 'clients' && (
+              <span className='text-xs text-gray-600'>
+                {selectedClient.value}
+              </span>
+            )}
+          </div>
         </div>
       </div>
       <div className='flex-1 overflow-y-auto p-4 space-y-3'>
@@ -218,9 +245,16 @@ export function DataListPanel({
                                 className='bg-white border border-gray-200 rounded p-2'
                               >
                                 <div className='mb-1 flex items-center justify-between gap-2'>
-                                  <span className='min-w-0 flex-1 text-xs text-gray-800'>
-                                    {formatPondDisplayNameTH(pond.name)}
-                                  </span>
+                                  <div className='min-w-0 flex-1'>
+                                    <span className='block text-xs text-gray-800'>
+                                      {formatPondDisplayNameTH(pond.name)}
+                                    </span>
+                                    {pond.area != null && (
+                                      <span className='block text-[10px] text-gray-500 mt-0.5'>
+                                        {th.ponds.areaRai}: {Number(pond.area).toLocaleString()}
+                                      </span>
+                                    )}
+                                  </div>
                                   <div className='flex shrink-0 items-center gap-2'>
                                     <button
                                       type='button'

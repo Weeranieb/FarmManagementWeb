@@ -95,8 +95,7 @@ export function monthNavigationBounds(cycleStartDate?: string | null) {
 
 export function emptyRow(): DayRow {
   return {
-    freshMorning: 0,
-    freshEvening: 0,
+    fresh: 0,
     pelletMorning: 0,
     pelletEvening: 0,
     deathFishCount: 0,
@@ -116,8 +115,7 @@ export function buildRowsFromMonth(
   if (!data?.entries) return rows
   for (const e of data.entries) {
     rows[e.day] = {
-      freshMorning: numField(e.freshMorning),
-      freshEvening: numField(e.freshEvening),
+      fresh: numField(e.fresh),
       pelletMorning: numField(e.pelletMorning),
       pelletEvening: numField(e.pelletEvening),
       deathFishCount: numField(e.deathFishCount),
@@ -129,8 +127,7 @@ export function buildRowsFromMonth(
 
 export function isRowNonEmpty(r: DayRow): boolean {
   return (
-    r.freshMorning > 0 ||
-    r.freshEvening > 0 ||
+    r.fresh > 0 ||
     r.pelletMorning > 0 ||
     r.pelletEvening > 0 ||
     r.deathFishCount > 0 ||
@@ -140,8 +137,7 @@ export function isRowNonEmpty(r: DayRow): boolean {
 
 export function isRowEqual(a: DayRow, b: DayRow): boolean {
   return (
-    a.freshMorning === b.freshMorning &&
-    a.freshEvening === b.freshEvening &&
+    a.fresh === b.fresh &&
     a.pelletMorning === b.pelletMorning &&
     a.pelletEvening === b.pelletEvening &&
     a.deathFishCount === b.deathFishCount &&
@@ -163,11 +159,4 @@ export function abbrevThaiKgUnit(unit: string): string {
 export function viewCellDisplay(val: number): string | number {
   if (!Number.isFinite(val) || val <= 0) return ''
   return val
-}
-
-const TOAST_ERR_MAX = 280
-export function errorMessageForToast(err: unknown): string {
-  const raw = err instanceof Error ? err.message : String(err)
-  if (raw.length <= TOAST_ERR_MAX) return raw
-  return `${raw.slice(0, TOAST_ERR_MAX - 1)}…`
 }

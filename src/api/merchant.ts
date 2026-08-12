@@ -29,10 +29,6 @@ export const merchantApi = {
     return apiClient.get<MerchantResponse[]>('/merchant')
   },
 
-  getMerchant: async (id: number): Promise<MerchantResponse> => {
-    return apiClient.get<MerchantResponse>(`/merchant/${id}`)
-  },
-
   createMerchant: async (
     body: CreateMerchantRequest,
   ): Promise<MerchantResponse> => {

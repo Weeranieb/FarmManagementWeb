@@ -14,7 +14,7 @@ import { feedTypeLabelTh } from '../../constants/feedType'
 import { FeedCollectionAddModal } from '../../components/feedCollections/FeedCollectionAddModal'
 import { FeedCollectionEditDetailsModal } from '../../components/feedCollections/FeedCollectionEditDetailsModal'
 import { FeedCollectionUpdatePriceModal } from '../../components/feedCollections/FeedCollectionUpdatePriceModal'
-import { useFeedCollectionsPage } from './hooks'
+import { useFeedCollectionsPage } from './hooks/useFeedCollectionsPage'
 
 const L = th.feedCollections
 

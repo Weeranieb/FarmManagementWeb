@@ -5,8 +5,9 @@ import { StockActionModal } from '../../components/stock-action-modal'
 import { PageHeader } from '../../components/PageHeader'
 import { th } from '../../locales/th'
 import { formatDateThai } from '../../utils/thaiTime'
-import { fishTypeDisplayLabel } from './utils'
-import { usePondsListPage } from './hooks'
+import { fishTypeDisplayLabel } from '../../utils/fishTypeLabel'
+import { usePondsListPage } from './hooks/usePondsListPage'
+import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 
 const L = th.ponds
 
@@ -101,7 +102,7 @@ export function PondsListPage() {
       {error && (
         <div className='bg-red-50 border border-red-200 rounded-xl p-6'>
           <p className='text-red-800'>
-            {error instanceof Error ? error.message : 'เกิดข้อผิดพลาด'}
+            {getApiErrorMessage(error, 'เกิดข้อผิดพลาด')}
           </p>
         </div>
       )}

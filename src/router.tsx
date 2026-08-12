@@ -15,6 +15,7 @@ import { FarmGroupFormPage } from './pages/FarmGroupFormPage'
 import { WorkersListPage } from './pages/WorkersListPage'
 import { WorkerFormPage } from './pages/WorkerFormPage'
 import { FeedCollectionsPage } from './pages/FeedCollectionsPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { ProtectedRoute } from './components/guards/ProtectedRoute'
 import { GuestRoute } from './components/guards/GuestRoute'
 import { AdminRoute } from './components/guards/AdminRoute'
@@ -133,6 +134,10 @@ export const router = createBrowserRouter([
             <AdminMasterDataPage />
           </AdminRoute>
         ),
+      },
+      {
+        path: '/settings',
+        element: <SettingsPage />,
       },
     ],
   },

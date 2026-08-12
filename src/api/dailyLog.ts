@@ -3,8 +3,7 @@ import { apiClient } from '../lib/api-client'
 export interface DailyLogEntry {
   id: number
   day: number
-  freshMorning: number
-  freshEvening: number
+  fresh: number
   pelletMorning: number
   pelletEvening: number
   deathFishCount: number
@@ -25,8 +24,7 @@ export interface DailyLogMonth {
 
 export interface DailyLogBulkUpsertEntry {
   day: number
-  freshMorning: number
-  freshEvening: number
+  fresh: number
   pelletMorning: number
   pelletEvening: number
   deathFishCount: number

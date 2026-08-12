@@ -9,9 +9,8 @@ import {
 } from 'lucide-react'
 import { PageHeader } from '../../components/PageHeader'
 import { th } from '../../locales/th'
-import { useAuthQuery } from '../../hooks/useAuth'
-import { UserLevel } from '../../constants/userLevel'
-import { useMerchantsListPage } from './hooks'
+import { useIsSuperAdmin } from '../../hooks/useAuth'
+import { useMerchantsListPage } from './hooks/useMerchantsListPage'
 import { MerchantAddModal } from './components/MerchantAddModal'
 import { MerchantEditModal } from './components/MerchantEditModal'
 import { MerchantDeleteConfirm } from './components/MerchantDeleteConfirm'
@@ -19,8 +18,7 @@ import { MerchantDeleteConfirm } from './components/MerchantDeleteConfirm'
 const L = th.merchants
 
 export function MerchantsListPage() {
-  const { data: user } = useAuthQuery()
-  const isSuperAdmin = user?.userLevel === UserLevel.SuperAdmin
+  const isSuperAdmin = useIsSuperAdmin()
   const ctx = useMerchantsListPage()
 
   return (

@@ -26,6 +26,14 @@ const defaultLocale: EditMasterDataModalLocale = {
   close: 'ปิด',
 }
 
+/** Optional extras block for pond editing — area (in rai/ไร่). Omit when editing other entity types. */
+export interface EditMasterDataModalPondExtras {
+  area: string
+  onAreaChange: (value: string) => void
+  labelArea: string
+  placeholderArea: string
+}
+
 /** Full client edit block (name stays in the main field above). Omit for farm/pond. */
 export interface EditMasterDataModalClientExtras {
   ownerName: string
@@ -59,6 +67,7 @@ interface EditMasterDataModalProps {
   isSaving?: boolean
   locale?: Partial<EditMasterDataModalLocale>
   clientEditExtras?: EditMasterDataModalClientExtras | null
+  pondEditExtras?: EditMasterDataModalPondExtras | null
 }
 
 export function EditMasterDataModal({
@@ -70,6 +79,7 @@ export function EditMasterDataModal({
   isSaving = false,
   locale: localeOverride,
   clientEditExtras,
+  pondEditExtras,
 }: EditMasterDataModalProps) {
   const locale = { ...defaultLocale, ...localeOverride }
   const [name, setName] = useState(currentName)
@@ -179,6 +189,24 @@ export function EditMasterDataModal({
               </p>
             )}
           </div>
+          {pondEditExtras && (
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
+                {pondEditExtras.labelArea}
+              </label>
+              <input
+                type='number'
+                step='0.01'
+                min='0'
+                inputMode='decimal'
+                value={pondEditExtras.area}
+                onChange={(e) => pondEditExtras.onAreaChange(e.target.value)}
+                disabled={isSaving}
+                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-500'
+                placeholder={pondEditExtras.placeholderArea}
+              />
+            </div>
+          )}
           {clientEditExtras && (
             <>
               <div>

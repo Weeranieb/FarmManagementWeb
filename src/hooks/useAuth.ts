@@ -1,6 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { authApi, type LoginRequest } from '../api/auth'
+import {
+  authApi,
+  type ChangeMyPasswordRequest,
+  type LoginRequest,
+  type UpdateMeRequest,
+  type User,
+} from '../api/auth'
+import { UserLevel } from '../constants/userLevel'
 
 // Query key factory
 export const authKeys = {
@@ -18,6 +25,18 @@ export function useAuthQuery() {
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
+}
+
+/** Client admin or above (userLevel >= ClientAdmin). */
+export function useIsClientAdmin(): boolean {
+  const { data: user } = useAuthQuery()
+  return user != null && user.userLevel >= UserLevel.ClientAdmin
+}
+
+/** Super admin only. */
+export function useIsSuperAdmin(): boolean {
+  const { data: user } = useAuthQuery()
+  return user?.userLevel === UserLevel.SuperAdmin
 }
 
 const REMEMBERED_USERNAME_KEY = 'boonmafarm_remembered_username'
@@ -42,6 +61,30 @@ export function useLoginMutation() {
 
 export function getRememberedUsername(): string | null {
   return localStorage.getItem(REMEMBERED_USERNAME_KEY)
+}
+
+/**
+ * Hook to update the current user's own profile.
+ */
+export function useUpdateMeMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: UpdateMeRequest) => authApi.updateMe(body),
+    onSuccess: (updated: User) => {
+      queryClient.setQueryData(authKeys.user(), updated)
+      queryClient.invalidateQueries({ queryKey: authKeys.user() })
+    },
+  })
+}
+
+/**
+ * Hook to change the current user's own password.
+ */
+export function useChangeMyPasswordMutation() {
+  return useMutation({
+    mutationFn: (body: ChangeMyPasswordRequest) =>
+      authApi.changeMyPassword(body),
+  })
 }
 
 /**

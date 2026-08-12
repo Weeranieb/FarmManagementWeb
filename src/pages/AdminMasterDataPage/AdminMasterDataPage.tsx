@@ -1,6 +1,10 @@
+import { useState } from 'react'
+import { Upload } from 'lucide-react'
+import { BulkImportFarmPondModal } from '../../components/BulkImportFarmPondModal'
 import { EditMasterDataModal } from '../../components/EditMasterDataModal'
 import { PageHeader } from '../../components/PageHeader'
-import { useAdminMasterData } from './hooks'
+import { th } from '../../locales/th'
+import { useAdminMasterData } from './hooks/useAdminMasterData'
 import { CreateClientTab } from './components/CreateClientTab'
 import { CreateFarmTab } from './components/CreateFarmTab'
 import { CreatePondTab } from './components/CreatePondTab'
@@ -10,6 +14,9 @@ import { UserManagementPanel } from './components/UserManagementPanel'
 export function AdminMasterDataPage() {
   const ctx = useAdminMasterData()
   const { t } = ctx
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false)
+
+  const canBulkImport = ctx.activeTab === 'farms' || ctx.activeTab === 'ponds'
   const pageSubtitle = ctx.isSuperAdmin
     ? t.pageSubtitleSuperAdmin
     : t.pageSubtitleClientAdmin
@@ -17,12 +24,6 @@ export function AdminMasterDataPage() {
   return (
     <div className='flex min-h-0 flex-col space-y-3'>
       <PageHeader title={t.pageTitle} subtitle={pageSubtitle} />
-
-      {ctx.showSuccessMessage && (
-        <div className='bg-green-50 border-l-4 border-green-500 p-3 rounded-lg shadow-md animate-fade-in'>
-          <p className='text-sm text-green-800'>{ctx.successMessage}</p>
-        </div>
-      )}
 
       {ctx.isSuperAdmin &&
         ctx.activeTab !== 'clients' &&
@@ -128,8 +129,24 @@ export function AdminMasterDataPage() {
       ) : (
         <div className='flex-1 grid grid-cols-2 gap-4 overflow-hidden'>
           <div className='bg-white rounded-lg shadow-md flex flex-col overflow-hidden'>
-            <div className='p-4 bg-gradient-to-r from-blue-800 to-blue-600 text-white'>
+            <div className='p-4 bg-gradient-to-r from-blue-800 to-blue-600 text-white flex items-center justify-between gap-3'>
               <h2 className='text-lg font-semibold'>{t.createNew}</h2>
+              {canBulkImport && (
+                <button
+                  type='button'
+                  onClick={() => setIsBulkImportOpen(true)}
+                  disabled={!ctx.selectedClientId}
+                  title={
+                    !ctx.selectedClientId
+                      ? t.pleaseSelectClientFirst
+                      : undefined
+                  }
+                  className='flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-xs font-medium border border-white/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors'
+                >
+                  <Upload size={14} />
+                  {t.bulkImportButton}
+                </button>
+              )}
             </div>
 
             <div className='flex-1 overflow-y-auto p-4'>
@@ -168,7 +185,7 @@ export function AdminMasterDataPage() {
                   updatePondForm={ctx.updatePondForm}
                   onSubmit={ctx.handlePondSubmit}
                   onResetPonds={() => {
-                    ctx.setPondForms([{ name: '' }])
+                    ctx.setPondForms([{ name: '', area: '' }])
                     ctx.setSelectedFarmId('')
                   }}
                   isSubmitting={ctx.isSavingPondForm}
@@ -194,8 +211,20 @@ export function AdminMasterDataPage() {
             onEditFarm={ctx.handleEditFarm}
             onEditPond={ctx.handleEditPond}
             onToggleFarmExpansion={ctx.toggleFarmExpansion}
+            areAllFarmsExpanded={ctx.areAllFarmsExpanded}
+            onToggleAllFarms={ctx.toggleAllFarms}
           />
         </div>
+      )}
+
+      {isBulkImportOpen && (
+        <BulkImportFarmPondModal
+          isOpen={isBulkImportOpen}
+          onClose={() => setIsBulkImportOpen(false)}
+          selectedClientId={ctx.selectedClientId}
+          selectedClientName={ctx.selectedClient?.value ?? ''}
+          onImported={ctx.refetchHierarchy}
+        />
       )}
 
       {ctx.isEditModalOpen && ctx.editingItem && (
@@ -208,6 +237,7 @@ export function AdminMasterDataPage() {
             ctx.setIsEditModalOpen(false)
             ctx.setEditingItem(null)
             ctx.setEditingClientSnapshot(null)
+            ctx.setEditingPondArea('')
           }}
           currentName={ctx.editingItem.name}
           title={
@@ -218,6 +248,16 @@ export function AdminMasterDataPage() {
                 : t.editPondTitle
           }
           onSave={ctx.handleSaveEdit}
+          pondEditExtras={
+            ctx.editingItem.type === 'pond'
+              ? {
+                  area: ctx.editingPondArea,
+                  onAreaChange: ctx.setEditingPondArea,
+                  labelArea: th.ponds.areaRai,
+                  placeholderArea: th.ponds.areaRaiPlaceholder,
+                }
+              : undefined
+          }
           clientEditExtras={
             ctx.editingItem.type === 'client' && ctx.editingClientSnapshot
               ? {

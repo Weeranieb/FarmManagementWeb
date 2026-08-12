@@ -15,12 +15,6 @@ export interface ApiError {
   status?: number
 }
 
-export interface ApiResponse<T> {
-  success: boolean
-  data?: T
-  error?: ApiError
-}
-
 type ApiPayload = Record<string, unknown>
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -76,12 +70,16 @@ class ApiClient {
     return isRecord(json) ? json : {}
   }
 
+  private static readonly PUBLIC_PATHS = ['/login', '/forgot-password', '/']
+
   private handleUnauthorized(response: Response): void {
     if (response.status !== 401) {
       return
     }
 
-    window.location.href = '/login'
+    if (!ApiClient.PUBLIC_PATHS.includes(window.location.pathname)) {
+      window.location.href = '/login'
+    }
     throw new HttpError('Unauthorized', 'UNAUTHORIZED', 401)
   }
 
@@ -89,7 +87,11 @@ class ApiClient {
     payload: ApiPayload,
     status: number,
   ): void {
-    if (payload.success === false) {
+    // Backend convention (utils/http/response.go ResponseModel) wraps logical
+    // errors as `{result: false, error: {code, message}}` and still returns
+    // HTTP 200. Surface those as real errors so callers don't silently see
+    // `undefined`.
+    if (payload.result === false || payload.success === false) {
       const err = isRecord(payload.error)
         ? (payload.error as Partial<ApiError>)
         : undefined

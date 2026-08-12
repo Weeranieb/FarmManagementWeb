@@ -21,8 +21,8 @@ import {
   monthNavigationBounds,
   todayYearMonth,
   abbrevThaiKgUnit,
-  errorMessageForToast,
 } from './utils'
+import { getApiErrorMessage } from '../../utils/apiErrorMessage'
 
 const L = th.dailyFeed
 
@@ -251,9 +251,7 @@ export function useDailyFeedTab({
       return
     }
 
-    const hasFresh = entries.some(
-      (e) => e.freshMorning > 0 || e.freshEvening > 0,
-    )
+    const hasFresh = entries.some((e) => e.fresh > 0)
     const hasPellet = entries.some(
       (e) => e.pelletMorning > 0 || e.pelletEvening > 0,
     )
@@ -281,7 +279,7 @@ export function useDailyFeedTab({
           setIsEditing(false)
         },
         onError: (err) => {
-          showToast('error', errorMessageForToast(err))
+          showToast('error', getApiErrorMessage(err))
         },
       },
     )
@@ -328,8 +326,7 @@ export function useDailyFeedTab({
   )
 
   const totals = useMemo(() => {
-    let freshMorning = 0
-    let freshEvening = 0
+    let fresh = 0
     let pelletMorning = 0
     let pelletEvening = 0
     let deaths = 0
@@ -338,21 +335,19 @@ export function useDailyFeedTab({
       if (isFutureDay(yearNum, monthNum, d)) continue
       if (isBeforeCycleStart(yearNum, monthNum, d, cycleStartDate)) continue
       const r = rowsForView[d] ?? emptyRow()
-      freshMorning += r.freshMorning
-      freshEvening += r.freshEvening
+      fresh += r.fresh
       pelletMorning += r.pelletMorning
       pelletEvening += r.pelletEvening
       deaths += r.deathFishCount
       tourist += r.touristCatchCount
     }
     return {
-      freshMorning,
-      freshEvening,
+      fresh,
       pelletMorning,
       pelletEvening,
       deaths,
       tourist,
-      totalFresh: freshMorning + freshEvening,
+      totalFresh: fresh,
       totalPellet: pelletMorning + pelletEvening,
     }
   }, [days, rowsForView, yearNum, monthNum, cycleStartDate])

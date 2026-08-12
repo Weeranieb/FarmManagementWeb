@@ -1,1 +1,0 @@
-export { useMasterDataPage } from './useMasterDataPage'

@@ -1,13 +1,19 @@
 import { Mail, ArrowLeft, CheckCircle, Fish } from 'lucide-react'
+import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { th } from '../../locales/th'
-import { useForgotPasswordPage } from './hooks'
 
 const L = th.forgotPassword
 const C = th.common
 
 export function ForgotPasswordPage() {
-  const { email, setEmail, isSubmitted, handleSubmit } = useForgotPasswordPage()
+  const [email, setEmail] = useState('')
+  const [isSubmitted, setIsSubmitted] = useState(false)
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    setIsSubmitted(true)
+  }
 
   if (isSubmitted) {
     return (

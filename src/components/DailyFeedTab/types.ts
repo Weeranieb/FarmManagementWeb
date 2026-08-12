@@ -9,8 +9,7 @@ export interface DailyFeedTabProps {
 }
 
 export type DayRow = {
-  freshMorning: number
-  freshEvening: number
+  fresh: number
   pelletMorning: number
   pelletEvening: number
   deathFishCount: number
